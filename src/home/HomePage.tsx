@@ -1,6 +1,7 @@
 import {
   APTOS_COIN,
   Account,
+  AnyRawTransaction,
   Aptos,
   AptosConfig,
   Ed25519PrivateKey,
@@ -37,13 +38,9 @@ const defaultAccount = Account.fromPrivateKey({
 
 const executeTx = async (
   signer: Account,
-  data: InputGenerateTransactionPayloadData,
+  transaction: AnyRawTransaction,
   update: (params: Record<string, ParameterType>) => void,
 ) => {
-  const transaction = await aptos.transaction.build.simple({
-    sender: signer.accountAddress,
-    data,
-  });
   const pendingTxn = await aptos.signAndSubmitTransaction({
     signer: signer,
     transaction,
@@ -56,16 +53,6 @@ const executeTx = async (
       value: pendingTxn.hash,
     },
     status: { type: 'string', value: 'Pending' },
-    ...Object.entries(data).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: {
-          type: 'string',
-          value: JSON.stringify(value),
-        },
-      }),
-      {},
-    ),
   });
 
   const response = await aptos.waitForTransaction({
@@ -282,11 +269,94 @@ const HomePage = () => {
                 function: '0x1::aptos_account::transfer',
                 functionArguments: [secondAccount.accountAddress.toString(), 1],
               };
-              await executeTx(firstAccount, data, (params) => {
+              const transaction = await aptos.transaction.build.simple({
+                sender: firstAccount.accountAddress,
+                data,
+              });
+              setFeedItems((prev) =>
+                prev.map((item) =>
+                  item.id === blockId && item.type === 'block'
+                    ? {
+                        ...item,
+                        params: {
+                          ...item.params,
+                          ...Object.entries(data).reduce(
+                            (acc, [key, value]) => ({
+                              ...acc,
+                              [key]: {
+                                type: 'string',
+                                value: JSON.stringify(value),
+                              },
+                            }),
+                            {},
+                          ),
+                        },
+                      }
+                    : item,
+                ),
+              );
+              await executeTx(firstAccount, transaction, (params) => {
                 setFeedItems((prev) =>
                   prev.map((item) =>
                     item.id === blockId && item.type === 'block'
-                      ? { ...item, params }
+                      ? { ...item, params: { ...item.params, ...params } }
+                      : item,
+                  ),
+                );
+              });
+            } else if (e.key === 'd') {
+              const blockId = uuidv4();
+              setFeedItems((prev) => [
+                ...prev,
+                {
+                  id: uuidv4(),
+                  type: 'message',
+                  value: 'I should buy a new Aptos Domain `geiuhgf85u.apt`.',
+                },
+              ]);
+              setFeedItems((prev) => [
+                ...prev,
+                {
+                  id: blockId,
+                  type: 'block',
+                  title: 'Register Domain',
+                  brand: Brands.AptosNames,
+                },
+              ]);
+              const firstAccount = Object.values(accounts)[0];
+              if (!firstAccount) {
+                return;
+              }
+              // const ca =
+              //   '0x867ed1f6bf916171b1de3ee92849b8978b7d1b9e0a8cc982a3d19d535dfd9c0c';
+              // const data: InputGenerateTransactionPayloadData = {
+              //   function: `${ca}::domains::register_domain`,
+              //   functionArguments: [
+              //     firstAccount.accountAddress.toString(),
+              //     'antikythera',
+              //     1n, // registration_duration_secs
+              //   ],
+              // };
+              // await executeTx(firstAccount, data, (params) => {
+              //   setFeedItems((prev) =>
+              //     prev.map((item) =>
+              //       item.id === blockId && item.type === 'block'
+              //         ? { ...item, params: { ...item.params, ...params } }
+              //         : item,
+              //     ),
+              //   );
+              // });
+              const transaction = await aptos.ans.registerName({
+                sender: firstAccount,
+                name: 'geiuhgf85u.apt',
+                expiration: { policy: 'domain' },
+              });
+              console.log(transaction);
+              await executeTx(firstAccount, transaction, (params) => {
+                setFeedItems((prev) =>
+                  prev.map((item) =>
+                    item.id === blockId && item.type === 'block'
+                      ? { ...item, params: { ...item.params, ...params } }
                       : item,
                   ),
                 );
