@@ -35,8 +35,12 @@ const defaultAccount = Account.fromPrivateKey({
   ),
 });
 
+type FeedItem =
+  | (BlockType & { type: 'block' })
+  | { id: string; type: 'message'; value: string };
+
 const HomePage = () => {
-  const [blocks, setBlocks] = useState<BlockType[]>([]);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [text, setText] = useState<string>('');
 
   const [accounts, setAccounts] = useState<Record<Address, Account>>({
@@ -46,15 +50,28 @@ const HomePage = () => {
   return (
     <Container>
       <BlockList>
-        {blocks.map((block) => (
-          <Block
-            key={block.id}
-            id={block.id}
-            title={block.title}
-            brand={block.brand}
-            params={block.params}
-          />
-        ))}
+        {feedItems.map((item) => {
+          if (item.type === 'block') {
+            return (
+              <Block
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                brand={item.brand}
+                params={item.params}
+              />
+            );
+          } else if (item.type === 'message') {
+            return (
+              <div
+                key={item.id}
+                className="flex flex-col bg-zinc-700 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
+              >
+                <p className="text-sm leading-snug">{item.value}</p>
+              </div>
+            );
+          }
+        })}
 
         <input
           className="bg-white"
@@ -62,16 +79,25 @@ const HomePage = () => {
           value={text}
           onKeyDown={async (e) => {
             if (e.key === 'a') {
+              setFeedItems((prev) => [
+                ...prev,
+                {
+                  id: uuidv4(),
+                  type: 'message',
+                  value: 'I should create a new account to receive APT.',
+                },
+              ]);
               const account = Account.generate();
               console.log(account);
               setAccounts((prev) => ({
                 ...prev,
                 [account.accountAddress.toString()]: account,
               }));
-              setBlocks((prev) => [
+              setFeedItems((prev) => [
                 ...prev,
                 {
                   id: uuidv4(),
+                  type: 'block',
                   title: 'Create Account',
                   brand: Brands.Aptos,
                   params: {
@@ -108,10 +134,19 @@ const HomePage = () => {
                 .catch(console.error);
             } */ else if (e.key === 'b') {
               const blockId = uuidv4();
-              setBlocks((prev) => [
+              setFeedItems((prev) => [
+                ...prev,
+                {
+                  id: uuidv4(),
+                  type: 'message',
+                  value: 'I should query the APT balance of my first account.',
+                },
+              ]);
+              setFeedItems((prev) => [
                 ...prev,
                 {
                   id: blockId,
+                  type: 'block',
                   title: 'Query Account Balance',
                   brand: Brands.Aptos,
                 },
@@ -126,13 +161,13 @@ const HomePage = () => {
                 });
                 console.log(res);
 
-                setBlocks((prev) =>
-                  prev.map((block) =>
-                    block.id === blockId
+                setFeedItems((prev) =>
+                  prev.map((item) =>
+                    item.id === blockId && item.type === 'block'
                       ? {
-                          ...block,
+                          ...item,
                           params: {
-                            ...block.params,
+                            ...item.params,
                             balance: {
                               type: 'coin',
                               coin: Coins.APT,
@@ -140,7 +175,7 @@ const HomePage = () => {
                             },
                           },
                         }
-                      : block,
+                      : item,
                   ),
                 );
               } catch (e) {
@@ -148,10 +183,20 @@ const HomePage = () => {
               }
             } else if (e.key === 's') {
               const blockId = uuidv4();
-              setBlocks((prev) => [
+              setFeedItems((prev) => [
+                ...prev,
+                {
+                  id: uuidv4(),
+                  type: 'message',
+                  value:
+                    'I should transfer 0.00000001 APT to my second account.',
+                },
+              ]);
+              setFeedItems((prev) => [
                 ...prev,
                 {
                   id: blockId,
+                  type: 'block',
                   title: 'Transfer APT',
                   brand: Brands.Aptos,
                 },
@@ -178,13 +223,13 @@ const HomePage = () => {
               });
               console.log({ pendingTxn });
 
-              setBlocks((prev) =>
-                prev.map((block) =>
-                  block.id === blockId
+              setFeedItems((prev) =>
+                prev.map((item) =>
+                  item.id === blockId && item.type === 'block'
                     ? {
-                        ...block,
+                        ...item,
                         params: {
-                          ...block.params,
+                          ...item.params,
                           transaction: {
                             type: 'hash',
                             value: pendingTxn.hash,
@@ -202,7 +247,7 @@ const HomePage = () => {
                           ),
                         },
                       }
-                    : block,
+                    : item,
                 ),
               );
 
@@ -211,13 +256,13 @@ const HomePage = () => {
               });
               console.log(response);
 
-              setBlocks((prev) =>
-                prev.map((block) =>
-                  block.id === blockId
+              setFeedItems((prev) =>
+                prev.map((item) =>
+                  item.id === blockId && item.type === 'block'
                     ? {
-                        ...block,
+                        ...item,
                         params: {
-                          ...block.params,
+                          ...item.params,
                           status: {
                             type: 'string',
                             value: response.success ? 'Success' : 'Failed',
@@ -240,7 +285,7 @@ const HomePage = () => {
                           },
                         },
                       }
-                    : block,
+                    : item,
                 ),
               );
 
@@ -249,20 +294,20 @@ const HomePage = () => {
               });
               console.log(blockInfo);
 
-              setBlocks((prev) =>
-                prev.map((block) =>
-                  block.id === blockId
+              setFeedItems((prev) =>
+                prev.map((item) =>
+                  item.id === blockId && item.type === 'block'
                     ? {
-                        ...block,
+                        ...item,
                         params: {
-                          ...block.params,
+                          ...item.params,
                           block: {
                             type: 'block',
                             value: blockInfo.block_height,
                           },
                         },
                       }
-                    : block,
+                    : item,
                 ),
               );
             }
