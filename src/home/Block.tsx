@@ -10,9 +10,15 @@ export type BlockProps = {
     src: string;
     color: string;
   };
+  params?: Record<string, string>;
 };
 
-export const Block: React.FC<BlockProps> = ({ className, title, brand }) => {
+export const Block: React.FC<BlockProps> = ({
+  className,
+  title,
+  brand,
+  params,
+}) => {
   return (
     <Container className={className}>
       <NetworkContainer>
@@ -26,6 +32,20 @@ export const Block: React.FC<BlockProps> = ({ className, title, brand }) => {
         <BrandLogo width={256} height={256} alt={brand.name} src={brand.src} />
         <BrandName style={{ color: brand.color }}>{brand.name}</BrandName>
       </BrandContainer>
+
+      {/* render simple table with tailwind */}
+      {params && (
+        <table className="w-full text-white table-auto">
+          <tbody>
+            {Object.entries(params).map(([key, value]) => (
+              <tr key={key}>
+                <td className="px-1.5 py-1 text-xs border">{key}</td>
+                <td className="px-1.5 py-1 text-xs border">{value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </Container>
   );
 };

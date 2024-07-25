@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.26.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "class-variance-authority": "^0.7.0",
