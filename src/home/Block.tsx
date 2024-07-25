@@ -43,22 +43,32 @@ export const Block: React.FC<BlockProps> = ({
         <NetworkCircle />
         <NetworkName>Testnet</NetworkName>
       </NetworkContainer>
-      <Title>{title}</Title>
-      <BrandContainer
-        style={{ boxShadow: `0px 12px 32px 0px ${brand.color}20` }}
-      >
-        <BrandLogo width={256} height={256} alt={brand.name} src={brand.src} />
-        <BrandName style={{ color: brand.color }}>{brand.name}</BrandName>
-      </BrandContainer>
+
+      <div className="flex items-center gap-2">
+        <BrandContainer
+          style={{ boxShadow: `0px 12px 32px 0px ${brand.color}20` }}
+        >
+          <BrandLogo
+            width={256}
+            height={256}
+            alt={brand.name}
+            src={brand.src}
+          />
+          <BrandName style={{ color: brand.color }}>{brand.name}</BrandName>
+        </BrandContainer>
+        <Title>{title}</Title>
+      </div>
 
       {/* render simple table with tailwind */}
       {params && (
-        <table className="w-full text-white table-auto">
+        <table className="w-full text-white rounded-sm">
           <tbody>
             {Object.entries(params).map(([key, param]) => (
               <tr key={key}>
-                <td className="px-1.5 py-1 text-xs border">{key}</td>
-                <td className="px-1.5 py-1 text-xs border">
+                <td className="px-1.5 py-1 text-xs border border-white/30">
+                  {key}
+                </td>
+                <td className="px-1.5 py-1 text-xs border border-white/30">
                   {param.type === 'block' && (
                     <a
                       style={{ color: Colors.AptosNeon }}
@@ -142,7 +152,7 @@ const Title = styled.div`
   color: #ffffff;
   text-align: left;
   font-family: 'Satoshi-Regular', sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   letter-spacing: -0.015em;
   font-weight: 400;
   position: relative;
@@ -170,14 +180,14 @@ const BrandContainer = styled.div`
 const BrandLogo = styled(Image)`
   border-radius: 50%;
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: cover;
 `;
 const BrandName = styled.span`
   text-align: left;
   font-family: 'Satoshi-Regular', sans-serif;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 100%;
   font-weight: 400;
   position: relative;
