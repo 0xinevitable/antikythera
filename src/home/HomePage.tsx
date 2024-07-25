@@ -82,9 +82,10 @@ const HomePage = () => {
           className="bg-white"
           placeholder="Text"
           value={text}
-          onKeyDown={(e) => {
+          onKeyDown={async (e) => {
             if (e.key === 'a') {
               const account = Account.generate();
+              console.log(account);
               setAccounts((prev) => ({
                 ...prev,
                 [account.accountAddress.toString()]: account,
@@ -141,32 +142,103 @@ const HomePage = () => {
               if (!firstAccount) {
                 return;
               }
-              aptos
-                .getAccountAPTAmount({
+              try {
+                const res = await aptos.getAccountAPTAmount({
                   accountAddress: firstAccount.accountAddress,
-                })
-                .then((res) => {
-                  console.log(res);
+                });
+                console.log(res);
 
-                  setBlocks((prev) =>
-                    prev.map((block) =>
-                      block.id === blockId
-                        ? {
-                            ...block,
-                            params: {
-                              ...block.params,
-                              balance: {
-                                type: 'coin',
-                                coin: Coins.APT,
-                                value: BigInt(res.toString()),
-                              },
+                setBlocks((prev) =>
+                  prev.map((block) =>
+                    block.id === blockId
+                      ? {
+                          ...block,
+                          params: {
+                            ...block.params,
+                            balance: {
+                              type: 'coin',
+                              coin: Coins.APT,
+                              value: BigInt(res.toString()),
                             },
-                          }
-                        : block,
-                    ),
-                  );
-                })
-                .catch(console.error);
+                          },
+                        }
+                      : block,
+                  ),
+                );
+              } catch (e) {
+                console.error(e);
+              }
+            } else if (e.key === 's') {
+              const blockId = uuidv4();
+              setBlocks((prev) => [
+                ...prev,
+                {
+                  id: blockId,
+                  title: 'Transfer APT',
+                  brand: Brands.Aptos,
+                },
+              ]);
+              const firstAccount = Object.values(accounts)[0];
+              if (!firstAccount) {
+                return;
+              }
+              const secondAccount = Object.values(accounts)[1];
+              if (!secondAccount) {
+                return;
+              }
+              const tx = await aptos.transferCoinTransaction({
+                sender: firstAccount.accountAddress,
+                recipient: secondAccount.accountAddress,
+                amount: 1000,
+              });
+              const pendingTxn = await aptos.signAndSubmitTransaction({
+                signer: firstAccount,
+                transaction: tx,
+              });
+
+              setBlocks((prev) =>
+                prev.map((block) =>
+                  block.id === blockId
+                    ? {
+                        ...block,
+                        params: {
+                          ...block.params,
+                          transaction: {
+                            type: 'string',
+                            value: pendingTxn.hash,
+                          },
+                          status: { type: 'string', value: 'Pending' },
+                        },
+                      }
+                    : block,
+                ),
+              );
+
+              const response = await aptos.waitForTransaction({
+                transactionHash: pendingTxn.hash,
+              });
+              console.log(response);
+
+              setBlocks((prev) =>
+                prev.map((block) =>
+                  block.id === blockId
+                    ? {
+                        ...block,
+                        params: {
+                          ...block.params,
+                          transaction: {
+                            type: 'string',
+                            value: response.hash,
+                          },
+                          status: {
+                            type: 'string',
+                            value: response.success ? 'Success' : 'Failed',
+                          },
+                        },
+                      }
+                    : block,
+                ),
+              );
             }
             setText('');
           }}
