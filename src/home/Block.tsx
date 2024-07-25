@@ -1,16 +1,19 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
 
-export type BlockProps = {
-  className?: string;
-
+export type BlockType = {
+  id: string;
   title: string;
   brand: {
     name: string;
     src: string;
     color: string;
   };
-  params?: Record<string, string>;
+  params?: Record<string, any>;
+};
+
+export type BlockProps = BlockType & {
+  className?: string;
 };
 
 export const Block: React.FC<BlockProps> = ({
@@ -40,7 +43,9 @@ export const Block: React.FC<BlockProps> = ({
             {Object.entries(params).map(([key, value]) => (
               <tr key={key}>
                 <td className="px-1.5 py-1 text-xs border">{key}</td>
-                <td className="px-1.5 py-1 text-xs border">{value}</td>
+                <td className="px-1.5 py-1 text-xs border">
+                  {(value as any).toString()}
+                </td>
               </tr>
             ))}
           </tbody>
