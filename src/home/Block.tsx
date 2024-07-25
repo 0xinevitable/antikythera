@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
 
+import { Colors } from '@/constants/colors';
 import { formatUnits } from '@/utils/units';
 
 export type Coin = {
@@ -19,6 +20,8 @@ export type BlockType = {
   };
   params?: Record<
     string,
+    | { type: 'block'; value: string }
+    | { type: 'hash'; value: string }
     | { type: 'string'; value: string }
     | { type: 'coin'; coin: Coin; value: bigint }
   >;
@@ -56,6 +59,24 @@ export const Block: React.FC<BlockProps> = ({
               <tr key={key}>
                 <td className="px-1.5 py-1 text-xs border">{key}</td>
                 <td className="px-1.5 py-1 text-xs border">
+                  {param.type === 'block' && (
+                    <a
+                      style={{ color: Colors.AptosNeon }}
+                      target="_blank"
+                      href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
+                    >
+                      {param.value}
+                    </a>
+                  )}
+                  {param.type === 'hash' && (
+                    <a
+                      style={{ color: Colors.AptosNeon }}
+                      target="_blank"
+                      href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
+                    >
+                      {param.value}
+                    </a>
+                  )}
                   {param.type === 'string' && param.value}
                   {param.type === 'coin' && (
                     <span>

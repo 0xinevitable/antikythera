@@ -1,48 +1,26 @@
 import {
+  APTOS_COIN,
   Account,
   Aptos,
   AptosConfig,
   Ed25519PrivateKey,
+  InputGenerateTransactionPayloadData,
   Network,
 } from '@aptos-labs/ts-sdk';
 import styled from '@emotion/styled';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Brands } from '@/constants/brands';
+
 import { Block, BlockType } from './Block';
 
-const Colors = {
-  Thala: '#c2afff',
-  Aptos: '#ffffff',
-  AptosNames: '#0EF7F7',
-};
-const Brands = {
-  ThalaFaucet: {
-    name: 'Thala Faucet',
-    color: Colors.Thala,
-    src: '/assets/logo-thala.png',
-  },
-  ThalaSwap: {
-    name: 'Thala Swap',
-    color: Colors.Thala,
-    src: '/assets/logo-thala.png',
-  },
-  Aptos: {
-    name: 'Aptos',
-    color: Colors.Aptos,
-    src: '/assets/logo-aptos.png',
-  },
-  AptosNames: {
-    name: 'Aptos Names',
-    color: Colors.AptosNames,
-    src: '/assets/logo-aptos-neon.png',
-  },
-};
 const Coins = {
   APT: {
     name: 'APT',
     symbol: 'APT',
     decimals: 8,
+    type: APTOS_COIN,
   },
 };
 
@@ -186,15 +164,19 @@ const HomePage = () => {
               if (!secondAccount) {
                 return;
               }
-              const tx = await aptos.transferCoinTransaction({
+              const data: InputGenerateTransactionPayloadData = {
+                function: '0x1::aptos_account::transfer',
+                functionArguments: [secondAccount.accountAddress.toString(), 1],
+              };
+              const transaction = await aptos.transaction.build.simple({
                 sender: firstAccount.accountAddress,
-                recipient: secondAccount.accountAddress,
-                amount: 1000,
+                data,
               });
               const pendingTxn = await aptos.signAndSubmitTransaction({
                 signer: firstAccount,
-                transaction: tx,
+                transaction,
               });
+              console.log({ pendingTxn });
 
               setBlocks((prev) =>
                 prev.map((block) =>
@@ -204,10 +186,20 @@ const HomePage = () => {
                         params: {
                           ...block.params,
                           transaction: {
-                            type: 'string',
+                            type: 'hash',
                             value: pendingTxn.hash,
                           },
                           status: { type: 'string', value: 'Pending' },
+                          ...Object.entries(data).reduce(
+                            (acc, [key, value]) => ({
+                              ...acc,
+                              [key]: {
+                                type: 'string',
+                                value: JSON.stringify(value),
+                              },
+                            }),
+                            {},
+                          ),
                         },
                       }
                     : block,
@@ -226,13 +218,47 @@ const HomePage = () => {
                         ...block,
                         params: {
                           ...block.params,
-                          transaction: {
-                            type: 'string',
-                            value: response.hash,
-                          },
                           status: {
                             type: 'string',
                             value: response.success ? 'Success' : 'Failed',
+                          },
+                          gas: {
+                            type: 'coin',
+                            coin: Coins.APT,
+                            value:
+                              BigInt(response.gas_used) *
+                              BigInt(pendingTxn.gas_unit_price),
+                          },
+                          gasUnitPrice: {
+                            type: 'coin',
+                            coin: Coins.APT,
+                            value: BigInt(pendingTxn.gas_unit_price),
+                          },
+                          block: {
+                            type: 'string',
+                            value: 'Loading...',
+                          },
+                        },
+                      }
+                    : block,
+                ),
+              );
+
+              const blockInfo = await aptos.getBlockByVersion({
+                ledgerVersion: Number(response.version),
+              });
+              console.log(blockInfo);
+
+              setBlocks((prev) =>
+                prev.map((block) =>
+                  block.id === blockId
+                    ? {
+                        ...block,
+                        params: {
+                          ...block.params,
+                          block: {
+                            type: 'block',
+                            value: blockInfo.block_height,
                           },
                         },
                       }
