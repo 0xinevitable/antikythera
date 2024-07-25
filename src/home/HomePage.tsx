@@ -327,25 +327,7 @@ const HomePage = () => {
               if (!firstAccount) {
                 return;
               }
-              // const ca =
-              //   '0x867ed1f6bf916171b1de3ee92849b8978b7d1b9e0a8cc982a3d19d535dfd9c0c';
-              // const data: InputGenerateTransactionPayloadData = {
-              //   function: `${ca}::domains::register_domain`,
-              //   functionArguments: [
-              //     firstAccount.accountAddress.toString(),
-              //     'antikythera',
-              //     1n, // registration_duration_secs
-              //   ],
-              // };
-              // await executeTx(firstAccount, data, (params) => {
-              //   setFeedItems((prev) =>
-              //     prev.map((item) =>
-              //       item.id === blockId && item.type === 'block'
-              //         ? { ...item, params: { ...item.params, ...params } }
-              //         : item,
-              //     ),
-              //   );
-              // });
+              // FIXME: Change to `aptos.transaction.build` -> https://github.com/aptos-labs/aptos-ts-sdk/blob/2f5880971f59499a5c5fe5738c8b30b4acb8ccdb/src/internal/ans.ts#L194
               const transaction = await aptos.ans.registerName({
                 sender: firstAccount,
                 name: 'geiuhgf85u.apt',
