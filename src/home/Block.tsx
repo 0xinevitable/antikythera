@@ -10,6 +10,12 @@ export type Coin = {
   decimals: number;
 };
 
+export type ParameterType =
+  | { type: 'block'; value: string }
+  | { type: 'hash'; value: string }
+  | { type: 'string'; value: string }
+  | { type: 'coin'; coin: Coin; value: bigint };
+
 export type BlockType = {
   id: string;
   title: string;
@@ -18,13 +24,7 @@ export type BlockType = {
     src: string;
     color: string;
   };
-  params?: Record<
-    string,
-    | { type: 'block'; value: string }
-    | { type: 'hash'; value: string }
-    | { type: 'string'; value: string }
-    | { type: 'coin'; coin: Coin; value: bigint }
-  >;
+  params?: Record<string, ParameterType>;
 };
 
 export type BlockProps = BlockType & {

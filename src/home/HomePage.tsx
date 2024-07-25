@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Brands } from '@/constants/brands';
 
-import { Block, BlockType } from './Block';
+import { Block, BlockType, ParameterType } from './Block';
 
 const Coins = {
   APT: {
@@ -34,6 +34,78 @@ const defaultAccount = Account.fromPrivateKey({
     '0x8770b1199261ee6ba4ce12cb11cf3dcf3b9fbf0a9bf9062ae00242fb9d686e3a',
   ),
 });
+
+const executeTx = async (
+  signer: Account,
+  data: InputGenerateTransactionPayloadData,
+  update: (params: Record<string, ParameterType>) => void,
+) => {
+  const transaction = await aptos.transaction.build.simple({
+    sender: signer.accountAddress,
+    data,
+  });
+  const pendingTxn = await aptos.signAndSubmitTransaction({
+    signer: signer,
+    transaction,
+  });
+  console.log({ pendingTxn });
+
+  update({
+    transaction: {
+      type: 'hash',
+      value: pendingTxn.hash,
+    },
+    status: { type: 'string', value: 'Pending' },
+    ...Object.entries(data).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: {
+          type: 'string',
+          value: JSON.stringify(value),
+        },
+      }),
+      {},
+    ),
+  });
+
+  const response = await aptos.waitForTransaction({
+    transactionHash: pendingTxn.hash,
+  });
+  console.log(response);
+
+  update({
+    status: {
+      type: 'string',
+      value: response.success ? 'Success' : 'Failed',
+    },
+    gas: {
+      type: 'coin',
+      coin: Coins.APT,
+      value: BigInt(response.gas_used) * BigInt(pendingTxn.gas_unit_price),
+    },
+    gasUnitPrice: {
+      type: 'coin',
+      coin: Coins.APT,
+      value: BigInt(pendingTxn.gas_unit_price),
+    },
+    block: {
+      type: 'string',
+      value: 'Loading...',
+    },
+  });
+
+  const blockInfo = await aptos.getBlockByVersion({
+    ledgerVersion: Number(response.version),
+  });
+  console.log(blockInfo);
+
+  update({
+    block: {
+      type: 'block',
+      value: blockInfo.block_height,
+    },
+  });
+};
 
 type FeedItem =
   | (BlockType & { type: 'block' })
@@ -202,114 +274,23 @@ const HomePage = () => {
                 },
               ]);
               const firstAccount = Object.values(accounts)[0];
-              if (!firstAccount) {
-                return;
-              }
               const secondAccount = Object.values(accounts)[1];
-              if (!secondAccount) {
+              if (!firstAccount || !secondAccount) {
                 return;
               }
               const data: InputGenerateTransactionPayloadData = {
                 function: '0x1::aptos_account::transfer',
                 functionArguments: [secondAccount.accountAddress.toString(), 1],
               };
-              const transaction = await aptos.transaction.build.simple({
-                sender: firstAccount.accountAddress,
-                data,
+              await executeTx(firstAccount, data, (params) => {
+                setFeedItems((prev) =>
+                  prev.map((item) =>
+                    item.id === blockId && item.type === 'block'
+                      ? { ...item, params }
+                      : item,
+                  ),
+                );
               });
-              const pendingTxn = await aptos.signAndSubmitTransaction({
-                signer: firstAccount,
-                transaction,
-              });
-              console.log({ pendingTxn });
-
-              setFeedItems((prev) =>
-                prev.map((item) =>
-                  item.id === blockId && item.type === 'block'
-                    ? {
-                        ...item,
-                        params: {
-                          ...item.params,
-                          transaction: {
-                            type: 'hash',
-                            value: pendingTxn.hash,
-                          },
-                          status: { type: 'string', value: 'Pending' },
-                          ...Object.entries(data).reduce(
-                            (acc, [key, value]) => ({
-                              ...acc,
-                              [key]: {
-                                type: 'string',
-                                value: JSON.stringify(value),
-                              },
-                            }),
-                            {},
-                          ),
-                        },
-                      }
-                    : item,
-                ),
-              );
-
-              const response = await aptos.waitForTransaction({
-                transactionHash: pendingTxn.hash,
-              });
-              console.log(response);
-
-              setFeedItems((prev) =>
-                prev.map((item) =>
-                  item.id === blockId && item.type === 'block'
-                    ? {
-                        ...item,
-                        params: {
-                          ...item.params,
-                          status: {
-                            type: 'string',
-                            value: response.success ? 'Success' : 'Failed',
-                          },
-                          gas: {
-                            type: 'coin',
-                            coin: Coins.APT,
-                            value:
-                              BigInt(response.gas_used) *
-                              BigInt(pendingTxn.gas_unit_price),
-                          },
-                          gasUnitPrice: {
-                            type: 'coin',
-                            coin: Coins.APT,
-                            value: BigInt(pendingTxn.gas_unit_price),
-                          },
-                          block: {
-                            type: 'string',
-                            value: 'Loading...',
-                          },
-                        },
-                      }
-                    : item,
-                ),
-              );
-
-              const blockInfo = await aptos.getBlockByVersion({
-                ledgerVersion: Number(response.version),
-              });
-              console.log(blockInfo);
-
-              setFeedItems((prev) =>
-                prev.map((item) =>
-                  item.id === blockId && item.type === 'block'
-                    ? {
-                        ...item,
-                        params: {
-                          ...item.params,
-                          block: {
-                            type: 'block',
-                            value: blockInfo.block_height,
-                          },
-                        },
-                      }
-                    : item,
-                ),
-              );
             }
             setText('');
           }}
