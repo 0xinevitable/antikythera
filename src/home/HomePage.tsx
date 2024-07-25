@@ -38,6 +38,13 @@ const Brands = {
     src: '/assets/logo-aptos-neon.png',
   },
 };
+const Coins = {
+  APT: {
+    name: 'APT',
+    symbol: 'APT',
+    decimals: 8,
+  },
+};
 
 type Address = `0x${string}`;
 
@@ -88,10 +95,15 @@ const HomePage = () => {
                   id: uuidv4(),
                   title: 'Create Account',
                   brand: Brands.Aptos,
-                  params: { address: account.accountAddress.toString() },
+                  params: {
+                    address: {
+                      type: 'string',
+                      value: account.accountAddress.toString(),
+                    },
+                  },
                 },
               ]);
-            } else if (e.key === 'r') {
+            } /* else if (e.key === 'r') {
               setBlocks((prev) => [
                 ...prev,
                 {
@@ -115,7 +127,7 @@ const HomePage = () => {
                   // TODO: Update block
                 })
                 .catch(console.error);
-            } else if (e.key === 'b') {
+            } */ else if (e.key === 'b') {
               const blockId = uuidv4();
               setBlocks((prev) => [
                 ...prev,
@@ -143,7 +155,11 @@ const HomePage = () => {
                             ...block,
                             params: {
                               ...block.params,
-                              balance: res.toString(),
+                              balance: {
+                                type: 'coin',
+                                coin: Coins.APT,
+                                value: BigInt(res.toString()),
+                              },
                             },
                           }
                         : block,

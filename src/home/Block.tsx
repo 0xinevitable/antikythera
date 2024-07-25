@@ -1,6 +1,14 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
 
+import { formatUnits } from '@/utils/units';
+
+export type Coin = {
+  symbol: string;
+  name: string;
+  decimals: number;
+};
+
 export type BlockType = {
   id: string;
   title: string;
@@ -9,7 +17,11 @@ export type BlockType = {
     src: string;
     color: string;
   };
-  params?: Record<string, any>;
+  params?: Record<
+    string,
+    | { type: 'string'; value: string }
+    | { type: 'coin'; coin: Coin; value: bigint }
+  >;
 };
 
 export type BlockProps = BlockType & {
@@ -40,11 +52,17 @@ export const Block: React.FC<BlockProps> = ({
       {params && (
         <table className="w-full text-white table-auto">
           <tbody>
-            {Object.entries(params).map(([key, value]) => (
+            {Object.entries(params).map(([key, param]) => (
               <tr key={key}>
                 <td className="px-1.5 py-1 text-xs border">{key}</td>
                 <td className="px-1.5 py-1 text-xs border">
-                  {(value as any).toString()}
+                  {param.type === 'string' && param.value}
+                  {param.type === 'coin' && (
+                    <span>
+                      {formatUnits(param.value, param.coin.decimals)}{' '}
+                      {param.coin.symbol}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
