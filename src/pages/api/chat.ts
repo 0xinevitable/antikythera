@@ -61,67 +61,86 @@ export default async function handler(
   //   return res.status(405).json({ error: 'Method not allowed' });
   // }
 
-  const { messages } = await req.json();
-  console.log(messages);
+  // try {
+  const data = await req.json();
+  // console.log({ messages: JSON.stringify(messages) });
+  const lastMessage = data.messages[data.messages.length - 1].content;
 
-  const model = new ChatOpenAI({
+  const llm = new ChatOpenAI({
     model: 'gpt-4o',
     temperature: 0,
     streaming: true,
     apiKey: 'sk-proj-EaGZZ3Nzj3Jj9AE2nXUFT3BlbkFJO7ZctA8pLqCbWitCCeoO',
   });
 
-  const llmWithTools = model.bind({ tools });
+  const llmWithTools = llm.bind({ tools });
 
-  const data = new experimental_StreamData();
+  let messages: BaseMessage[] = [new HumanMessage(lastMessage)];
+  let finalResponse: string | null = null;
 
-  const stream = await llmWithTools.stream([new HumanMessage(messages[0])]);
+  while (finalResponse === null) {
+    const response = await llm.invoke(messages);
 
-  const textEncoder = new TextEncoder();
-  const transformStream = new TransformStream({
-    async transform(chunk, controller) {
-      if (chunk.content) {
-        controller.enqueue(textEncoder.encode(chunk.content));
-      }
+    if (
+      'additional_kwargs' in response &&
+      response.additional_kwargs.tool_calls
+    ) {
+      const toolMessages: ToolMessage[] = [];
+      for (const toolCall of response.additional_kwargs.tool_calls || []) {
+        if (toolCall.type === 'function' && toolCall.function) {
+          const { name, arguments: argsString } = toolCall.function;
+          try {
+            const args = JSON.parse(argsString);
+            const result = JSON.stringify(await runTool(name, args));
+            console.log(JSON.stringify(result), name, args);
 
-      console.log(JSON.stringify(chunk));
-      if (chunk.additional_kwargs?.tool_calls) {
-        for (const toolCall of chunk.additional_kwargs.tool_calls) {
-          if (toolCall.type === 'function' && toolCall.function) {
-            console.log({ toolCall });
-            const { name, arguments: args } = toolCall.function;
-            controller.enqueue(
-              textEncoder.encode(`\nExecuting tool: ${name}\n`),
+            toolMessages.push(
+              new ToolMessage({
+                content: result,
+                tool_call_id: toolCall.id,
+                name: name,
+              }),
             );
-            try {
-              console.log({ args });
-              const result = await runTool(name, JSON.parse(args));
-              console.log({ result });
-              const resultString = JSON.stringify(result);
-              controller.enqueue(
-                textEncoder.encode(`\nTool ${name} result: ${resultString}\n`),
-              );
-              data.append({ type: 'tool_result', tool: name, result });
-            } catch (error) {
-              console.error(`Error executing tool ${name}:`, error);
-              controller.enqueue(
-                textEncoder.encode(
-                  `\nError executing tool ${name}: ${error.message}\n`,
-                ),
-              );
-            }
+          } catch (error) {
+            console.error(`Error executing tool ${name}:`, error);
+            // response.additional_kwargs.result += `\n\nError executing tool ${name}: ${error.message}`;
           }
         }
       }
-    },
-    flush(controller) {
-      data.close();
-    },
-  });
 
-  return new StreamingTextResponse(
-    stream.pipeThrough(transformStream),
-    {},
-    data,
-  );
+      messages.push(response as AIMessage);
+      messages.push(...toolMessages);
+    } else if (typeof response.content === 'string') {
+      finalResponse = response.content;
+      messages.push(response as AIMessage);
+    }
+
+    return messages;
+  }
 }
+
+// console.log({ result: JSON.stringify(result.toJSON()) });
+
+//   if (response.additional_kwargs?.tool_calls) {
+//     for (const toolCall of response.additional_kwargs.tool_calls) {
+//       if (toolCall.type === 'function' && toolCall.function) {
+//         const { name, arguments: argsString } = toolCall.function;
+//         try {
+//           const args = JSON.parse(argsString);
+//           const toolResult = await runTool(name, args);
+//           result += `\n\nTool ${name} result:\n${JSON.stringify(toolResult, null, 2)}`;
+//         } catch (error) {
+//           console.error(`Error executing tool ${name}:`, error);
+//           result += `\n\nError executing tool ${name}: ${error.message}`;
+//         }
+//       }
+//     }
+//   }
+
+//   res.status(200).json({ result });
+// } catch (error) {
+//   console.error('Error in API route:', error);
+//   res
+//     .status(500)
+//     .json({ error: 'Internal server error', details: error.message });
+// }

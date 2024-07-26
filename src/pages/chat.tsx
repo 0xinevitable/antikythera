@@ -16,6 +16,8 @@ import { useState } from 'react';
 
 // app/page.tsx
 
+// app/page.tsx
+
 export default function ThalaSwapAgent() {
   // const [input, setInput] = useState(
   //   'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
@@ -32,7 +34,7 @@ export default function ThalaSwapAgent() {
 
   return (
     <div className="max-w-lg p-4 mx-auto bg-white">
-      <h1 className="mb-4 text-2xl font-bold">ThalaSwap Agent</h1>
+      <h1 className="mb-4 text-2xl font-bold">Agent</h1>
       <form onSubmit={handleSubmit} className="mb-4">
         <input
           type="text"
