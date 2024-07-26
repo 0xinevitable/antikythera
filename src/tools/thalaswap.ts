@@ -5,8 +5,8 @@ import { ThalaswapRouter } from '@thalalabs/router-sdk';
 import path from 'path';
 import { z } from 'zod';
 
-import { ThalaSwapPackageId } from '../vectorstore-abi';
-import { loadOrCreateVectorStore } from '../vectorstore-abi';
+import { ThalaSwapPackageId } from '@/vectorstore-abi';
+import { loadOrCreateVectorStore } from '@/vectorstore-abi';
 
 // Initialize the ThalaSwap Router
 const router = new ThalaswapRouter(

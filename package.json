@@ -17,6 +17,7 @@
     "@langchain/openai": "^0.2.5",
     "@thalalabs/router-sdk": "^3.2.1",
     "@thalalabs/surf": "^1.7.1",
+    "ai": "^3.2.36",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "langchain": "^0.2.11",
