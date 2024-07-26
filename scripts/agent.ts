@@ -12,6 +12,7 @@ import { ChatOpenAI, ChatOpenAICallOptions } from '@langchain/openai';
 
 import { searchCoinTool } from './tools/coins';
 import { findSwapRouteTool, thalaSwapABITool } from './tools/thalaswap';
+import { formatUnitsTool, parseUnitsTool } from './tools/units';
 
 type ExtendedTool = DynamicStructuredTool<any>;
 
@@ -19,6 +20,10 @@ const tools: ExtendedTool[] = [
   searchCoinTool,
   findSwapRouteTool,
   thalaSwapABITool,
+
+  // units
+  parseUnitsTool,
+  formatUnitsTool,
 ];
 
 const toolsByName = {
@@ -87,8 +92,8 @@ const main = async () => {
 
   const result = await interactiveAgentLoop(
     llmWithTools,
-    'Get route of APT->USDC and print each pool state',
-    // 'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘',
+    // 'Get route of APT->USDC and print each pool state',
+    'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
   );
 
   console.log('Final result:', result);

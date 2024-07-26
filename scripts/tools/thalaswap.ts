@@ -25,7 +25,10 @@ const findSwapRouteSchema = z.object({
   toTokenType: z
     .string()
     .describe('The full coin type of the token to swap to'),
-  amountIn: z.number().positive().describe('The amount of fromToken to swap'),
+  amountIn: z
+    .number()
+    .positive()
+    .describe('The amount of fromToken to swap. Formatted units.'),
 });
 
 const findSwapRouteTool = tool(

@@ -18,10 +18,7 @@ const searchCoinSchema = z.object({
       'token_type.module_name',
       'token_type.struct_name',
     ])
-    .optional()
-    .describe(
-      'The specific field to search in. If not provided, will search in all fields',
-    ),
+    .describe('The specific field to search in.'),
 });
 export const searchCoinTool = tool(
   async ({ query, field }) => {
