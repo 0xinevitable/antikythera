@@ -1,7 +1,7 @@
 // app/page.tsx
 'use client';
 
-import { useCompletion } from 'ai/react';
+import { useChat, useCompletion } from 'ai/react';
 import { useState } from 'react';
 
 // app/page.tsx
@@ -10,18 +10,25 @@ import { useState } from 'react';
 
 // app/page.tsx
 
+// app/page.tsx
+
+// app/page.tsx
+
+// app/page.tsx
+
 export default function ThalaSwapAgent() {
-  const [input, setInput] = useState(
-    'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
-  );
-  const { completion, complete } = useCompletion({
-    api: '/api/chat',
+  // const [input, setInput] = useState(
+  //   'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
+  // );
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    initialInput:
+      'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    complete(input);
-  };
+  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   complete(input);
+  // };
 
   return (
     <div className="max-w-lg p-4 mx-auto bg-white">
@@ -30,7 +37,8 @@ export default function ThalaSwapAgent() {
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          // onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Enter your query here..."
           className="w-full p-2 border rounded"
         />
@@ -43,7 +51,7 @@ export default function ThalaSwapAgent() {
       </form>
       <div className="p-4 bg-gray-100 rounded">
         <h2 className="mb-2 font-bold">Response:</h2>
-        <pre className="whitespace-pre-wrap">{completion}</pre>
+        <pre className="whitespace-pre-wrap">{JSON.stringify(messages)}</pre>
       </div>
     </div>
   );

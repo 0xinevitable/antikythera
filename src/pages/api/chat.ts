@@ -1,4 +1,5 @@
 // app/api/thalaswap/route.ts
+import { InputValues } from '@langchain/core/dist/utils/types';
 import {
   AIMessage,
   BaseMessage,
@@ -46,24 +47,31 @@ const runTool = async (
   return await tool.invoke(args);
 };
 
-export default async function handler(req: NextApiRequest<{ prompt: string }>) {
-  const { prompt } = req.body;
+export const runtime = 'edge';
+
+export default async function handler(req: Request) {
+  const data = await req.json();
+  // console.log(messages);
+  const messages: ChatPromptTemplate<InputValues, string>[] = (
+    data.messages as { role: string; content: string }[]
+  ).map((v) => ChatPromptTemplate.fromMessages([[v.role, v.content]]));
 
   const model = new ChatOpenAI({
     model: 'gpt-4o',
     temperature: 0,
     streaming: true,
-    apiKey: '',
+    apiKey: 'sk-proj-EaGZZ3Nzj3Jj9AE2nXUFT3BlbkFJO7ZctA8pLqCbWitCCeoO',
   });
 
   const llmWithTools = model.bind({ tools });
-
-  const chatPrompt = ChatPromptTemplate.fromMessages([['human', prompt]]);
+  // const chatPrompt = ChatPromptTemplate.fromMessages([['human', prompt]]);
+  const chatPrompt = ChatPromptTemplate.fromMessages(messages);
 
   const chain = chatPrompt.pipe(llmWithTools);
 
   const processStream = async function* () {
     for await (const chunk of stream) {
+      console.log({ chunk });
       if ('content' in chunk && chunk.content) {
         yield chunk.content;
       }
@@ -72,6 +80,7 @@ export default async function handler(req: NextApiRequest<{ prompt: string }>) {
           if (toolCall.type === 'function' && toolCall.function) {
             const { name, arguments: args } = toolCall.function;
             const result = await runTool(name, JSON.parse(args));
+            console.log({ result });
             yield `\nTool ${name} result: ${JSON.stringify(result)}\n`;
           }
         }
