@@ -1,48 +1,156 @@
 import {
   Aptos,
   AptosConfig,
+  MoveFunctionGenericTypeParam,
   MoveFunctionVisibility,
   Network,
 } from '@aptos-labs/ts-sdk';
 import { OpenAIEmbeddings } from '@langchain/openai';
+import fs from 'fs/promises';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import path from 'path';
+
+import { APTOS_MAINNET_COINS } from './aptos-coins';
 
 const ThalaSwap =
   '0x48271d39d0b05bd6efca2278f22277d6fcc375504f9839fd73f74ace240861af';
 
-(async () => {
+type ABI = {
+  is_view: boolean;
+  name: string;
+  visibility: MoveFunctionVisibility;
+  is_entry: boolean;
+  generic_type_params: MoveFunctionGenericTypeParam[];
+  params: string[];
+  return: string[];
+  module: string;
+};
+
+interface StoredVectorData {
+  memoryVectors: any[];
+  texts: string[];
+  metadatas: object[];
+}
+
+const getCoinDataBySymbol = (symbol: string) => {
+  return APTOS_MAINNET_COINS.find((v) => v.symbol === symbol);
+};
+
+async function createVectorStore(abis: ABI[]): Promise<MemoryVectorStore> {
+  const embeddings = new OpenAIEmbeddings({ apiKey: process.env.API_KEY });
+  const texts = abis.map((v) => JSON.stringify(v));
+  const metadatas = abis.map((v) => ({ id: `${v.module}::${v.name}` }));
+  return await MemoryVectorStore.fromTexts(texts, metadatas, embeddings);
+}
+
+async function saveVectorStore(
+  vectorStore: MemoryVectorStore,
+  texts: string[],
+  metadatas: object[],
+  filename: string,
+): Promise<void> {
+  const data: StoredVectorData = {
+    memoryVectors: vectorStore.memoryVectors,
+    texts,
+    metadatas,
+  };
+  await fs.writeFile(filename, JSON.stringify(data), 'utf8');
+}
+
+async function loadVectorStore(
+  filename: string,
+): Promise<MemoryVectorStore | null> {
+  try {
+    const data = await fs.readFile(filename, 'utf8');
+    const storedData: StoredVectorData = JSON.parse(data);
+    const embeddings = new OpenAIEmbeddings({ apiKey: process.env.API_KEY });
+    const vectorStore = await MemoryVectorStore.fromTexts(
+      storedData.texts,
+      storedData.metadatas,
+      embeddings,
+    );
+    vectorStore.memoryVectors = storedData.memoryVectors;
+    return vectorStore;
+  } catch (error) {
+    console.log(`Error loading vector store from ${filename}: ${error}`);
+    return null;
+  }
+}
+
+async function loadOrCreateVectorStore(
+  packageId: string,
+  isView: boolean,
+  abis: ABI[],
+): Promise<MemoryVectorStore> {
+  const filename = `vectorstores/abis/${packageId}_${isView ? 'view' : 'nonview'}.json`;
+
+  const loadedStore = await loadVectorStore(filename);
+  if (loadedStore) {
+    console.log(`Loaded vector store from ${filename}`);
+    return loadedStore;
+  }
+
+  console.log(`Creating new vector store for ${filename}`);
+  const vectorStore = await createVectorStore(abis);
+  const texts = abis.map((v) => JSON.stringify(v));
+  const metadatas = abis.map((v) => ({ id: `${v.module}::${v.name}` }));
+  await saveVectorStore(vectorStore, texts, metadatas, filename);
+  return vectorStore;
+}
+
+async function main() {
   const config = new AptosConfig({ network: Network.MAINNET });
   const aptos = new Aptos(config);
   const modules = await aptos.getAccountModules({ accountAddress: ThalaSwap });
 
-  const abis = modules.flatMap((module) => {
+  const packageId = path.basename(ThalaSwap);
+
+  const allAbis = modules.flatMap((module) => {
     if (!module.abi) {
       return [];
     }
     const { address: _address, ...abi } = module.abi;
     return abi.exposed_functions.flatMap((func) => {
       if (func.visibility === MoveFunctionVisibility.PUBLIC) {
-        return { module: module.abi!.name, ...func };
+        return { module: module.abi!.name, ...func, is_view: func.is_view };
       }
       return [];
     });
   });
-  console.log(abis);
 
-  const vectorStore = await MemoryVectorStore.fromTexts(
-    abis.map((v) => JSON.stringify(v)),
-    abis.map((v) => `${v.module}::${v.name}`),
-    new OpenAIEmbeddings({ apiKey: process.env.API_KEY }),
-  );
-  const [resultOne] = await vectorStore.similaritySearch(
-    'Swap with exact amount in normal amm',
-    1,
-  );
-  console.log(resultOne.pageContent);
+  const viewAbis = allAbis.filter((abi) => abi.is_view);
+  const nonViewAbis = allAbis.filter((abi) => !abi.is_view);
 
-  const [resultTwo] = await vectorStore.similaritySearch(
+  const viewVectorStore = await loadOrCreateVectorStore(
+    packageId,
+    true,
+    viewAbis,
+  );
+  const nonViewVectorStore = await loadOrCreateVectorStore(
+    packageId,
+    false,
+    nonViewAbis,
+  );
+
+  console.log('View functions:');
+  const viewResults = await viewVectorStore.similaritySearch(
     'Get pool status of a weighted pool',
     1,
   );
-  console.log(resultTwo.pageContent);
-})();
+  console.log(viewResults[0].pageContent);
+
+  console.log('\nNon-view functions:');
+  const nonViewResults = await nonViewVectorStore.similaritySearch(
+    'Swap with exact amount in normal amm',
+    1,
+  );
+  console.log(nonViewResults[0].pageContent);
+
+  const anotherNonViewResults = await nonViewVectorStore.similaritySearch(
+    "Get pool lp coin address when amm pool's coins are given",
+    1,
+  );
+  console.log(anotherNonViewResults[0].pageContent);
+}
+
+main().catch(console.error);
