@@ -10,9 +10,7 @@ import fs from 'fs/promises';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import path from 'path';
 
-import { APTOS_MAINNET_COINS } from './aptos-coins';
-
-const ThalaSwap =
+export const ThalaSwapPackageId =
   '0x48271d39d0b05bd6efca2278f22277d6fcc375504f9839fd73f74ace240861af';
 
 type ABI = {
@@ -32,18 +30,16 @@ interface StoredVectorData {
   metadatas: object[];
 }
 
-const getCoinDataBySymbol = (symbol: string) => {
-  return APTOS_MAINNET_COINS.find((v) => v.symbol === symbol);
-};
-
-async function createVectorStore(abis: ABI[]): Promise<MemoryVectorStore> {
+export async function createVectorStore(
+  abis: ABI[],
+): Promise<MemoryVectorStore> {
   const embeddings = new OpenAIEmbeddings({ apiKey: process.env.API_KEY });
   const texts = abis.map((v) => JSON.stringify(v));
   const metadatas = abis.map((v) => ({ id: `${v.module}::${v.name}` }));
   return await MemoryVectorStore.fromTexts(texts, metadatas, embeddings);
 }
 
-async function saveVectorStore(
+export async function saveVectorStore(
   vectorStore: MemoryVectorStore,
   texts: string[],
   metadatas: object[],
@@ -57,7 +53,7 @@ async function saveVectorStore(
   await fs.writeFile(filename, JSON.stringify(data), 'utf8');
 }
 
-async function loadVectorStore(
+export async function loadVectorStore(
   filename: string,
 ): Promise<MemoryVectorStore | null> {
   try {
@@ -77,7 +73,7 @@ async function loadVectorStore(
   }
 }
 
-async function loadOrCreateVectorStore(
+export async function loadOrCreateVectorStore(
   packageId: string,
   isView: boolean,
   abis: ABI[],
@@ -101,9 +97,11 @@ async function loadOrCreateVectorStore(
 async function main() {
   const config = new AptosConfig({ network: Network.MAINNET });
   const aptos = new Aptos(config);
-  const modules = await aptos.getAccountModules({ accountAddress: ThalaSwap });
+  const modules = await aptos.getAccountModules({
+    accountAddress: ThalaSwapPackageId,
+  });
 
-  const packageId = path.basename(ThalaSwap);
+  const packageId = path.basename(ThalaSwapPackageId);
 
   const allAbis = modules.flatMap((module) => {
     if (!module.abi) {
@@ -153,4 +151,4 @@ async function main() {
   console.log(anotherNonViewResults[0].pageContent);
 }
 
-main().catch(console.error);
+// main().catch(console.error);
