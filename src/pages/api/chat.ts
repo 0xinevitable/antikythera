@@ -1,20 +1,12 @@
-// pages/api/thalaswap.ts
 import {
   AIMessage,
   BaseMessage,
   HumanMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import { StringOutputParser } from '@langchain/core/output_parsers';
-import { RunnableSequence } from '@langchain/core/runnables';
-import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
-import {
-  LangChainStream,
-  StreamingTextResponse,
-  experimental_StreamData,
-} from 'ai';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { searchCoinTool } from '@/tools/coins';
 import { findSwapRouteTool, thalaSwapABITool } from '@/tools/thalaswap';
@@ -22,14 +14,12 @@ import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
 
 export const maxDuration = 300; // 5 minutes
 
-type ExtendedTool = DynamicStructuredTool<any>;
+type ExtendedTool = any; // Replace with the actual type if available
 
 const tools: ExtendedTool[] = [
   searchCoinTool,
   findSwapRouteTool,
   thalaSwapABITool,
-
-  // units
   parseUnitsTool,
   formatUnitsTool,
 ];
@@ -51,19 +41,16 @@ const runTool = async (
   return await tool.invoke(args);
 };
 
-export const runtime = 'edge';
-
 export default async function handler(
-  req: Request,
-  // res: NextApiResponse,
+  req: NextApiRequest,
+  res: NextApiResponse,
 ) {
-  // if (req.method !== 'POST') {
-  //   return res.status(405).json({ error: 'Method not allowed' });
-  // }
+  if (req.method !== 'POST') {
+    // return new Response('Method not allowed', { status: 405 });
+    return res.status(405).send('Method not allowed');
+  }
 
-  // try {
-  const data = await req.json();
-  // console.log({ messages: JSON.stringify(messages) });
+  const data = req.body;
   const lastMessage = data.messages[data.messages.length - 1].content;
 
   const llm = new ChatOpenAI({
@@ -78,69 +65,77 @@ export default async function handler(
   let messages: BaseMessage[] = [new HumanMessage(lastMessage)];
   let finalResponse: string | null = null;
 
-  while (finalResponse === null) {
-    const response = await llm.invoke(messages);
+  const stream = new ReadableStream({
+    async start(controller) {
+      while (finalResponse === null) {
+        const response = await llmWithTools.invoke(messages);
+        console.log(JSON.stringify(response));
 
-    if (
-      'additional_kwargs' in response &&
-      response.additional_kwargs.tool_calls
-    ) {
-      const toolMessages: ToolMessage[] = [];
-      for (const toolCall of response.additional_kwargs.tool_calls || []) {
-        if (toolCall.type === 'function' && toolCall.function) {
-          const { name, arguments: argsString } = toolCall.function;
-          try {
-            const args = JSON.parse(argsString);
-            const result = JSON.stringify(await runTool(name, args));
-            console.log(JSON.stringify(result), name, args);
+        if (
+          'additional_kwargs' in response &&
+          response.additional_kwargs.tool_calls
+        ) {
+          const toolMessages: ToolMessage[] = [];
+          for (const toolCall of response.additional_kwargs.tool_calls || []) {
+            if (toolCall.type === 'function' && toolCall.function) {
+              const { name, arguments: argsString } = toolCall.function;
+              try {
+                const args = JSON.parse(argsString);
+                const result = JSON.stringify(await runTool(name, args));
+                console.log(JSON.stringify(result), name, args);
 
-            toolMessages.push(
-              new ToolMessage({
-                content: result,
-                tool_call_id: toolCall.id,
-                name: name,
-              }),
-            );
-          } catch (error) {
-            console.error(`Error executing tool ${name}:`, error);
-            // response.additional_kwargs.result += `\n\nError executing tool ${name}: ${error.message}`;
+                toolMessages.push(
+                  new ToolMessage({
+                    content: result,
+                    tool_call_id: toolCall.id,
+                    name: name,
+                  }),
+                );
+              } catch (error) {
+                console.error(`Error executing tool ${name}:`, error);
+              }
+            }
           }
+
+          messages.push(response as AIMessage);
+          messages.push(...toolMessages);
+
+          // Send the tool calls and results as a JSONL stream
+          controller.enqueue(
+            JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
+          );
+        } else if (typeof response.content === 'string') {
+          finalResponse = response.content;
+          messages.push(response as AIMessage);
+
+          // Send the final response as a JSONL stream
+          controller.enqueue(
+            JSON.stringify({ type: 'final_response', data: finalResponse }) +
+              '\n',
+          );
         }
       }
+      controller.close();
+    },
+  });
 
-      messages.push(response as AIMessage);
-      messages.push(...toolMessages);
-    } else if (typeof response.content === 'string') {
-      finalResponse = response.content;
-      messages.push(response as AIMessage);
-    }
+  // return new Response(stream, {
+  //   headers: {
+  //     'Content-Type': 'application/x-ndjson',
+  //     'Transfer-Encoding': 'chunked',
+  //   },
+  // });
+  res.setHeader('Content-Type', 'application/x-ndjson');
+  res.setHeader('Transfer-Encoding', 'chunked');
 
-    return messages;
-  }
+  await stream.pipeTo(
+    new WritableStream({
+      write(chunk) {
+        res.write(chunk);
+      },
+      close() {
+        res.end();
+      },
+    }),
+  );
 }
-
-// console.log({ result: JSON.stringify(result.toJSON()) });
-
-//   if (response.additional_kwargs?.tool_calls) {
-//     for (const toolCall of response.additional_kwargs.tool_calls) {
-//       if (toolCall.type === 'function' && toolCall.function) {
-//         const { name, arguments: argsString } = toolCall.function;
-//         try {
-//           const args = JSON.parse(argsString);
-//           const toolResult = await runTool(name, args);
-//           result += `\n\nTool ${name} result:\n${JSON.stringify(toolResult, null, 2)}`;
-//         } catch (error) {
-//           console.error(`Error executing tool ${name}:`, error);
-//           result += `\n\nError executing tool ${name}: ${error.message}`;
-//         }
-//       }
-//     }
-//   }
-
-//   res.status(200).json({ result });
-// } catch (error) {
-//   console.error('Error in API route:', error);
-//   res
-//     .status(500)
-//     .json({ error: 'Internal server error', details: error.message });
-// }
