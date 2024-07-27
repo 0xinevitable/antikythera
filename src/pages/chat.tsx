@@ -2,16 +2,59 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { CoinData } from '@/constants/aptos-coins';
 
-interface Message {
-  role: 'user' | 'assistant' | 'tool' | 'error';
-  tool_name?: string;
-  content: React.ReactNode;
-}
+type Message =
+  | {
+      role: 'user' | 'assistant' | 'error';
+      content: React.ReactNode;
+    }
+  | {
+      role: 'tool';
+      name: string;
+      content: React.ReactNode;
+    };
 
 interface ParsedLine {
   type: 'tool_calls' | 'final_response';
   data: any;
 }
+
+const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
+  const [collapsed, setCollapsed] = useState<boolean>(true);
+
+  if (coins.length === 0) {
+    return <p>No results found.</p>;
+  }
+
+  const renderedCoins = collapsed ? coins.slice(0, 5) : coins;
+
+  return (
+    <ul>
+      <span>{`${coins.length} Results`}</span>
+      {renderedCoins.map((coin) => (
+        <div key={coin.token_type.type} className="flex">
+          <img
+            src={coin.logo_url}
+            alt={coin.name}
+            className="w-8 h-8 rounded-full"
+          />
+          <div className="flex flex-col">
+            <p className="text-[12px] font-bold">{coin.symbol}</p>
+            <h3 className="text-[10px]">{coin.name}</h3>
+          </div>
+        </div>
+      ))}
+      {coins.length > 5 && (
+        <button
+          type="button"
+          onClick={() => setCollapsed((prev) => !prev)}
+          className="text-blue-500"
+        >
+          {collapsed ? 'Show more' : 'Show less'}
+        </button>
+      )}
+    </ul>
+  );
+};
 
 async function fetchStreamingResponse(
   messages: Message[],
@@ -57,23 +100,10 @@ async function fetchStreamingResponse(
                     ...prev,
                     {
                       role: 'tool',
+                      name: toolCall.kwargs.name,
                       content:
                         toolCall.kwargs.name === 'searchCoin' ? (
-                          <>
-                            {(JSON.parse(toolContent) as CoinData[]).map(
-                              (coin) => (
-                                <div key={coin.token_type.type}>
-                                  <img
-                                    src={coin.logo_url}
-                                    alt={coin.name}
-                                    className="w-8 h-8"
-                                  />
-                                  <h3>{coin.name}</h3>
-                                  <p>{coin.symbol}</p>
-                                </div>
-                              ),
-                            )}
-                          </>
+                          <CoinSearchList coins={toolContent as CoinData[]} />
                         ) : (
                           JSON.stringify(toolContent)
                         ),
@@ -83,7 +113,11 @@ async function fetchStreamingResponse(
                   console.error('Error parsing tool content:', error);
                   onUpdate((prev) => [
                     ...prev,
-                    { role: 'tool', content: toolCall.kwargs.content },
+                    {
+                      role: 'tool',
+                      name: toolCall.kwargs.name,
+                      content: toolCall.kwargs.content,
+                    },
                   ]);
                 }
               }
@@ -101,7 +135,7 @@ async function fetchStreamingResponse(
       }
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
+    if ((error as Error).name === 'AbortError') {
       console.log('Fetch aborted');
     } else {
       throw error;
@@ -208,7 +242,9 @@ const AgentPage: React.FC = () => {
                     : 'bg-red-100'
             }`}
           >
-            <strong>{message.role}: </strong>
+            <strong>
+              {message.role}: {message.role === 'tool' ? message.name : null}
+            </strong>
             <pre className="overflow-x-auto whitespace-pre-wrap">
               {message.content}
             </pre>

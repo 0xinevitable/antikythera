@@ -4,9 +4,9 @@ import {
   HumanMessage,
   ToolMessage,
 } from '@langchain/core/messages';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { NextRequest, NextResponse } from 'next/server';
 
 import { searchCoinTool } from '@/tools/coins';
 import { findSwapRouteTool, thalaSwapABITool } from '@/tools/thalaswap';
@@ -14,7 +14,7 @@ import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
 
 export const maxDuration = 300; // 5 minutes
 
-type ExtendedTool = any; // Replace with the actual type if available
+type ExtendedTool = DynamicStructuredTool<any>;
 
 const tools: ExtendedTool[] = [
   searchCoinTool,
@@ -81,7 +81,7 @@ export default async function handler(
               const { name, arguments: argsString } = toolCall.function;
               try {
                 const args = JSON.parse(argsString);
-                const result = JSON.stringify(await runTool(name, args));
+                const result = await runTool(name, args);
                 console.log(JSON.stringify(result), name, args);
 
                 toolMessages.push(
