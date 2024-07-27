@@ -82,13 +82,16 @@ export default async function handler(
               try {
                 const args = JSON.parse(argsString);
                 const result = await runTool(name, args);
-                console.log(JSON.stringify(result), name, args);
 
                 toolMessages.push(
                   new ToolMessage({
                     content: result,
                     tool_call_id: toolCall.id,
                     name: name,
+                    additional_kwargs: {
+                      // tool_calls: [toolCall],
+                      tool_call: toolCall,
+                    },
                   }),
                 );
               } catch (error) {

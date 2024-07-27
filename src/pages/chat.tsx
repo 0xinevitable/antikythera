@@ -1,22 +1,90 @@
+import { ToolMessage, ToolMessageChunk } from '@langchain/core/messages';
 import React, { useCallback, useRef, useState } from 'react';
 
 import { CoinData } from '@/constants/aptos-coins';
+
+type ParsedLine =
+  | {
+      type: 'tool_calls';
+      // FIXME: ?
+      data: SerializedToolMessage[];
+    }
+  | {
+      type: 'final_response';
+      data: any;
+    };
+
+type SerializedJSON = string;
+
+// FIXME: Check with Anthropic too
+type OpenAIToolCall = {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: SerializedJSON; // JSON stringified
+  };
+};
+
+type AntikytheraToolArgs = {
+  content: CoinData[];
+  name: 'searchCoin';
+  tool_call_id: string;
+  additional_kwargs: {
+    // Custom
+    tool_call: OpenAIToolCall & {
+      function: {
+        name: 'searchCoin';
+        arguments: {
+          query: string;
+          // TODO:
+          field: 'symbol';
+        };
+      };
+    };
+  };
+};
+
+type SerializedToolMessage = {
+  lc: number;
+  type: string; // 'constructor' ?
+  id: string[]; // ["langchain_core", "messages", "ToolMessage"]
+  kwargs: {
+    content: SerializedJSON;
+    tool_call_id: string;
+    additional_kwargs: {
+      // Custom
+      tool_call: OpenAIToolCall;
+    };
+  };
+};
+
+type AntiKytheraToolMessage = SerializedToolMessage & {
+  kwargs: AntikytheraToolArgs;
+};
 
 type Message =
   | {
       role: 'user' | 'assistant' | 'error';
       content: React.ReactNode;
     }
-  | {
+  | ({
       role: 'tool';
-      name: string;
-      content: React.ReactNode;
-    };
+    } & AntiKytheraToolMessage);
 
-interface ParsedLine {
-  type: 'tool_calls' | 'final_response';
-  data: any;
-}
+const decodeToolMessage = (
+  toolMessage: SerializedToolMessage,
+): AntiKytheraToolMessage => {
+  toolMessage.kwargs.content = JSON.parse(toolMessage.kwargs.content);
+
+  // 단일 tool_call 만 있다고 가정
+  toolMessage.kwargs.additional_kwargs.tool_call.function.arguments =
+    JSON.parse(
+      toolMessage.kwargs.additional_kwargs.tool_call.function.arguments,
+    );
+
+  return toolMessage as AntiKytheraToolMessage;
+};
 
 const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
@@ -90,36 +158,18 @@ async function fetchStreamingResponse(
 
           if (parsedLine.type === 'tool_calls') {
             console.log('Tool calls:', parsedLine.data);
-            for (const toolCall of parsedLine.data) {
-              console.log(JSON.stringify(toolCall));
-              if (toolCall.kwargs && toolCall.kwargs.content) {
-                try {
-                  const toolContent = JSON.parse(toolCall.kwargs.content);
-                  console.log(toolContent);
-                  onUpdate((prev) => [
-                    ...prev,
-                    {
-                      role: 'tool',
-                      name: toolCall.kwargs.name,
-                      content:
-                        toolCall.kwargs.name === 'searchCoin' ? (
-                          <CoinSearchList coins={toolContent as CoinData[]} />
-                        ) : (
-                          JSON.stringify(toolContent)
-                        ),
-                    },
-                  ]);
-                } catch (error) {
-                  console.error('Error parsing tool content:', error);
-                  onUpdate((prev) => [
-                    ...prev,
-                    {
-                      role: 'tool',
-                      name: toolCall.kwargs.name,
-                      content: toolCall.kwargs.content,
-                    },
-                  ]);
-                }
+            for (const serializedToolMessage of parsedLine.data) {
+              const toolMessage = decodeToolMessage(serializedToolMessage);
+              if (toolMessage.kwargs && toolMessage.kwargs.content) {
+                onUpdate((prev) => [
+                  ...prev,
+                  {
+                    role: 'tool',
+                    ...toolMessage,
+                  },
+                ]);
+              } else {
+                // FIXME: ?
               }
             }
           } else if (parsedLine.type === 'final_response') {
@@ -243,10 +293,15 @@ const AgentPage: React.FC = () => {
             }`}
           >
             <strong>
-              {message.role}: {message.role === 'tool' ? message.name : null}
+              {message.role}:{' '}
+              {message.role === 'tool' ? message.kwargs.name : null}
             </strong>
             <pre className="overflow-x-auto whitespace-pre-wrap">
-              {message.content}
+              {message.role !== 'tool' ? message.content : null}
+              {message.role === 'tool' &&
+                message.kwargs.name === 'searchCoin' && (
+                  <CoinSearchList coins={message.kwargs.content} />
+                )}
             </pre>
           </div>
         ))}
