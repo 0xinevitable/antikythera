@@ -1,4 +1,4 @@
-import { ToolMessage, ToolMessageChunk } from '@langchain/core/messages';
+import { Route as ThalaSwapRoute } from '@thalalabs/router-sdk';
 import React, { useCallback, useRef, useState } from 'react';
 
 import { CoinData } from '@/constants/aptos-coins';
@@ -15,6 +15,7 @@ type ParsedLine =
     };
 
 type SerializedJSON = string;
+type CoinType = `0x${string}`;
 
 // FIXME: Check with Anthropic too
 type OpenAIToolCall = {
@@ -26,24 +27,44 @@ type OpenAIToolCall = {
   };
 };
 
-type AntikytheraToolArgs = {
-  content: CoinData[];
-  name: 'searchCoin';
-  tool_call_id: string;
-  additional_kwargs: {
-    // Custom
-    tool_call: OpenAIToolCall & {
-      function: {
-        name: 'searchCoin';
-        arguments: {
-          query: string;
-          // TODO:
-          field: 'symbol';
+type AntikytheraToolArgs =
+  | {
+      content: CoinData[];
+      name: 'searchCoin';
+      tool_call_id: string;
+      additional_kwargs: {
+        // Custom
+        tool_call: OpenAIToolCall & {
+          function: {
+            name: 'searchCoin';
+            arguments: {
+              query: string;
+              // TODO:
+              field: 'symbol';
+            };
+          };
+        };
+      };
+    }
+  | {
+      // FIXME: Thala Swap 맥락 추가해야 함
+      content: ThalaSwapRoute;
+      name: 'findSwapRoute';
+      tool_call_id: string;
+      additional_kwargs: {
+        // Custom
+        tool_call: OpenAIToolCall & {
+          function: {
+            name: 'findSwapRoute';
+            arguments: {
+              fromTokenType: CoinType;
+              toTokenType: CoinType;
+              amountIn: number;
+            };
+          };
         };
       };
     };
-  };
-};
 
 type SerializedToolMessage = {
   lc: number;
@@ -299,9 +320,15 @@ const AgentPage: React.FC = () => {
             <pre className="overflow-x-auto whitespace-pre-wrap">
               {message.role !== 'tool' ? message.content : null}
               {message.role === 'tool' &&
-                message.kwargs.name === 'searchCoin' && (
-                  <CoinSearchList coins={message.kwargs.content} />
-                )}
+                (() => {
+                  if (message.kwargs.name === 'searchCoin') {
+                    return <CoinSearchList coins={message.kwargs.content} />;
+                  }
+                  if (message.kwargs.name === 'findSwapRoute') {
+                    return JSON.stringify(message.kwargs.content);
+                  }
+                  return null;
+                })()}
             </pre>
           </div>
         ))}
