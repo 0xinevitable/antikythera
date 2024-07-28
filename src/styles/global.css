@@ -12,6 +12,11 @@ a {
   cursor: pointer;
 }
 
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 input,
 button {
   outline: 0;

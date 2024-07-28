@@ -19,6 +19,7 @@ import { shortenAddress } from '@/utils/format';
 
 import { Block, BlockType, ParameterType } from './Block';
 import { CoinSearchList } from './CoinSearchList';
+import { Header } from './components/Header';
 import { fetchStreamingResponse } from './stream';
 import { Message } from './types';
 
@@ -169,7 +170,7 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
 
@@ -217,117 +218,120 @@ const HomePage = () => {
 
   return (
     <Container>
-      <BlockList>
-        {messages.map((message, index) => {
-          if (message.role === 'assistant') {
-            return (
-              <div
-                key={index}
-                className="flex flex-col bg-zinc-800 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
-              >
-                <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
-                  <Markdown
-                    components={{
-                      ol: ({ className, ...props }) => (
-                        <ol
-                          className={cn(
-                            'mt-1 list-decimal space-y-2 pl-8',
-                            className,
-                          )}
-                          {...props}
-                        />
-                      ),
-                      ul: ({ className, ...props }) => (
-                        <ul
-                          className={cn(
-                            'mt-1 list-disc space-y-2 pl-8',
-                            className,
-                          )}
-                          {...props}
-                        />
-                      ),
-                      li: ({ className, ...props }) => (
-                        <li
-                          className={cn(
-                            'whitespace-normal break-words',
-                            className,
-                          )}
-                          {...props}
-                        />
-                      ),
-                      code: (props) => <CustomCode {...props} />,
-                      img: (props) => <CustomImg {...props} />,
-                    }}
-                  >
+      <Header />
+
+      {messages.length > 0 && (
+        <BlockList>
+          {messages.map((message, index) => {
+            if (message.role === 'user') {
+              return (
+                <div
+                  key={index}
+                  className="ml-auto flex flex-col bg-[#55FFD9] text-black w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tr-none"
+                >
+                  <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
                     {message.content}
-                  </Markdown>
+                  </div>
                 </div>
-              </div>
-            );
-          }
-          if (message.role === 'tool') {
-            const brand =
-              message.kwargs.name === 'findSwapRoute'
-                ? Brands.ThalaSwap
-                : message.kwargs.name === 'searchCoin'
-                  ? Brands.Nodit
-                  : Brands.Aptos;
+              );
+            }
+            if (message.role === 'assistant') {
+              return (
+                <div
+                  key={index}
+                  className="flex flex-col bg-zinc-800 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
+                >
+                  <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
+                    <Markdown
+                      components={{
+                        ol: ({ className, ...props }) => (
+                          <ol
+                            className={cn(
+                              'mt-1 list-decimal space-y-2 pl-8',
+                              className,
+                            )}
+                            {...props}
+                          />
+                        ),
+                        ul: ({ className, ...props }) => (
+                          <ul
+                            className={cn(
+                              'mt-1 list-disc space-y-2 pl-8',
+                              className,
+                            )}
+                            {...props}
+                          />
+                        ),
+                        li: ({ className, ...props }) => (
+                          <li
+                            className={cn(
+                              'whitespace-normal break-words',
+                              className,
+                            )}
+                            {...props}
+                          />
+                        ),
+                        code: (props) => <CustomCode {...props} />,
+                        img: (props) => <CustomImg {...props} />,
+                      }}
+                    >
+                      {message.content}
+                    </Markdown>
+                  </div>
+                </div>
+              );
+            }
+            if (message.role === 'tool') {
+              const brand =
+                message.kwargs.name === 'findSwapRoute'
+                  ? Brands.ThalaSwap
+                  : message.kwargs.name === 'searchCoin'
+                    ? Brands.Nodit
+                    : Brands.Aptos;
 
-            const title = capitalizeFirstLetter(message.kwargs.name);
+              const title = capitalizeFirstLetter(message.kwargs.name);
 
-            return (
-              <Block
-                id={index.toString()}
-                title={title}
-                brand={brand}
-                params={(() => {
-                  if (message.kwargs.name === 'searchCoin') {
-                    return <CoinSearchList coins={message.kwargs.content} />;
-                  }
-                  if (message.kwargs.name === 'findSwapRoute') {
-                    return (
-                      <span className="text-sm text-white">
-                        {JSON.stringify(message.kwargs.content)}
-                      </span>
-                    );
-                  }
-                  return null;
-                })()}
-              />
-            );
-          }
-          return (
-            <div
-              key={index}
-              className={`mb-4 p-2 rounded ${
-                message.role === 'user' ? 'bg-blue-100' : 'bg-red-100'
-              }`}
-            >
-              <strong>
-                {message.role}:{' '}
-                {/* {message.role === 'tool' ? message.kwargs.name : null} */}
-              </strong>
-              <pre className="overflow-x-auto whitespace-pre-wrap">
-                {message.content}
-                {/* {message.role === 'tool' &&
-                  (() => {
+              return (
+                <Block
+                  id={index.toString()}
+                  title={title}
+                  brand={brand}
+                  params={(() => {
                     if (message.kwargs.name === 'searchCoin') {
                       return <CoinSearchList coins={message.kwargs.content} />;
                     }
                     if (message.kwargs.name === 'findSwapRoute') {
-                      return JSON.stringify(message.kwargs.content);
+                      return (
+                        <span className="text-sm text-white">
+                          {JSON.stringify(message.kwargs.content)}
+                        </span>
+                      );
                     }
                     return null;
-                  })()} */}
-              </pre>
-            </div>
-          );
-        })}
-      </BlockList>
+                  })()}
+                />
+              );
+            }
+            return (
+              <div
+                key={index}
+                // TODO: Error
+                className="p-2 mb-4 bg-red-100 rounded"
+              >
+                <strong>{message.role}</strong>
+                <pre className="overflow-x-auto whitespace-pre-wrap">
+                  {message.content}
+                </pre>
+              </div>
+            );
+          })}
+        </BlockList>
+      )}
 
       <form onSubmit={handleSubmit} className="w-full mb-4">
-        <input
-          type="text"
+        <Input
+          // type="text"
+          // TODO: auto-grow height of textarea
           value={input}
           onChange={handleInputChange}
           placeholder="Enter your query here..."
@@ -357,7 +361,7 @@ const HomePage = () => {
 export default HomePage;
 
 const Container = styled.div`
-  max-width: 900px;
+  max-width: 800px;
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
@@ -373,4 +377,15 @@ const BlockList = styled.ul`
   display: flex;
   flex-direction: column;
   gap: 12px;
+`;
+
+const Input = styled.textarea`
+  padding: 16px;
+
+  border-radius: 8px 8px 0px 0px;
+  border: 0;
+  border-bottom: 1px solid #50e3c2;
+  background: linear-gradient(180deg, #282c2c 0%, #203530 100%);
+
+  color: #50e3c2;
 `;
