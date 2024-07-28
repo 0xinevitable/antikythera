@@ -8,7 +8,7 @@ import {
   Network,
 } from '@aptos-labs/ts-sdk';
 import styled from '@emotion/styled';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -216,12 +216,26 @@ const HomePage = () => {
     }
   };
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  // const bottomBarRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    setTimeout(() => {
+      if (!containerRef.current) {
+        return;
+      }
+      window.scrollTo({
+        top: containerRef.current.offsetHeight || 0,
+        behavior: 'smooth',
+      });
+    });
+  }, [messages]);
+
   return (
     <Container>
       <Header />
 
       {messages.length > 0 && (
-        <BlockList>
+        <BlockList ref={containerRef}>
           {messages.map((message, index) => {
             if (message.role === 'user') {
               return (
@@ -298,7 +312,17 @@ const HomePage = () => {
                   brand={brand}
                   params={(() => {
                     if (message.kwargs.name === 'searchCoin') {
-                      return <CoinSearchList coins={message.kwargs.content} />;
+                      return (
+                        <>
+                          <span className="text-sm text-white">
+                            {JSON.stringify(
+                              message.kwargs.additional_kwargs.tool_call
+                                .function.arguments,
+                            )}
+                          </span>
+                          <CoinSearchList coins={message.kwargs.content} />
+                        </>
+                      );
                     }
                     if (message.kwargs.name === 'findSwapRoute') {
                       return (
@@ -328,7 +352,11 @@ const HomePage = () => {
         </BlockList>
       )}
 
-      <form onSubmit={handleSubmit} className="w-full mb-4">
+      <form
+        // ref={bottomBarRef}
+        onSubmit={handleSubmit}
+        className="w-full mb-4"
+      >
         <Input
           // type="text"
           // TODO: auto-grow height of textarea
@@ -372,7 +400,7 @@ const Container = styled.div`
 
   gap: 32px;
 `;
-const BlockList = styled.ul`
+const BlockList = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
