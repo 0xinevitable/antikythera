@@ -21,6 +21,32 @@ export const Header: React.FC = () => {
             height={94}
           />
           <h1 className="sr-only">Antikythera</h1>
+
+          <div className="absolute min-w-[438px]">
+            <div className="flex flex-col gap-1 absolute top-[-36px] right-[-88px]">
+              <div className="flex ml-[28px]">
+                <SVGImage
+                  alt="Execute Transactions"
+                  src="/assets/arrow-execute.svg"
+                  width={207}
+                  height={18}
+                />
+              </div>
+              <SVGImage
+                alt="Query Contracts"
+                src="/assets/arrow-query.svg"
+                width={169}
+                height={18}
+              />
+            </div>
+          </div>
+
+          <SVGImage
+            alt="ANTIKYTHERA v0.1"
+            src="/assets/label-version.svg"
+            width={107}
+            height={16}
+          />
         </AntikytheraLogoContainer>
       </IllustContainer>
     </Container>
@@ -73,11 +99,11 @@ const Gradient = styled.div`
 const AntikytheraLogoContainer = styled.div`
   height: 94px;
 
-  width: 100vw;
+  width: 438px;
   transform: translateX(-50%);
 
   display: flex;
-  justify-content: center;
+  flex-direction: column;
 
   position: absolute;
   bottom: 48px;
@@ -89,3 +115,5 @@ const AntikytheraLogo = styled(Image)`
   height: 94px;
   display: flex;
 `;
+
+const SVGImage = styled(Image)``;
