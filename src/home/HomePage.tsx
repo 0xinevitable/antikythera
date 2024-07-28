@@ -5,7 +5,6 @@ import {
   Aptos,
   AptosConfig,
   Ed25519PrivateKey,
-  InputGenerateTransactionPayloadData,
   Network,
 } from '@aptos-labs/ts-sdk';
 import styled from '@emotion/styled';
@@ -14,7 +13,9 @@ import Markdown from 'react-markdown';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Brands } from '@/constants/brands';
+import { Colors } from '@/constants/colors';
 import { cn } from '@/utils/cn';
+import { shortenAddress } from '@/utils/format';
 
 import { Block, BlockType, ParameterType } from './Block';
 import { CoinSearchList } from './CoinSearchList';
@@ -119,20 +120,38 @@ const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
 
   if (addressMatch) {
     const address = addressMatch[1];
+    const shortenedContent = content.replace(address, shortenAddress(address));
+
     return (
       <a
         // FIXME: Refactor Sui Explorer APIs
         href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-500 hover:underline"
+        className="font-medium hover:underline"
+        style={{ color: Colors.AptosNeon }}
       >
-        {children}
+        {shortenedContent}
       </a>
     );
   }
 
   return <code>{children}</code>;
+};
+
+const CustomImg: React.FC<React.ImgHTMLAttributes<HTMLImageElement>> = ({
+  src,
+  className,
+  ...props
+}) => {
+  const isCoinLogo = src?.includes('aptos-coin-list');
+  return (
+    <img
+      className={cn(isCoinLogo && 'w-full max-w-[32px]', className)}
+      src={src}
+      {...props}
+    />
+  );
 };
 
 const HomePage = () => {
@@ -204,9 +223,9 @@ const HomePage = () => {
             return (
               <div
                 key={index}
-                className="flex flex-col bg-zinc-700 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
+                className="flex flex-col bg-zinc-800 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
               >
-                <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-xs leading-snug">
+                <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
                   <Markdown
                     components={{
                       ol: ({ className, ...props }) => (
@@ -237,6 +256,7 @@ const HomePage = () => {
                         />
                       ),
                       code: (props) => <CustomCode {...props} />,
+                      img: (props) => <CustomImg {...props} />,
                     }}
                   >
                     {message.content}

@@ -7,10 +7,6 @@
   word-break: keep-all;
 }
 
-*:not(code) {
-  font-family: 'Satoshi', sans-serif;
-}
-
 a {
   text-decoration: none;
   cursor: pointer;

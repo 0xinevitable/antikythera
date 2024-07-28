@@ -152,7 +152,6 @@ const NetworkName = styled.span`
 const Title = styled.div`
   color: #ffffff;
   text-align: left;
-  font-family: 'Satoshi', sans-serif;
   font-size: 20px;
   letter-spacing: -0.015em;
   font-weight: 400;
@@ -183,7 +182,6 @@ const BrandLogo = styled(Image)`
 `;
 const BrandName = styled.span`
   text-align: left;
-  font-family: 'Satoshi', sans-serif;
   font-size: 14px;
   line-height: 100%;
   font-weight: 400;

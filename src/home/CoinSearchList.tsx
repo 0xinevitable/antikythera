@@ -31,24 +31,24 @@ export const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
               target="_blank"
               href={`https://tracemove.io/coin/${coin.token_type.type}`}
               className={cn(
-                'w-full flex items-center gap-2 px-[6px] py-[3px] hover:bg-[#1D2222] cursor-pointer',
-                index === 0 && 'pt-[6px]',
-                index === renderedCoins.length - 1 && 'pb-[6px]',
+                'w-full flex items-center gap-2 px-[8px] py-[8px] hover:bg-[#1D2222] cursor-pointer',
+                index === 0 && 'pt-[10px]',
+                index === renderedCoins.length - 1 && 'pb-[10px]',
               )}
             >
-              {/* <div className="w-[28px] h-[28px] min-w-[28px] flex items-center justify-center overflow-hidden rounded-full"> */}
               <img
                 src={coin.logo_url}
                 alt={coin.name}
-                // className="w-[28px] h-[28px] bg-white border rounded-full border-zinc-600"
                 className="w-[30px] h-[30px] bg-white rounded-full"
               />
-              {/* </div> */}
-              <div className="flex flex-col">
-                <p className="text-[14px] font-medium text-white">
+
+              <div className="flex flex-col gap-1">
+                <p className="text-[14px] font-medium text-white leading-none">
                   {coin.symbol}
                 </p>
-                <h3 className="text-[12px] text-zinc-400">{coin.name}</h3>
+                <h3 className="text-[12px] text-zinc-400 leading-none">
+                  {coin.name}
+                </h3>
               </div>
             </a>
           </li>
