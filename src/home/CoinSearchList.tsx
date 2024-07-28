@@ -13,17 +13,17 @@ export const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
 
   return (
     <ul>
-      <span>{`${coins.length} Results`}</span>
+      <span className="text-xs text-zinc-400">{`${coins.length} Results`}</span>
       {renderedCoins.map((coin) => (
-        <div key={coin.token_type.type} className="flex">
+        <div key={coin.token_type.type} className="flex gap-2 py-1">
           <img
             src={coin.logo_url}
             alt={coin.name}
-            className="w-8 h-8 rounded-full"
+            className="w-8 h-8 bg-white border rounded-full border-zinc-600"
           />
           <div className="flex flex-col">
-            <p className="text-[12px] font-bold">{coin.symbol}</p>
-            <h3 className="text-[10px]">{coin.name}</h3>
+            <p className="text-[12px] font-bold text-white">{coin.symbol}</p>
+            <h3 className="text-[10px] text-zinc-400">{coin.name}</h3>
           </div>
         </div>
       ))}
