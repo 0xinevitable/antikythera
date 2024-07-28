@@ -178,6 +178,7 @@ const HomePage = () => {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (isLoading) return;
+      setInput('');
 
       setIsLoading(true);
       const newMessage: Message = { role: 'user', content: input };
