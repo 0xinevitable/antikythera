@@ -383,6 +383,32 @@ const HomePage = () => {
           </button>
         )}
       </form>
+
+      {messages.length === 0 && (
+        <div className="flex gap-4">
+          <SuggestionCard
+            onClick={() => {
+              setInput('List all the bridged versions of USDC Coin.');
+
+              // TODO: inputRef -> focus
+            }}
+          >
+            <h3>List all the bridged versions of USDC Coin.</h3>
+          </SuggestionCard>
+          <SuggestionCard
+            onClick={() => {
+              setInput(
+                'Estimate the swap for exchanging 100 APT into Wormhole USDC. Display the state of each pool in the route.',
+              );
+            }}
+          >
+            <h3>
+              Estimate the swap for exchanging 100 APT into Wormhole USDC.
+              Display the state of each pool in the route.
+            </h3>
+          </SuggestionCard>
+        </div>
+      )}
     </Container>
   );
 };
@@ -417,4 +443,20 @@ const Input = styled.textarea`
   background: linear-gradient(180deg, #282c2c 0%, #203530 100%);
 
   color: #50e3c2;
+`;
+
+const SuggestionCard = styled.div`
+  padding: 12px;
+  gap: 8px 4px;
+
+  display: flex;
+  flex: 1 0 0;
+  flex-wrap: wrap;
+
+  /* TODO: Remove this to children styles */
+  color: white;
+
+  border: 1px solid #5c5c5c;
+  background: linear-gradient(180deg, #222 0%, #151c1a 100%);
+  box-shadow: 0px 4px 12px 0px rgba(202, 255, 243, 0.12);
 `;
