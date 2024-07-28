@@ -1,16 +1,6 @@
 import { Colors } from './colors';
 
 export const Brands = {
-  ThalaFaucet: {
-    name: 'Thala Faucet',
-    color: Colors.Thala,
-    src: '/assets/logo-thala.png',
-  },
-  ThalaSwap: {
-    name: 'Thala Swap',
-    color: Colors.Thala,
-    src: '/assets/logo-thala.png',
-  },
   Aptos: {
     name: 'Aptos',
     color: Colors.Aptos,
@@ -20,5 +10,15 @@ export const Brands = {
     name: 'Aptos Names',
     color: Colors.AptosNeon,
     src: '/assets/logo-aptos-neon.png',
+  },
+  Nodit: {
+    name: 'Nodit',
+    color: Colors.Nodit,
+    src: '/assets/logo-nodit.png',
+  },
+  ThalaSwap: {
+    name: 'Thala Swap',
+    color: Colors.Thala,
+    src: '/assets/logo-thala.png',
   },
 };

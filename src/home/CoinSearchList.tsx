@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 import { CoinData } from '@/constants/aptos-coins';
+import { Colors } from '@/constants/colors';
+import { cn } from '@/utils/cn';
 
 export const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
@@ -12,30 +14,57 @@ export const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
   const renderedCoins = collapsed ? coins.slice(0, 5) : coins;
 
   return (
-    <ul>
-      <span className="text-xs text-zinc-400">{`${coins.length} Results`}</span>
-      {renderedCoins.map((coin) => (
-        <div key={coin.token_type.type} className="flex gap-2 py-1">
-          <img
-            src={coin.logo_url}
-            alt={coin.name}
-            className="w-8 h-8 bg-white border rounded-full border-zinc-600"
-          />
-          <div className="flex flex-col">
-            <p className="text-[12px] font-bold text-white">{coin.symbol}</p>
-            <h3 className="text-[10px] text-zinc-400">{coin.name}</h3>
-          </div>
-        </div>
-      ))}
+    <div className="w-full">
+      <span className="text-sm font-medium text-zinc-400">
+        <span style={{ color: Colors.Nodit }}>{coins.length}</span> Results
+      </span>
+
+      <ul
+        className="mt-1 w-full overflow-hidden rounded-lg bg-[#282C2C] border border-[#374141]"
+        style={{
+          boxShadow: `0px 4px 8px 0px rgba(0, 0, 0, 0.14)`,
+        }}
+      >
+        {renderedCoins.map((coin, index) => (
+          <li key={coin.token_type.type} className="flex w-full">
+            <a
+              target="_blank"
+              href={`https://tracemove.io/coin/${coin.token_type.type}`}
+              className={cn(
+                'w-full flex items-center gap-2 px-[6px] py-[3px] hover:bg-[#1D2222] cursor-pointer',
+                index === 0 && 'pt-[6px]',
+                index === renderedCoins.length - 1 && 'pb-[6px]',
+              )}
+            >
+              {/* <div className="w-[28px] h-[28px] min-w-[28px] flex items-center justify-center overflow-hidden rounded-full"> */}
+              <img
+                src={coin.logo_url}
+                alt={coin.name}
+                // className="w-[28px] h-[28px] bg-white border rounded-full border-zinc-600"
+                className="w-[30px] h-[30px] bg-white rounded-full"
+              />
+              {/* </div> */}
+              <div className="flex flex-col">
+                <p className="text-[14px] font-medium text-white">
+                  {coin.symbol}
+                </p>
+                <h3 className="text-[12px] text-zinc-400">{coin.name}</h3>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+
       {coins.length > 5 && (
         <button
           type="button"
           onClick={() => setCollapsed((prev) => !prev)}
-          className="text-blue-500"
+          className="mt-1 text-sm text-blue-500"
+          style={{ color: Colors.Nodit }}
         >
           {collapsed ? 'Show more' : 'Show less'}
         </button>
       )}
-    </ul>
+    </div>
   );
 };

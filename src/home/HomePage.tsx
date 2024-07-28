@@ -111,7 +111,7 @@ const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
 }) => {
   const content = React.Children.toArray(children).join('');
 
-  // Match Aptos addresses or CoinType/ObjectType patterns
+  // Match Aptos addresses or ㅊ patterns
   // Allows hex addresses of 1 to 64 characters (e.g., 0x1, 0x1::module::type, or full 64-char addresses)
   const addressMatch = content.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
 
@@ -206,7 +206,7 @@ const HomePage = () => {
                 key={index}
                 className="flex flex-col bg-zinc-700 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
               >
-                <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
+                <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-xs leading-snug">
                   <Markdown
                     components={{
                       ol: ({ className, ...props }) => (
@@ -249,7 +249,9 @@ const HomePage = () => {
             const brand =
               message.kwargs.name === 'findSwapRoute'
                 ? Brands.ThalaSwap
-                : Brands.Aptos;
+                : message.kwargs.name === 'searchCoin'
+                  ? Brands.Nodit
+                  : Brands.Aptos;
 
             const title = capitalizeFirstLetter(message.kwargs.name);
 
@@ -263,7 +265,11 @@ const HomePage = () => {
                     return <CoinSearchList coins={message.kwargs.content} />;
                   }
                   if (message.kwargs.name === 'findSwapRoute') {
-                    return <>{JSON.stringify(message.kwargs.content)}</>;
+                    return (
+                      <span className="text-sm text-white">
+                        {JSON.stringify(message.kwargs.content)}
+                      </span>
+                    );
                   }
                   return null;
                 })()}

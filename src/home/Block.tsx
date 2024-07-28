@@ -40,12 +40,12 @@ export const Block: React.FC<BlockProps> = ({
 }) => {
   return (
     <Container className={className}>
-      <NetworkContainer>
+      {/* <NetworkContainer>
         <NetworkCircle />
         <NetworkName>Testnet</NetworkName>
-      </NetworkContainer>
+      </NetworkContainer> */}
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pr-[32px]">
         <BrandContainer
           style={{ boxShadow: `0px 12px 32px 0px ${brand.color}20` }}
         >
@@ -109,7 +109,6 @@ export const Block: React.FC<BlockProps> = ({
 
 const Container = styled.li`
   padding: 12px;
-  padding-right: 36px;
   width: fit-content;
   overflow: hidden;
 
@@ -153,7 +152,7 @@ const NetworkName = styled.span`
 const Title = styled.div`
   color: #ffffff;
   text-align: left;
-  font-family: 'Satoshi-Regular', sans-serif;
+  font-family: 'Satoshi', sans-serif;
   font-size: 20px;
   letter-spacing: -0.015em;
   font-weight: 400;
@@ -173,11 +172,7 @@ const BrandContainer = styled.div`
   gap: 8px;
 
   border: 0.5px solid black;
-  background: linear-gradient(
-    180deg,
-    rgba(27, 27, 27, 1) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: linear-gradient(to bottom, #222222 0%, #151c1a 100%);
 `;
 const BrandLogo = styled(Image)`
   border-radius: 50%;
@@ -188,7 +183,7 @@ const BrandLogo = styled(Image)`
 `;
 const BrandName = styled.span`
   text-align: left;
-  font-family: 'Satoshi-Regular', sans-serif;
+  font-family: 'Satoshi', sans-serif;
   font-size: 14px;
   line-height: 100%;
   font-weight: 400;
