@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
+import { isValidElement as isValidReactElement } from 'react';
 
 import { Colors } from '@/constants/colors';
 import { formatUnits } from '@/utils/units';
@@ -24,7 +25,7 @@ export type BlockType = {
     src: string;
     color: string;
   };
-  params?: Record<string, ParameterType>;
+  params?: Record<string, ParameterType> | React.ReactNode;
 };
 
 export type BlockProps = BlockType & {
@@ -60,46 +61,48 @@ export const Block: React.FC<BlockProps> = ({
       </div>
 
       {/* render simple table with tailwind */}
-      {params && (
-        <table className="w-full text-white rounded-sm">
-          <tbody>
-            {Object.entries(params).map(([key, param]) => (
-              <tr key={key}>
-                <td className="px-1.5 py-1 text-xs border border-white/30">
-                  {key}
-                </td>
-                <td className="px-1.5 py-1 text-xs border border-white/30">
-                  {param.type === 'block' && (
-                    <a
-                      style={{ color: Colors.AptosNeon }}
-                      target="_blank"
-                      href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
-                    >
-                      {param.value}
-                    </a>
-                  )}
-                  {param.type === 'hash' && (
-                    <a
-                      style={{ color: Colors.AptosNeon }}
-                      target="_blank"
-                      href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
-                    >
-                      {param.value}
-                    </a>
-                  )}
-                  {param.type === 'string' && param.value}
-                  {param.type === 'coin' && (
-                    <span>
-                      {formatUnits(param.value, param.coin.decimals)}{' '}
-                      {param.coin.symbol}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {isValidReactElement(params)
+        ? params
+        : params && (
+            <table className="w-full text-white rounded-sm">
+              <tbody>
+                {Object.entries(params).map(([key, param]) => (
+                  <tr key={key}>
+                    <td className="px-1.5 py-1 text-xs border border-white/30">
+                      {key}
+                    </td>
+                    <td className="px-1.5 py-1 text-xs border border-white/30">
+                      {param.type === 'block' && (
+                        <a
+                          style={{ color: Colors.AptosNeon }}
+                          target="_blank"
+                          href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
+                        >
+                          {param.value}
+                        </a>
+                      )}
+                      {param.type === 'hash' && (
+                        <a
+                          style={{ color: Colors.AptosNeon }}
+                          target="_blank"
+                          href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
+                        >
+                          {param.value}
+                        </a>
+                      )}
+                      {param.type === 'string' && param.value}
+                      {param.type === 'coin' && (
+                        <span>
+                          {formatUnits(param.value, param.coin.decimals)}{' '}
+                          {param.coin.symbol}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
     </Container>
   );
 };

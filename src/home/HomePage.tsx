@@ -9,12 +9,15 @@ import {
   Network,
 } from '@aptos-labs/ts-sdk';
 import styled from '@emotion/styled';
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Brands } from '@/constants/brands';
 
 import { Block, BlockType, ParameterType } from './Block';
+import { CoinSearchList } from './CoinSearchList';
+import { fetchStreamingResponse } from './stream';
+import { Message } from './types';
 
 const Coins = {
   APT: {
@@ -98,6 +101,9 @@ type FeedItem =
   | (BlockType & { type: 'block' })
   | { id: string; type: 'message'; value: string };
 
+const capitalizeFirstLetter = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);
+
 const HomePage = () => {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [text, setText] = useState<string>('');
@@ -106,247 +112,151 @@ const HomePage = () => {
     [defaultAccount.accountAddress.toString()]: defaultAccount,
   });
 
+  const [input, setInput] = useState<string>(
+    'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
+  );
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (isLoading) return;
+
+      setIsLoading(true);
+      const newMessage: Message = { role: 'user', content: input };
+      setMessages((prev) => [...prev, newMessage]);
+
+      abortControllerRef.current = new AbortController();
+
+      try {
+        await fetchStreamingResponse(
+          [...messages, newMessage],
+          setMessages,
+          abortControllerRef.current.signal,
+        );
+      } catch (error) {
+        console.error('Error:', error);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'error',
+            content: 'An error occurred while processing your request.',
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
+        setInput('');
+        abortControllerRef.current = null;
+      }
+    },
+    [input, messages, isLoading],
+  );
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Container>
       <BlockList>
-        {feedItems.map((item) => {
-          if (item.type === 'block') {
-            return (
-              <Block
-                key={item.id}
-                id={item.id}
-                title={item.title}
-                brand={item.brand}
-                params={item.params}
-              />
-            );
-          } else if (item.type === 'message') {
+        {messages.map((message, index) => {
+          if (message.role === 'assistant') {
             return (
               <div
-                key={item.id}
+                key={index}
                 className="flex flex-col bg-zinc-700 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
               >
-                <p className="text-sm leading-snug">{item.value}</p>
+                <p className="text-sm leading-snug">{message.content}</p>
               </div>
             );
           }
+          if (message.role === 'tool') {
+            const brand =
+              message.kwargs.name === 'findSwapRoute'
+                ? Brands.ThalaSwap
+                : Brands.Aptos;
+
+            const title = capitalizeFirstLetter(message.kwargs.name);
+
+            return (
+              <Block
+                id={index.toString()}
+                title={title}
+                brand={brand}
+                params={(() => {
+                  if (message.kwargs.name === 'searchCoin') {
+                    return <CoinSearchList coins={message.kwargs.content} />;
+                  }
+                  if (message.kwargs.name === 'findSwapRoute') {
+                    return <>{JSON.stringify(message.kwargs.content)}</>;
+                  }
+                  return null;
+                })()}
+              />
+            );
+          }
+          return (
+            <div
+              key={index}
+              className={`mb-4 p-2 rounded ${
+                message.role === 'user' ? 'bg-blue-100' : 'bg-red-100'
+              }`}
+            >
+              <strong>
+                {message.role}:{' '}
+                {/* {message.role === 'tool' ? message.kwargs.name : null} */}
+              </strong>
+              <pre className="overflow-x-auto whitespace-pre-wrap">
+                {message.content}
+                {/* {message.role === 'tool' &&
+                  (() => {
+                    if (message.kwargs.name === 'searchCoin') {
+                      return <CoinSearchList coins={message.kwargs.content} />;
+                    }
+                    if (message.kwargs.name === 'findSwapRoute') {
+                      return JSON.stringify(message.kwargs.content);
+                    }
+                    return null;
+                  })()} */}
+              </pre>
+            </div>
+          );
         })}
 
-        <input
-          className="bg-white"
-          placeholder="Text"
-          value={text}
-          onKeyDown={async (e) => {
-            if (e.key === 'a') {
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: uuidv4(),
-                  type: 'message',
-                  value: 'I should create a new account to receive APT.',
-                },
-              ]);
-              const account = Account.generate();
-              console.log(account);
-              setAccounts((prev) => ({
-                ...prev,
-                [account.accountAddress.toString()]: account,
-              }));
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: uuidv4(),
-                  type: 'block',
-                  title: 'Create Account',
-                  brand: Brands.Aptos,
-                  params: {
-                    address: {
-                      type: 'string',
-                      value: account.accountAddress.toString(),
-                    },
-                  },
-                },
-              ]);
-            } /* else if (e.key === 'r') {
-              setBlocks((prev) => [
-                ...prev,
-                {
-                  id: uuidv4(),
-                  title: 'Fund Account',
-                  brand: Brands.Aptos,
-                },
-              ]);
-              const firstAccount = Object.values(accounts)[0];
-              if (!firstAccount) {
-                return;
-              }
-              aptos
-                .fundAccount({
-                  accountAddress: firstAccount.accountAddress,
-                  amount: 100_000_000,
-                })
-                .then((res) => {
-                  console.log(res);
-
-                  // TODO: Update block
-                })
-                .catch(console.error);
-            } */ else if (e.key === 'b') {
-              const blockId = uuidv4();
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: uuidv4(),
-                  type: 'message',
-                  value: 'I should query the APT balance of my first account.',
-                },
-              ]);
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: blockId,
-                  type: 'block',
-                  title: 'Query Account Balance',
-                  brand: Brands.Aptos,
-                },
-              ]);
-              const firstAccount = Object.values(accounts)[0];
-              if (!firstAccount) {
-                return;
-              }
-              try {
-                const res = await aptos.getAccountAPTAmount({
-                  accountAddress: firstAccount.accountAddress,
-                });
-                console.log(res);
-
-                setFeedItems((prev) =>
-                  prev.map((item) =>
-                    item.id === blockId && item.type === 'block'
-                      ? {
-                          ...item,
-                          params: {
-                            ...item.params,
-                            balance: {
-                              type: 'coin',
-                              coin: Coins.APT,
-                              value: BigInt(res.toString()),
-                            },
-                          },
-                        }
-                      : item,
-                  ),
-                );
-              } catch (e) {
-                console.error(e);
-              }
-            } else if (e.key === 's') {
-              const blockId = uuidv4();
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: uuidv4(),
-                  type: 'message',
-                  value:
-                    'I should transfer 0.00000001 APT to my second account.',
-                },
-              ]);
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: blockId,
-                  type: 'block',
-                  title: 'Transfer APT',
-                  brand: Brands.Aptos,
-                },
-              ]);
-              const firstAccount = Object.values(accounts)[0];
-              const secondAccount = Object.values(accounts)[1];
-              if (!firstAccount || !secondAccount) {
-                return;
-              }
-              const data: InputGenerateTransactionPayloadData = {
-                function: '0x1::aptos_account::transfer',
-                functionArguments: [secondAccount.accountAddress.toString(), 1],
-              };
-              const transaction = await aptos.transaction.build.simple({
-                sender: firstAccount.accountAddress,
-                data,
-              });
-              setFeedItems((prev) =>
-                prev.map((item) =>
-                  item.id === blockId && item.type === 'block'
-                    ? {
-                        ...item,
-                        params: {
-                          ...item.params,
-                          ...Object.entries(data).reduce(
-                            (acc, [key, value]) => ({
-                              ...acc,
-                              [key]: {
-                                type: 'string',
-                                value: JSON.stringify(value),
-                              },
-                            }),
-                            {},
-                          ),
-                        },
-                      }
-                    : item,
-                ),
-              );
-              await executeTx(firstAccount, transaction, (params) => {
-                setFeedItems((prev) =>
-                  prev.map((item) =>
-                    item.id === blockId && item.type === 'block'
-                      ? { ...item, params: { ...item.params, ...params } }
-                      : item,
-                  ),
-                );
-              });
-            } else if (e.key === 'd') {
-              const blockId = uuidv4();
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: uuidv4(),
-                  type: 'message',
-                  value: 'I should buy a new Aptos Domain `geiuhgf85u.apt`.',
-                },
-              ]);
-              setFeedItems((prev) => [
-                ...prev,
-                {
-                  id: blockId,
-                  type: 'block',
-                  title: 'Register Domain',
-                  brand: Brands.AptosNames,
-                },
-              ]);
-              const firstAccount = Object.values(accounts)[0];
-              if (!firstAccount) {
-                return;
-              }
-              // FIXME: Change to `aptos.transaction.build` -> https://github.com/aptos-labs/aptos-ts-sdk/blob/2f5880971f59499a5c5fe5738c8b30b4acb8ccdb/src/internal/ans.ts#L194
-              const transaction = await aptos.ans.registerName({
-                sender: firstAccount,
-                name: 'geiuhgf85u.apt',
-                expiration: { policy: 'domain' },
-              });
-              console.log(transaction);
-              await executeTx(firstAccount, transaction, (params) => {
-                setFeedItems((prev) =>
-                  prev.map((item) =>
-                    item.id === blockId && item.type === 'block'
-                      ? { ...item, params: { ...item.params, ...params } }
-                      : item,
-                  ),
-                );
-              });
-            }
-            setText('');
-          }}
-        />
+        <form onSubmit={handleSubmit} className="mb-4">
+          <input
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            placeholder="Enter your query here..."
+            className="w-full p-2 text-white bg-gray-700 border rounded"
+          />
+          <button
+            type="submit"
+            className="p-2 mt-2 mr-2 text-white bg-blue-500 rounded"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Processing...' : 'Submit'}
+          </button>
+          {isLoading && (
+            <button
+              type="button"
+              onClick={handleStop}
+              className="p-2 mt-2 text-white bg-red-500 rounded"
+            >
+              Stop
+            </button>
+          )}
+        </form>
       </BlockList>
     </Container>
   );
