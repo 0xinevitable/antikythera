@@ -119,19 +119,19 @@ const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
   console.log({ content, addressMatch });
 
   if (addressMatch) {
-    const address = addressMatch[1];
-    const shortenedContent = content.replace(address, shortenAddress(address));
+    // const address = addressMatch[1];
+    // const shortenedContent = content.replace(address, shortenAddress(address));
 
     return (
       <a
-        // FIXME: Refactor Sui Explorer APIs
-        href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
+        // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
+        href={`https://tracemove.io/search/${content}`}
         target="_blank"
         rel="noopener noreferrer"
         className="font-medium hover:underline"
         style={{ color: Colors.AptosNeon }}
       >
-        {shortenedContent}
+        {children}
       </a>
     );
   }
