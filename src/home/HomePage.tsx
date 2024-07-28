@@ -10,9 +10,11 @@ import {
 } from '@aptos-labs/ts-sdk';
 import styled from '@emotion/styled';
 import React, { useCallback, useRef, useState } from 'react';
+import Markdown from 'react-markdown';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Brands } from '@/constants/brands';
+import { cn } from '@/utils/cn';
 
 import { Block, BlockType, ParameterType } from './Block';
 import { CoinSearchList } from './CoinSearchList';
@@ -104,6 +106,35 @@ type FeedItem =
 const capitalizeFirstLetter = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);
 
+const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
+  children,
+}) => {
+  const content = React.Children.toArray(children).join('');
+
+  // Match Aptos addresses or CoinType/ObjectType patterns
+  // Allows hex addresses of 1 to 64 characters (e.g., 0x1, 0x1::module::type, or full 64-char addresses)
+  const addressMatch = content.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
+
+  console.log({ content, addressMatch });
+
+  if (addressMatch) {
+    const address = addressMatch[1];
+    return (
+      <a
+        // FIXME: Refactor Sui Explorer APIs
+        href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:underline"
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return <code>{children}</code>;
+};
+
 const HomePage = () => {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [text, setText] = useState<string>('');
@@ -175,7 +206,42 @@ const HomePage = () => {
                 key={index}
                 className="flex flex-col bg-zinc-700 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
               >
-                <p className="text-sm leading-snug">{message.content}</p>
+                <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
+                  <Markdown
+                    components={{
+                      ol: ({ className, ...props }) => (
+                        <ol
+                          className={cn(
+                            'mt-1 list-decimal space-y-2 pl-8',
+                            className,
+                          )}
+                          {...props}
+                        />
+                      ),
+                      ul: ({ className, ...props }) => (
+                        <ul
+                          className={cn(
+                            'mt-1 list-disc space-y-2 pl-8',
+                            className,
+                          )}
+                          {...props}
+                        />
+                      ),
+                      li: ({ className, ...props }) => (
+                        <li
+                          className={cn(
+                            'whitespace-normal break-words',
+                            className,
+                          )}
+                          {...props}
+                        />
+                      ),
+                      code: (props) => <CustomCode {...props} />,
+                    }}
+                  >
+                    {message.content}
+                  </Markdown>
+                </div>
               </div>
             );
           }
@@ -271,6 +337,10 @@ const Container = styled.div`
   justify-content: center;
 `;
 const BlockList = styled.ul`
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+
   display: flex;
   flex-direction: column;
   gap: 12px;

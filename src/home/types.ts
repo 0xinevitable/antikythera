@@ -86,7 +86,7 @@ export type AntiKytheraToolMessage = SerializedToolMessage & {
 export type Message =
   | {
       role: 'user' | 'assistant' | 'error';
-      content: React.ReactNode;
+      content: string;
     }
   | ({
       role: 'tool';

@@ -110,7 +110,6 @@ export const Block: React.FC<BlockProps> = ({
 const Container = styled.li`
   padding: 12px;
   padding-right: 36px;
-  min-width: 180px;
   width: fit-content;
   overflow: hidden;
 
