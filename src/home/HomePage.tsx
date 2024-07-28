@@ -323,33 +323,33 @@ const HomePage = () => {
             </div>
           );
         })}
-
-        <form onSubmit={handleSubmit} className="mb-4">
-          <input
-            type="text"
-            value={input}
-            onChange={handleInputChange}
-            placeholder="Enter your query here..."
-            className="w-full p-2 text-white bg-gray-700 border rounded"
-          />
-          <button
-            type="submit"
-            className="p-2 mt-2 mr-2 text-white bg-blue-500 rounded"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Processing...' : 'Submit'}
-          </button>
-          {isLoading && (
-            <button
-              type="button"
-              onClick={handleStop}
-              className="p-2 mt-2 text-white bg-red-500 rounded"
-            >
-              Stop
-            </button>
-          )}
-        </form>
       </BlockList>
+
+      <form onSubmit={handleSubmit} className="w-full mb-4">
+        <input
+          type="text"
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Enter your query here..."
+          className="w-full p-2 text-white bg-gray-700 border rounded"
+        />
+        <button
+          type="submit"
+          className="p-2 mt-2 mr-2 text-white bg-blue-500 rounded"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Processing...' : 'Submit'}
+        </button>
+        {isLoading && (
+          <button
+            type="button"
+            onClick={handleStop}
+            className="p-2 mt-2 text-white bg-red-500 rounded"
+          >
+            Stop
+          </button>
+        )}
+      </form>
     </Container>
   );
 };
@@ -357,16 +357,19 @@ const HomePage = () => {
 export default HomePage;
 
 const Container = styled.div`
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-`;
-const BlockList = styled.ul`
   max-width: 900px;
   width: 100%;
+  min-height: 100vh;
   margin: 0 auto;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 32px;
+`;
+const BlockList = styled.ul`
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
