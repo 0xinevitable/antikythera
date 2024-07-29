@@ -217,6 +217,7 @@ const HomePage = () => {
     }
   };
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // const bottomBarRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
@@ -358,9 +359,10 @@ const HomePage = () => {
         onSubmit={handleSubmit}
         className="w-full mb-4"
       >
-        <Input
+        <Textarea
           // type="text"
           // TODO: auto-grow height of textarea
+          ref={textareaRef}
           value={input}
           onChange={handleInputChange}
           placeholder="Enter your query here..."
@@ -391,15 +393,18 @@ const HomePage = () => {
               setInput('List all the bridged versions of USDC Coin.');
 
               // TODO: inputRef -> focus
+              textareaRef.current?.focus();
             }}
           >
-            <h3>List all the bridged versions of USDC Coin.</h3>
+            <h3>List all the bridged versions of USDC.</h3>
           </SuggestionCard>
           <SuggestionCard
             onClick={() => {
               setInput(
                 'Estimate the swap for exchanging 100 APT into Wormhole USDC. Display the state of each pool in the route.',
               );
+
+              textareaRef.current?.focus();
             }}
           >
             <h3>
@@ -434,7 +439,7 @@ const BlockList = styled.div`
   gap: 12px;
 `;
 
-const Input = styled.textarea`
+const Textarea = styled.textarea`
   padding: 16px;
 
   border-radius: 8px 8px 0px 0px;
