@@ -10,12 +10,10 @@ import {
 import styled from '@emotion/styled';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
-import { v4 as uuidv4 } from 'uuid';
 
 import { Brands } from '@/constants/brands';
 import { Colors } from '@/constants/colors';
 import { cn } from '@/utils/cn';
-import { shortenAddress } from '@/utils/format';
 
 import { Block, BlockType, ParameterType } from './Block';
 import { CoinSearchList } from './CoinSearchList';
@@ -101,10 +99,6 @@ const executeTx = async (
   });
 };
 
-type FeedItem =
-  | (BlockType & { type: 'block' })
-  | { id: string; type: 'message'; value: string };
-
 const capitalizeFirstLetter = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -156,7 +150,6 @@ const CustomImg: React.FC<React.ImgHTMLAttributes<HTMLImageElement>> = ({
 };
 
 const HomePage = () => {
-  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [text, setText] = useState<string>('');
 
   const [accounts, setAccounts] = useState<Record<Address, Account>>({
