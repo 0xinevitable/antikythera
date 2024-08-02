@@ -22,7 +22,13 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AptosWalletAdapterProvider
         // plugins={wallets}
         autoConnect={true}
-        dappConfig={{ network: Network.MAINNET }}
+        dappConfig={{
+          network: Network.MAINNET,
+          mizuwallet: {
+            manifestURL:
+              'https://assets.mz.xyz/static/config/mizuwallet-connect-manifest.json',
+          },
+        }}
         onError={(error) => {
           console.log('error', error);
         }}
