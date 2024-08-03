@@ -4,6 +4,7 @@ export async function fetchStreamingResponse(
   messages: Message[],
   onUpdate: React.Dispatch<React.SetStateAction<Message[]>>,
   signal: AbortSignal,
+  address: string,
 ): Promise<void> {
   const response = await fetch('/api/chat', {
     method: 'POST',
@@ -35,17 +36,48 @@ export async function fetchStreamingResponse(
           if (parsedLine.type === 'tool_calls') {
             console.log('Tool calls:', parsedLine.data);
             for (const serializedToolMessage of parsedLine.data) {
-              const toolMessage = decodeToolMessage(serializedToolMessage);
-              if (toolMessage.kwargs && toolMessage.kwargs.content) {
-                onUpdate((prev) => [
-                  ...prev,
-                  {
-                    role: 'tool',
-                    ...toolMessage,
-                  },
-                ]);
-              } else {
-                // FIXME: ?
+              try {
+                const toolMessage = decodeToolMessage(serializedToolMessage);
+                if (toolMessage.kwargs && toolMessage.kwargs.content) {
+                  onUpdate((prev) => [
+                    ...prev,
+                    {
+                      role: 'tool',
+                      ...toolMessage,
+                    },
+                  ]);
+                } else {
+                  // FIXME: ?
+                }
+              } catch {
+                if (
+                  serializedToolMessage.kwargs.content ===
+                  'STOP_CURRENT_WALLET_ADDRESS'
+                ) {
+                  onUpdate((prev) => [
+                    ...prev,
+                    {
+                      role: 'tool',
+                      // ...toolMessage,
+                      kwargs: {
+                        name: 'currentWalletAddress',
+                        content: { address },
+                        tool_call_id: '',
+                        additional_kwargs: {
+                          // Custom
+                          tool_call: {
+                            id: '',
+                            type: 'function',
+                            function: {
+                              name: 'currentWalletAddress',
+                              arguments: {},
+                            },
+                          },
+                        },
+                      },
+                    } as any,
+                  ]);
+                }
               }
             }
           } else if (parsedLine.type === 'final_response') {

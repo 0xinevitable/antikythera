@@ -188,6 +188,7 @@ const HomePage = () => {
           [...messages, newMessage],
           setMessages,
           abortControllerRef.current.signal,
+          account?.address || '0x0',
         );
       } catch (error) {
         console.error('Error:', error);
@@ -204,7 +205,7 @@ const HomePage = () => {
         abortControllerRef.current = null;
       }
     },
-    [input, messages, isLoading],
+    [input, messages, isLoading, account?.address],
   );
 
   const handleStop = () => {

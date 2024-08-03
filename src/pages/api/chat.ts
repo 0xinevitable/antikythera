@@ -4,19 +4,21 @@ import {
   HumanMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { searchCoinTool } from '@/tools/coins';
 import { findSwapRouteTool, thalaSwapABITool } from '@/tools/thalaswap';
 import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
+import { currentWalletAddressTool } from '@/tools/wallet';
 
 export const maxDuration = 300; // 5 minutes
 
-type ExtendedTool = DynamicStructuredTool<any>;
+type ExtendedTool = DynamicTool | DynamicStructuredTool<any>;
 
 const tools: ExtendedTool[] = [
+  currentWalletAddressTool,
   searchCoinTool,
   findSwapRouteTool,
   thalaSwapABITool,
@@ -25,6 +27,7 @@ const tools: ExtendedTool[] = [
 ];
 
 const toolsByName = {
+  currentWalletAddress: currentWalletAddressTool,
   searchCoin: searchCoinTool,
   findSwapRoute: findSwapRouteTool,
   getThalaSwapABI: thalaSwapABITool,
@@ -75,6 +78,8 @@ export default async function handler(
           'additional_kwargs' in response &&
           response.additional_kwargs.tool_calls
         ) {
+          let hasStopFlag: boolean = false;
+
           const toolMessages: ToolMessage[] = [];
           for (const toolCall of response.additional_kwargs.tool_calls || []) {
             if (toolCall.type === 'function' && toolCall.function) {
@@ -82,6 +87,10 @@ export default async function handler(
               try {
                 const args = JSON.parse(argsString);
                 const result = await runTool(name, args);
+
+                if (result === 'STOP_CURRENT_WALLET_ADDRESS') {
+                  hasStopFlag = true;
+                }
 
                 toolMessages.push(
                   new ToolMessage({
@@ -107,6 +116,14 @@ export default async function handler(
           controller.enqueue(
             JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
           );
+
+          if (hasStopFlag) {
+            controller.enqueue(
+              JSON.stringify({ type: 'final_response' }) + '\n',
+            );
+            controller.close();
+            return;
+          }
         } else if (typeof response.content === 'string') {
           finalResponse = response.content;
           messages.push(response as AIMessage);
