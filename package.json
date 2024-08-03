@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.11.0",
     "@langchain/core": "^0.2.18",
     "@langchain/openai": "^0.2.5",
+    "@martianwallet/aptos-wallet-adapter": "^0.0.5",
     "@mizuwallet-sdk/core": "^1.2.0",
     "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",

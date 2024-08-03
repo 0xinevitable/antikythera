@@ -1,26 +1,27 @@
 import { Network } from '@aptos-labs/ts-sdk';
 import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
+import { MartianWallet } from '@martianwallet/aptos-wallet-adapter';
 import { AppProps } from 'next/app';
 import React from 'react';
 
 import { SatoshiFont } from '@/styles/fonts';
 import '@/styles/global.css';
 
-// const wallets = [
-//   new BitgetWallet(),
-//   new FewchaWallet(),
-//   new MartianWallet(),
-//   new MSafeWalletAdapter(),
-//   new PontemWallet(),
-//   new TrustWallet(),
-//   new OKXWallet(),
-// ];
+const wallets = [
+  // new BitgetWallet(),
+  // new FewchaWallet(),
+  new MartianWallet(),
+  // new MSafeWalletAdapter(),
+  // new PontemWallet(),
+  // new TrustWallet(),
+  // new OKXWallet(),
+];
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <React.Fragment>
       <AptosWalletAdapterProvider
-        // plugins={wallets}
+        plugins={wallets}
         autoConnect={true}
         dappConfig={{
           network: Network.MAINNET,

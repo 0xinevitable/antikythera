@@ -121,6 +121,16 @@
     jwt-decode "^4.0.0"
     poseidon-lite "^0.2.0"
 
+"@aptos-labs/wallet-adapter-core@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-core/-/wallet-adapter-core-2.1.0.tgz#cfce6a6ff187fdddbf48ece1cb6fd7601a1c33dd"
+  integrity sha512-ZSCCsFt2heEh9IDaObbzw8EwqfzJGCWGBoaGouBtOYn2DVkh5R0P9xRj6ryF9cuO+tkfP+8KZmZ9m4c+xsJN2g==
+  dependencies:
+    aptos "^1.3.17"
+    buffer "^6.0.3"
+    eventemitter3 "^4.0.7"
+    tweetnacl "^1.0.3"
+
 "@aptos-labs/wallet-adapter-core@4.13.0", "@aptos-labs/wallet-adapter-core@^4.7.0":
   version "4.13.0"
   resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-core/-/wallet-adapter-core-4.13.0.tgz#2e3dc71d9dbd035a7608cc73c920583964d584ee"
@@ -814,6 +824,14 @@
   dependencies:
     "@langchain/core" ">0.2.0 <0.3.0"
     js-tiktoken "^1.0.12"
+
+"@martianwallet/aptos-wallet-adapter@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@martianwallet/aptos-wallet-adapter/-/aptos-wallet-adapter-0.0.5.tgz#d2e10d9600a152f7728004e868dfa9272872bea0"
+  integrity sha512-x6Q3bM7HSltCAD8Zl0AeU1AFhu0M+Ho22QP+oOXWhdb4TledVVLNfGIAx1jP4slqfcpDGOjnibPtPt8Bm32wmg==
+  dependencies:
+    "@aptos-labs/wallet-adapter-core" "2.1.0"
+    aptos "^1.4.0"
 
 "@metamask/object-multiplex@^1.1.0":
   version "1.3.0"
@@ -1685,7 +1703,7 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aptos@^1.21.0:
+aptos@^1.21.0, aptos@^1.3.17, aptos@^1.4.0:
   version "1.21.0"
   resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.21.0.tgz#346623967a6d038a85f02d71ed6ec62c4cd2ae5e"
   integrity sha512-PRKjoFgL8tVEc9+oS7eJUv8GNxx8n3+0byH2+m7CP3raYOD6yFKOecuwjVMIJmgfpjp6xH0P0HDMGZAXmSyU0Q==
