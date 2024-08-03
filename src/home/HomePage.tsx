@@ -7,10 +7,12 @@ import {
   Ed25519PrivateKey,
   Network,
 } from '@aptos-labs/ts-sdk';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import styled from '@emotion/styled';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 
+import { WalletSelector } from '@/components/WalletSelector';
 import { Brands } from '@/constants/brands';
 import { Colors } from '@/constants/colors';
 import { cn } from '@/utils/cn';
@@ -150,6 +152,8 @@ const CustomImg: React.FC<React.ImgHTMLAttributes<HTMLImageElement>> = ({
 };
 
 const HomePage = () => {
+  const { account, connected, wallet, changeNetwork } = useWallet();
+
   const [text, setText] = useState<string>('');
 
   const [accounts, setAccounts] = useState<Record<Address, Account>>({
@@ -228,7 +232,7 @@ const HomePage = () => {
   return (
     <Container>
       <Header />
-
+      <WalletSelector />
       {messages.length > 0 && (
         <BlockList ref={containerRef}>
           {messages.map((message, index) => {
@@ -346,7 +350,6 @@ const HomePage = () => {
           })}
         </BlockList>
       )}
-
       <form
         // ref={bottomBarRef}
         onSubmit={handleSubmit}
@@ -378,7 +381,6 @@ const HomePage = () => {
           </button>
         )}
       </form>
-
       {messages.length === 0 && (
         <div className="flex gap-4">
           <SuggestionCard
