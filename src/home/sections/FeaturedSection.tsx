@@ -2,6 +2,8 @@ import styled from '@emotion/styled';
 import { TrophyIcon } from 'lucide-react';
 import Image from 'next/image';
 
+import { InlineBlock } from '@/components/InlineBlock';
+
 type FeaturedSectionProps = {
   onSelect: (selectedPrompt: string) => void;
 };
@@ -75,17 +77,20 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           />
           <FeaturedCardTitle>
             <span className="underline text-[#A98EFF]">Estimate</span> the swap
-            for exchanging 100{' '}
-            <CoinBadge className="apt">
-              <Image
-                className="w-[16px] h-[16px] saturate-[105%]"
-                src="/assets/logo-aptos.png"
-                alt=""
-                width={48}
-                height={48}
-              />
-              APT
-            </CoinBadge>{' '}
+            for exchanging{' '}
+            <InlineBlock>
+              100{' '}
+              <CoinBadge className="apt">
+                <Image
+                  className="w-[16px] h-[16px] saturate-[105%]"
+                  src="/assets/logo-aptos.png"
+                  alt=""
+                  width={48}
+                  height={48}
+                />
+                APT
+              </CoinBadge>
+            </InlineBlock>{' '}
             into{' '}
             <CoinBadge className="mod">
               <Image
@@ -133,17 +138,20 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
               USDT
             </CoinBadge>{' '}
             with <span className="underline text-[#50E3C2]">20% LTV</span> from{' '}
-            <span className="text-[#50E3C2]">Echelon</span> by supplying 100{' '}
-            <CoinBadge className="apt">
-              <Image
-                className="w-[16px] h-[16px] saturate-[105%]"
-                src="/assets/logo-aptos.png"
-                alt=""
-                width={48}
-                height={48}
-              />
-              APT
-            </CoinBadge>
+            <span className="text-[#50E3C2]">Echelon</span> by supplying{' '}
+            <InlineBlock>
+              100{' '}
+              <CoinBadge className="apt">
+                <Image
+                  className="w-[16px] h-[16px] saturate-[105%]"
+                  src="/assets/logo-aptos.png"
+                  alt=""
+                  width={48}
+                  height={48}
+                />
+                APT
+              </CoinBadge>
+            </InlineBlock>
           </FeaturedCardTitle>
         </FeaturedCard>
       </FeaturedList>
