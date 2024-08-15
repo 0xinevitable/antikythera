@@ -17,9 +17,9 @@ import { Brands } from '@/constants/brands';
 import { Colors } from '@/constants/colors';
 import { cn } from '@/utils/cn';
 
-import { Block, BlockType, ParameterType } from './Block';
+import { Block, ParameterType } from './Block';
 import { CoinSearchList } from './CoinSearchList';
-import { Header } from './components/Header';
+import { Header } from './sections/Header';
 import { fetchStreamingResponse } from './stream';
 import { Message } from './types';
 
