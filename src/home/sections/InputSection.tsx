@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Wand2Icon } from 'lucide-react';
+import { BadgeInfoIcon, Wand2Icon } from 'lucide-react';
 import { forwardRef } from 'react';
 
 type InputSectionProps = {
@@ -43,6 +43,7 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
         />
 
         <ModelBadge>
+          <BadgeInfoIcon size={12} />
           <span>Claude 3.5 Sonnet</span>
         </ModelBadge>
       </Form>
@@ -85,9 +86,15 @@ const Textarea = styled.textarea`
   border-bottom: 1px solid #3f3f3f;
   transition: border-bottom-color 0.12s ease;
 
+  resize: none;
+
   &:focus {
     outline: 0;
     border-bottom-color: #50e3c2;
+  }
+
+  &::placeholder {
+    color: #9b9cad;
   }
 `;
 

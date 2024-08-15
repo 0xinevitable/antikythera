@@ -110,9 +110,7 @@ const HomePage: NextPage = () => {
     [defaultAccount.accountAddress.toString()]: defaultAccount,
   });
 
-  const [draft, setDraft] = useState<string>(
-    'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
-  );
+  const [draft, setDraft] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
