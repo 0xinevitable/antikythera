@@ -61,7 +61,8 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
 
           <ModelBadge>
             <BadgeInfoIcon size={12} />
-            <span>Claude 3.5 Sonnet</span>
+            {/* <span>Claude 3.5 Sonnet</span> */}
+            <span>GPT-4o</span>
           </ModelBadge>
         </Form>
         <BottomHeight />
@@ -172,7 +173,7 @@ const Textarea = styled.textarea`
 const ModelBadge = styled.div`
   margin-top: 8px;
   border-radius: 4px;
-  background: #9b9cad;
+  background: rgba(155, 156, 173, 0.45);
 
   width: fit-content;
   display: flex;
