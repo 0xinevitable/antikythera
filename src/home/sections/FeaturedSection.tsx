@@ -12,7 +12,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   return (
     <Section>
       <div className="flex gap-[10px] items-center">
-        <TrophyIcon color="#969696" size={18} />
+        <TrophyIcon color="#9b9cad" size={18} />
         <Title>Featured</Title>
       </div>
 
@@ -181,7 +181,7 @@ const Section = styled.section`
 `;
 
 const Title = styled.h2`
-  color: #969696;
+  color: #9b9cad;
   font-size: 18px;
   font-weight: 700;
   line-height: 100%; /* 20px */
@@ -256,7 +256,7 @@ const FeaturedCard = styled.li`
 `;
 const FeaturedCardTitle = styled.h3`
   color: #ddd;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 160%;
 `;

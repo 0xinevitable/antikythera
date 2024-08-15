@@ -264,13 +264,13 @@ const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
-  padding: 48px 12px 0;
+  padding: 48px 12px 64px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  gap: 48px;
+  gap: 24px;
 `;
 
 const Main = styled.main`
