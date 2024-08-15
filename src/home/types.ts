@@ -83,14 +83,18 @@ export type AntiKytheraToolMessage = SerializedToolMessage & {
   kwargs: AntikytheraToolArgs;
 };
 
-export type Message =
-  | {
-      role: 'user' | 'assistant' | 'error';
-      content: string;
-    }
-  | ({
-      role: 'tool';
-    } & AntiKytheraToolMessage);
+export type BasicMessage = {
+  role: 'user' | 'assistant' | 'error';
+  content: string;
+};
+export type ToolMessage = {
+  role: 'tool';
+} & AntiKytheraToolMessage;
+
+export type Message = BasicMessage | ToolMessage;
+export type BasicMessageProps = {
+  message: BasicMessage;
+};
 
 export const decodeToolMessage = (
   toolMessage: SerializedToolMessage,

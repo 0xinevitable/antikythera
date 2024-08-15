@@ -9,16 +9,14 @@ import {
 } from '@aptos-labs/ts-sdk';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import styled from '@emotion/styled';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Markdown from 'react-markdown';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { WalletSelector } from '@/components/WalletSelector';
-import { Brands } from '@/constants/brands';
-import { Colors } from '@/constants/colors';
-import { cn } from '@/utils/cn';
 
-import { Block, ParameterType } from './Block';
-import { CoinSearchList } from './CoinSearchList';
+import { AssistantMessageItem } from './components/AssistantMessageItem';
+import { ParameterType } from './components/Block';
+import { ToolMessageItem } from './components/ToolMessageItem';
+import { UserMessageItem } from './components/UserMessageItem';
 import { Header } from './sections/Header';
 import { fetchStreamingResponse } from './stream';
 import { Message } from './types';
@@ -99,56 +97,6 @@ const executeTx = async (
       value: blockInfo.block_height,
     },
   });
-};
-
-const capitalizeFirstLetter = (value: string) =>
-  value.charAt(0).toUpperCase() + value.slice(1);
-
-const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
-  children,
-}) => {
-  const content = React.Children.toArray(children).join('');
-
-  // Match Aptos addresses or ㅊ patterns
-  // Allows hex addresses of 1 to 64 characters (e.g., 0x1, 0x1::module::type, or full 64-char addresses)
-  const addressMatch = content.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
-
-  console.log({ content, addressMatch });
-
-  if (addressMatch) {
-    // const address = addressMatch[1];
-    // const shortenedContent = content.replace(address, shortenAddress(address));
-
-    return (
-      <a
-        // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
-        href={`https://tracemove.io/search/${content}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-medium hover:underline"
-        style={{ color: Colors.AptosNeon }}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  return <code>{children}</code>;
-};
-
-const CustomImg: React.FC<React.ImgHTMLAttributes<HTMLImageElement>> = ({
-  src,
-  className,
-  ...props
-}) => {
-  const isCoinLogo = src?.includes('aptos-coin-list');
-  return (
-    <img
-      className={cn(isCoinLogo && 'w-full max-w-[32px]', className)}
-      src={src}
-      {...props}
-    />
-  );
 };
 
 const HomePage = () => {
@@ -238,101 +186,17 @@ const HomePage = () => {
         <BlockList ref={containerRef}>
           {messages.map((message, index) => {
             if (message.role === 'user') {
-              return (
-                <div
-                  key={index}
-                  className="ml-auto flex flex-col bg-[#55FFD9] text-black w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tr-none"
-                >
-                  <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
-                    {message.content}
-                  </div>
-                </div>
-              );
+              return <UserMessageItem key={index} message={message} />;
             }
             if (message.role === 'assistant') {
-              return (
-                <div
-                  key={index}
-                  className="flex flex-col bg-zinc-800 text-white w-fit max-w-[80%] py-3 px-4 rounded-xl rounded-tl-none"
-                >
-                  <div className="grid-col-1 grid gap-2.5 [&_>_*]:min-w-0 text-sm leading-snug">
-                    <Markdown
-                      components={{
-                        ol: ({ className, ...props }) => (
-                          <ol
-                            className={cn(
-                              'mt-1 list-decimal space-y-2 pl-8',
-                              className,
-                            )}
-                            {...props}
-                          />
-                        ),
-                        ul: ({ className, ...props }) => (
-                          <ul
-                            className={cn(
-                              'mt-1 list-disc space-y-2 pl-8',
-                              className,
-                            )}
-                            {...props}
-                          />
-                        ),
-                        li: ({ className, ...props }) => (
-                          <li
-                            className={cn(
-                              'whitespace-normal break-words',
-                              className,
-                            )}
-                            {...props}
-                          />
-                        ),
-                        code: (props) => <CustomCode {...props} />,
-                        img: (props) => <CustomImg {...props} />,
-                      }}
-                    >
-                      {message.content}
-                    </Markdown>
-                  </div>
-                </div>
-              );
+              return <AssistantMessageItem key={index} message={message} />;
             }
             if (message.role === 'tool') {
-              const brand =
-                message.kwargs.name === 'findSwapRoute'
-                  ? Brands.ThalaSwap
-                  : message.kwargs.name === 'searchCoin'
-                    ? Brands.Nodit
-                    : Brands.Aptos;
-
-              const title = capitalizeFirstLetter(message.kwargs.name);
-
               return (
-                <Block
+                <ToolMessageItem
+                  key={index}
                   id={index.toString()}
-                  title={title}
-                  brand={brand}
-                  params={(() => {
-                    if (message.kwargs.name === 'searchCoin') {
-                      return (
-                        <>
-                          <span className="text-sm text-white">
-                            {JSON.stringify(
-                              message.kwargs.additional_kwargs.tool_call
-                                .function.arguments,
-                            )}
-                          </span>
-                          <CoinSearchList coins={message.kwargs.content} />
-                        </>
-                      );
-                    }
-                    if (message.kwargs.name === 'findSwapRoute') {
-                      return (
-                        <span className="text-sm text-white">
-                          {JSON.stringify(message.kwargs.content)}
-                        </span>
-                      );
-                    }
-                    return null;
-                  })()}
+                  message={message}
                 />
               );
             }
