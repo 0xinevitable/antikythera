@@ -180,7 +180,7 @@ const HomePage: NextPage = () => {
 
   return (
     <Wrapper>
-      <Sidebar />
+      {/* <Sidebar /> */}
       <Container>
         {/* Header */}
         <Image
