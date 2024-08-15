@@ -205,7 +205,9 @@ const Description = styled.p`
 
 const FeaturedList = styled.ul`
   margin-top: 24px;
-  width: 100%;
+  margin-left: -8px;
+  margin-right: -8px;
+  width: calc(100% + 16px);
 
   display: flex;
   justify-content: center;
@@ -213,7 +215,7 @@ const FeaturedList = styled.ul`
 `;
 
 const FeaturedCard = styled.li`
-  padding: 8px 16px 16px;
+  padding: 8px 14px 14px;
   gap: 8px;
   height: fit-content;
   position: relative;
@@ -243,21 +245,21 @@ const FeaturedCard = styled.li`
 
   &.usdc {
     background:
-      linear-gradient(180deg, #222 0%, #101010 100%) padding-box,
+      linear-gradient(180deg, #141414 0%, #101010 100%) padding-box,
       linear-gradient(180deg, #009dff 27%, #292929 100%) border-box;
     border: 1px solid transparent;
   }
 
   &.thala {
     background:
-      linear-gradient(180deg, #222 0%, #101010 100%) padding-box,
+      linear-gradient(180deg, #141414 0%, #101010 100%) padding-box,
       linear-gradient(180deg, #996dff 27%, #292929 100%) border-box;
     border: 1px solid transparent;
   }
 
   &.echelon {
     background:
-      linear-gradient(180deg, #222 0%, #101010 100%) padding-box,
+      linear-gradient(180deg, #141414 0%, #101010 100%) padding-box,
       linear-gradient(180deg, #50e3c2 27%, #292929 100%) border-box;
     border: 1px solid transparent;
   }
