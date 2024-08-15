@@ -29,40 +29,43 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
     const [isFocused, setFocused] = useState<boolean>(false);
 
     return (
-      <Form
-        // ref={bottomBarRef}
-        onSubmit={onClickSubmit}
-      >
-        <div className="flex gap-[10px] items-center">
-          <Wand2Icon color="#9b9cad" size={18} />
-          <Title>Ask Anything</Title>
-        </div>
+      <>
+        <Form
+          // ref={bottomBarRef}
+          onSubmit={onClickSubmit}
+        >
+          <div className="flex gap-[10px] items-center">
+            <Wand2Icon color="#9b9cad" size={18} />
+            <Title>Ask Anything</Title>
+          </div>
 
-        <TextareaCard className={cn(isFocused && 'focused')}>
-          <Textarea
-            // TODO: auto-grow height of textarea
-            ref={ref}
-            value={value}
-            onChange={onChangeValue}
-            placeholder="Enter your query here..."
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-          />
+          <TextareaCard className={cn(isFocused && 'focused')}>
+            <Textarea
+              // TODO: auto-grow height of textarea
+              ref={ref}
+              value={value}
+              onChange={onChangeValue}
+              placeholder="Enter your query here..."
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+            />
 
-          {!isLoading ? (
-            <Button type="submit">Start</Button>
-          ) : (
-            <Button type="button" onClick={onStop}>
-              Stop
-            </Button>
-          )}
-        </TextareaCard>
+            {!isLoading ? (
+              <Button type="submit">Start</Button>
+            ) : (
+              <Button type="button" onClick={onStop}>
+                Stop
+              </Button>
+            )}
+          </TextareaCard>
 
-        <ModelBadge>
-          <BadgeInfoIcon size={12} />
-          <span>Claude 3.5 Sonnet</span>
-        </ModelBadge>
-      </Form>
+          <ModelBadge>
+            <BadgeInfoIcon size={12} />
+            <span>Claude 3.5 Sonnet</span>
+          </ModelBadge>
+        </Form>
+        <BottomHeight />
+      </>
     );
   },
 );
@@ -79,6 +82,29 @@ const Form = styled.form`
   border: 1px solid #3f3f3f;
   background: #1b1b1b;
   z-index: 0;
+
+  @media screen and (max-width: 660px) {
+    padding: 16px;
+
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 24px);
+    left: 12px;
+    right: 12px;
+
+    box-shadow: 0px -8px 16px 0px rgba(0, 0, 0, 0.45);
+
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+`;
+const BottomHeight = styled.div`
+  height: 0;
+  width: 100%;
+
+  @media screen and (max-width: 660px) {
+    height: 100px;
+  }
 `;
 
 const Title = styled.h2`

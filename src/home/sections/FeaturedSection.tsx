@@ -186,6 +186,14 @@ const Section = styled.section`
 
     background: linear-gradient(180deg, rgba(11, 11, 11, 0) 0%, #0b0b0b 100%);
   }
+
+  @media screen and (max-width: 660px) {
+    padding: 16px;
+
+    &::before {
+      height: 300px;
+    }
+  }
 `;
 
 const Title = styled.h2`
@@ -201,17 +209,6 @@ const Description = styled.p`
   font-size: 14px;
   font-weight: 500;
   line-height: 100%; /* 14px */
-`;
-
-const FeaturedList = styled.ul`
-  margin-top: 24px;
-  margin-left: -8px;
-  margin-right: -8px;
-  width: calc(100% + 16px);
-
-  display: flex;
-  justify-content: center;
-  gap: 10px;
 `;
 
 const FeaturedCard = styled.li`
@@ -264,6 +261,32 @@ const FeaturedCard = styled.li`
     border: 1px solid transparent;
   }
 `;
+const FeaturedList = styled.ul`
+  margin-top: 24px;
+  margin-left: -8px;
+  margin-right: -8px;
+  width: calc(100% + 16px);
+
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+
+  @media screen and (max-width: 660px) {
+    flex-direction: column;
+    max-width: 380px;
+    gap: 6px;
+
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+
+    ${FeaturedCard} > img {
+      width: 48px;
+      height: 48px;
+    }
+  }
+`;
+
 const FeaturedCardTitle = styled.h3`
   color: #ddd;
   font-size: 16px;

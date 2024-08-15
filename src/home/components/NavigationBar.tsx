@@ -31,6 +31,7 @@ const Container = styled.div`
   top: 0;
   left: 0;
   right: 0;
+  z-index: 50;
 
   width: 100%;
   height: 64px;
@@ -39,7 +40,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
 
-  background: linear-gradient(180deg, #0b0b0b 0%, rgba(11, 11, 11, 0) 100%);
+  background: linear-gradient(180deg, #0b0b0b 20%, rgba(11, 11, 11, 0) 100%);
 `;
 const BrandLogo: React.FC = () => (
   <svg
