@@ -14,10 +14,17 @@ export async function fetchStreamingResponse(
     body: JSON.stringify({ messages }),
     signal,
   });
+  if (response.status >= 400 && response.status < 600) {
+    throw await response.text();
+  }
+  const stream = response.body;
+  if (!stream) {
+    throw new Error('Stream not found!');
+  }
 
-  const reader = response.body!.getReader();
+  const reader = stream.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
+  let buffer: string = '';
 
   try {
     while (true) {

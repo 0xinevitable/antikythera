@@ -1,11 +1,9 @@
 import { Brands } from '@/constants/brands';
+import { capitalizeFirstLetter } from '@/utils/format';
 
 import { AntiKytheraToolMessage } from '../types';
 import { Block } from './Block';
 import { CoinSearchList } from './CoinSearchList';
-
-const capitalizeFirstLetter = (value: string) =>
-  value.charAt(0).toUpperCase() + value.slice(1);
 
 type ToolMessageProps = {
   id: string;

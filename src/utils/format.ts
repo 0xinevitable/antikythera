@@ -5,3 +5,6 @@ export const shortenAddress = (address: string): string => {
   }
   return address.slice(0, 6) + '...' + address.slice(-4);
 };
+
+export const capitalizeFirstLetter = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);

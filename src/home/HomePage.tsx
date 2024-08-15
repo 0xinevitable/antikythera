@@ -150,7 +150,7 @@ const HomePage: NextPage = () => {
           ...prev,
           {
             role: 'error',
-            content: 'An error occurred while processing your request.',
+            content: (error as Error).toString(),
           },
         ]);
       } finally {
@@ -189,13 +189,15 @@ const HomePage: NextPage = () => {
       {/* <Sidebar /> */}
       <Container>
         {/* Header */}
-        <Image
-          className="w-[100px] h-[100px]"
-          src="/assets/3d-aptos-compact.png"
-          alt=""
-          width={512}
-          height={512}
-        />
+        {messages.length === 0 && (
+          <Image
+            className="w-[100px] h-[100px]"
+            src="/assets/3d-aptos-compact.png"
+            alt=""
+            width={512}
+            height={512}
+          />
+        )}
 
         {/* <WalletSelector /> */}
 

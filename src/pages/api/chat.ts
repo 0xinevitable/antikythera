@@ -53,109 +53,118 @@ export default async function handler(
     return res.status(405).send('Method not allowed');
   }
 
-  const data = req.body;
-  const lastMessage = data.messages[data.messages.length - 1].content;
+  try {
+    const data = req.body;
+    const lastMessage = data.messages[data.messages.length - 1].content;
 
-  const llm = new ChatOpenAI({
-    model: 'gpt-4o',
-    temperature: 0,
-    streaming: true,
-    apiKey: 'sk-proj-EaGZZ3Nzj3Jj9AE2nXUFT3BlbkFJO7ZctA8pLqCbWitCCeoO',
-  });
+    const llm = new ChatOpenAI({
+      model: 'gpt-4o',
+      temperature: 0,
+      streaming: true,
+      apiKey: 'sk-proj-EaGZZ3Nzj3Jj9AE2nXUFT3BlbkFJO7ZctA8pLqCbWitCCeoO',
+    });
+    const llmWithTools = llm.bind({ tools });
 
-  const llmWithTools = llm.bind({ tools });
+    let messages: BaseMessage[] = [new HumanMessage(lastMessage)];
+    let finalResponse: string | null = null;
 
-  let messages: BaseMessage[] = [new HumanMessage(lastMessage)];
-  let finalResponse: string | null = null;
+    const stream = new ReadableStream({
+      async start(controller) {
+        while (finalResponse === null) {
+          const response = await llmWithTools.invoke(messages);
+          console.log(JSON.stringify(response));
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      while (finalResponse === null) {
-        const response = await llmWithTools.invoke(messages);
-        console.log(JSON.stringify(response));
+          if (
+            'additional_kwargs' in response &&
+            response.additional_kwargs.tool_calls
+          ) {
+            let hasStopFlag: boolean = false;
 
-        if (
-          'additional_kwargs' in response &&
-          response.additional_kwargs.tool_calls
-        ) {
-          let hasStopFlag: boolean = false;
+            const toolMessages: ToolMessage[] = [];
+            for (const toolCall of response.additional_kwargs.tool_calls ||
+              []) {
+              if (toolCall.type === 'function' && toolCall.function) {
+                const { name, arguments: argsString } = toolCall.function;
+                try {
+                  const args = JSON.parse(argsString);
+                  const result = await runTool(name, args);
 
-          const toolMessages: ToolMessage[] = [];
-          for (const toolCall of response.additional_kwargs.tool_calls || []) {
-            if (toolCall.type === 'function' && toolCall.function) {
-              const { name, arguments: argsString } = toolCall.function;
-              try {
-                const args = JSON.parse(argsString);
-                const result = await runTool(name, args);
+                  if (result === 'STOP_CURRENT_WALLET_ADDRESS') {
+                    hasStopFlag = true;
+                  }
 
-                if (result === 'STOP_CURRENT_WALLET_ADDRESS') {
-                  hasStopFlag = true;
+                  toolMessages.push(
+                    new ToolMessage({
+                      content: result,
+                      tool_call_id: toolCall.id,
+                      name: name,
+                      additional_kwargs: {
+                        // tool_calls: [toolCall],
+                        tool_call: toolCall,
+                      },
+                    }),
+                  );
+                } catch (error) {
+                  console.error(`Error executing tool ${name}:`, error);
                 }
-
-                toolMessages.push(
-                  new ToolMessage({
-                    content: result,
-                    tool_call_id: toolCall.id,
-                    name: name,
-                    additional_kwargs: {
-                      // tool_calls: [toolCall],
-                      tool_call: toolCall,
-                    },
-                  }),
-                );
-              } catch (error) {
-                console.error(`Error executing tool ${name}:`, error);
               }
             }
-          }
 
-          messages.push(response as AIMessage);
-          messages.push(...toolMessages);
+            messages.push(response as AIMessage);
+            messages.push(...toolMessages);
 
-          // Send the tool calls and results as a JSONL stream
-          controller.enqueue(
-            JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
-          );
-
-          if (hasStopFlag) {
+            // Send the tool calls and results as a JSONL stream
             controller.enqueue(
-              JSON.stringify({ type: 'final_response' }) + '\n',
+              JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
             );
-            controller.close();
-            return;
+
+            if (hasStopFlag) {
+              controller.enqueue(
+                JSON.stringify({ type: 'final_response' }) + '\n',
+              );
+              controller.close();
+              return;
+            }
+          } else if (typeof response.content === 'string') {
+            finalResponse = response.content;
+            messages.push(response as AIMessage);
+
+            // Send the final response as a JSONL stream
+            controller.enqueue(
+              JSON.stringify({ type: 'final_response', data: finalResponse }) +
+                '\n',
+            );
           }
-        } else if (typeof response.content === 'string') {
-          finalResponse = response.content;
-          messages.push(response as AIMessage);
-
-          // Send the final response as a JSONL stream
-          controller.enqueue(
-            JSON.stringify({ type: 'final_response', data: finalResponse }) +
-              '\n',
-          );
         }
-      }
-      controller.close();
-    },
-  });
-
-  // return new Response(stream, {
-  //   headers: {
-  //     'Content-Type': 'application/x-ndjson',
-  //     'Transfer-Encoding': 'chunked',
-  //   },
-  // });
-  res.setHeader('Content-Type', 'application/x-ndjson');
-  res.setHeader('Transfer-Encoding', 'chunked');
-
-  await stream.pipeTo(
-    new WritableStream({
-      write(chunk) {
-        res.write(chunk);
+        controller.close();
       },
-      close() {
-        res.end();
-      },
-    }),
-  );
+    });
+
+    // return new Response(stream, {
+    //   headers: {
+    //     'Content-Type': 'application/x-ndjson',
+    //     'Transfer-Encoding': 'chunked',
+    //   },
+    // });
+    res.setHeader('Content-Type', 'application/x-ndjson');
+    res.setHeader('Transfer-Encoding', 'chunked');
+
+    await stream.pipeTo(
+      new WritableStream({
+        write(chunk) {
+          res.write(chunk);
+        },
+        close() {
+          res.end();
+        },
+      }),
+    );
+  } catch (err) {
+    return res
+      .status(500)
+      .send(
+        (err as Error).message ||
+          'An error occurred while processing your request.',
+      );
+  }
 }
