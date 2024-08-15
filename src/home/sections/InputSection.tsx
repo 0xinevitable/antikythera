@@ -82,6 +82,22 @@ const Form = styled.form`
   border: 1px solid #3f3f3f;
   background: #1b1b1b;
   z-index: 0;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    width: 160px; // 100 + 60
+    height: 80px; // 50 + 30
+
+    position: absolute;
+    top: 0px;
+    left: 80px;
+
+    background-image: url('/assets/section-blur.png');
+    background-size: cover;
+    z-index: -1;
+    filter: blur(2px);
+  }
 
   @media screen and (max-width: 660px) {
     padding: 16px;

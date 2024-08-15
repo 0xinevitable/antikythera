@@ -168,23 +168,42 @@ const Section = styled.section`
   padding: 18px 18px 0;
 
   border-radius: 12px;
-  border: 1px solid #3f3f3f;
-  border-bottom: 0;
-  background: #1b1b1b;
   z-index: 0;
+
+  background:
+    linear-gradient(#1b1b1b, #1b1b1b) padding-box,
+    linear-gradient(180deg, #3f3f3f 27%, #0b0b0b 100%) border-box;
+  border: 1px solid transparent;
+
+  overflow: hidden;
 
   &::before {
     content: '';
     position: absolute;
-    left: -1px;
-    right: -1px;
-    bottom: -1px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 1;
 
-    width: calc(100% + 2px);
+    width: 100%;
     height: 120px;
 
     background: linear-gradient(180deg, rgba(11, 11, 11, 0) 0%, #0b0b0b 100%);
+  }
+
+  &::after {
+    content: '';
+    width: 160px; // 100 + 60
+    height: 80px; // 50 + 30
+
+    position: absolute;
+    top: 0px;
+    left: 80px;
+
+    background-image: url('/assets/section-blur.png');
+    background-size: cover;
+    z-index: -1;
+    filter: blur(2px);
   }
 
   @media screen and (max-width: 660px) {
