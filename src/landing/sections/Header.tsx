@@ -1,5 +1,8 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
 
 export const Header: React.FC = () => {
   return (
@@ -49,12 +52,20 @@ export const Header: React.FC = () => {
           />
         </AntikytheraLogoContainer>
       </IllustContainer>
+
+      <div className="flex mt-[-42px] z-10">
+        <Link href="/home">
+          <Button variant="secondary" className="text-base font-bold">
+            Start Now
+          </Button>
+        </Link>
+      </div>
     </Container>
   );
 };
 
 const Container = styled.header`
-  margin-top: 64px;
+  margin-top: 52px;
   margin-bottom: -28px;
   width: 100%;
 

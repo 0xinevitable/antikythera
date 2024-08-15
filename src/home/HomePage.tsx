@@ -18,6 +18,7 @@ import { WalletSelector } from '@/components/WalletSelector';
 import { AssistantMessageItem } from './components/AssistantMessageItem';
 import { ParameterType } from './components/Block';
 import { ErrorMessageItem } from './components/ErrorMessageItem';
+import { NavigationBar } from './components/NavigationBar';
 import { ToolMessageItem } from './components/ToolMessageItem';
 import { UserMessageItem } from './components/UserMessageItem';
 import { FeaturedSection } from './sections/FeaturedSection';
@@ -186,6 +187,12 @@ const HomePage: NextPage = () => {
 
   return (
     <Wrapper>
+      <NavigationBar
+        onClickLogo={() => {
+          setMessages([]);
+        }}
+      />
+
       {/* <Sidebar /> */}
       <Container>
         {/* Header */}
