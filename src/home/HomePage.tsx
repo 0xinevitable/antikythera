@@ -122,7 +122,13 @@ const HomePage: NextPage = () => {
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (isLoading) return;
+      if (isLoading) {
+        return;
+      }
+      if (!draft) {
+        // empty check
+        return;
+      }
       setDraft('');
 
       setIsLoading(true);

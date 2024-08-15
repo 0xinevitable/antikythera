@@ -1,6 +1,9 @@
 import styled from '@emotion/styled';
 import { BadgeInfoIcon, Wand2Icon } from 'lucide-react';
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
+
+import { Button as BaseButton } from '@/components/ui/button';
+import { cn } from '@/utils/cn';
 
 type InputSectionProps = {
   isLoading: boolean;
@@ -23,6 +26,8 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
     },
     ref,
   ) => {
+    const [isFocused, setFocused] = useState<boolean>(false);
+
     return (
       <Form
         // ref={bottomBarRef}
@@ -33,14 +38,25 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
           <Title>Ask Anything</Title>
         </div>
 
-        <Textarea
-          // TODO: auto-grow height of textarea
-          ref={ref}
-          value={value}
-          onChange={onChangeValue}
-          placeholder="Enter your query here..."
-          className="w-full p-2 text-white bg-gray-700 border rounded"
-        />
+        <TextareaCard className={cn(isFocused && 'focused')}>
+          <Textarea
+            // TODO: auto-grow height of textarea
+            ref={ref}
+            value={value}
+            onChange={onChangeValue}
+            placeholder="Enter your query here..."
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+          />
+
+          {!isLoading ? (
+            <Button type="submit">Start</Button>
+          ) : (
+            <Button type="button" onClick={onStop}>
+              Stop
+            </Button>
+          )}
+        </TextareaCard>
 
         <ModelBadge>
           <BadgeInfoIcon size={12} />
@@ -72,25 +88,38 @@ const Title = styled.h2`
   line-height: 100%; /* 20px */
 `;
 
-const Textarea = styled.textarea`
+const TextareaCard = styled.div`
   margin-top: 12px;
-  padding: 12px;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
 
   border-radius: 8px 8px 0px 0px;
-  border: 0;
   background: linear-gradient(180deg, #282c2c 0%, #203530 100%);
-
-  color: #50e3c2;
-  font-size: 14px;
 
   border-bottom: 1px solid #3f3f3f;
   transition: border-bottom-color 0.12s ease;
 
+  &.focused {
+    outline: 0;
+    border-bottom-color: #50e3c2;
+  }
+`;
+const Textarea = styled.textarea`
+  padding: 12px;
+  border: 0;
   resize: none;
+
+  display: flex;
+  flex: 1;
+
+  background-color: transparent;
+  color: #50e3c2;
+  font-size: 14px;
 
   &:focus {
     outline: 0;
-    border-bottom-color: #50e3c2;
   }
 
   &::placeholder {
@@ -117,5 +146,26 @@ const ModelBadge = styled.div`
     font-style: normal;
     font-weight: 500;
     line-height: 95%; /* 11.4px */
+  }
+`;
+
+const Button = styled(BaseButton)`
+  min-width: 90px;
+  margin-top: 12px;
+  margin-right: 12px;
+
+  border-radius: 8px;
+  background-color: #50e3c2;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.38);
+
+  color: #000;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 95%; /* 15.2px */
+
+  transition: background-color 0.12s ease;
+
+  &:hover {
+    background-color: #3db49a;
   }
 `;
