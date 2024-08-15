@@ -1,20 +1,24 @@
 import styled from '@emotion/styled';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { float } from '@/styles/motion';
 
 export const Header: React.FC = () => {
   return (
     <Container>
-      {/* FIXME: placeholder blur loading */}
       <IllustContainer>
-        <Illust
-          src="/assets/3d-aptos.png"
-          alt=""
-          width={309 * 2}
-          height={294 * 2}
-        />
+        <IllustWrapper {...float(8, true)}>
+          {/* FIXME: placeholder blur loading */}
+          <Illust
+            src="/assets/3d-aptos.png"
+            alt=""
+            width={309 * 2}
+            height={294 * 2}
+          />
+        </IllustWrapper>
         <Gradient />
         <AntikytheraLogoContainer>
           <AntikytheraLogo
@@ -79,6 +83,11 @@ const IllustContainer = styled.div`
   height: 294px;
   position: relative;
   z-index: 0;
+`;
+const IllustWrapper = styled(motion.div)`
+  display: flex;
+  width: 309px;
+  height: 294px;
 `;
 const Illust = styled(Image)`
   display: flex;

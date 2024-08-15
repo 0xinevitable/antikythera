@@ -29,6 +29,7 @@
     "aptos": "^1.21.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "framer-motion": "^11.3.28",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
     "langchain": "^0.2.11",
