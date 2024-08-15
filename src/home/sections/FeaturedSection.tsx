@@ -12,13 +12,13 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   return (
     <Section>
       <div className="flex gap-[10px] items-center">
-        <TrophyIcon color="#fff" size={18} />
+        <TrophyIcon color="#969696" size={18} />
         <Title>Featured</Title>
       </div>
 
-      {/* <Description>
+      <Description>
         Try the best community-verified prompts and examples
-      </Description> */}
+      </Description>
 
       <FeaturedList>
         <FeaturedCard
@@ -181,7 +181,7 @@ const Section = styled.section`
 `;
 
 const Title = styled.h2`
-  color: #fff;
+  color: #969696;
   font-size: 18px;
   font-weight: 700;
   line-height: 100%; /* 20px */

@@ -217,6 +217,15 @@ const HomePage: NextPage = () => {
             </MessageList>
           )}
 
+          <InputSection
+            isLoading={isLoading}
+            onClickSubmit={handleSubmit}
+            onStop={handleStop}
+            value={draft}
+            onChangeValue={handleInputChange}
+          />
+
+          {/* Featured */}
           {messages.length === 0 && (
             <FeaturedSection
               onSelect={(text) => {
@@ -225,14 +234,6 @@ const HomePage: NextPage = () => {
               }}
             />
           )}
-
-          <InputSection
-            isLoading={isLoading}
-            onClickSubmit={handleSubmit}
-            onStop={handleStop}
-            value={draft}
-            onChangeValue={handleInputChange}
-          />
         </Main>
       </Container>
     </Wrapper>

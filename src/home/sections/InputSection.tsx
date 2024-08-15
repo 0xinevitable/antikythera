@@ -29,7 +29,7 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
         onSubmit={onClickSubmit}
       >
         <div className="flex gap-[10px] items-center">
-          <Wand2Icon color="#fff" size={18} />
+          <Wand2Icon color="#969696" size={18} />
           <Title>Ask Anything</Title>
         </div>
 
@@ -66,7 +66,7 @@ const Form = styled.form`
 `;
 
 const Title = styled.h2`
-  color: #fff;
+  color: #969696;
   font-size: 18px;
   font-weight: 700;
   line-height: 100%; /* 20px */
