@@ -17,7 +17,9 @@ import { AssistantMessageItem } from './components/AssistantMessageItem';
 import { ParameterType } from './components/Block';
 import { ToolMessageItem } from './components/ToolMessageItem';
 import { UserMessageItem } from './components/UserMessageItem';
+import { FeaturedSection } from './sections/FeaturedSection';
 import { Header } from './sections/Header';
+import { InputSection } from './sections/InputSection';
 import { fetchStreamingResponse } from './stream';
 import { Message } from './types';
 
@@ -102,13 +104,11 @@ const executeTx = async (
 const HomePage = () => {
   const { account, connected, wallet, changeNetwork } = useWallet();
 
-  const [text, setText] = useState<string>('');
-
   const [accounts, setAccounts] = useState<Record<Address, Account>>({
     [defaultAccount.accountAddress.toString()]: defaultAccount,
   });
 
-  const [input, setInput] = useState<string>(
+  const [draft, setDraft] = useState<string>(
     'APT->USDC 경로 안에 있는 각각의 풀 상태를 알려줘. 그리고 100 APT 넣었을 때 결과값 예상해줘.',
   );
   const [messages, setMessages] = useState<Message[]>([]);
@@ -116,17 +116,17 @@ const HomePage = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    setDraft(e.target.value);
   };
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (isLoading) return;
-      setInput('');
+      setDraft('');
 
       setIsLoading(true);
-      const newMessage: Message = { role: 'user', content: input };
+      const newMessage: Message = { role: 'user', content: draft };
       setMessages((prev) => [...prev, newMessage]);
 
       abortControllerRef.current = new AbortController();
@@ -149,11 +149,11 @@ const HomePage = () => {
         ]);
       } finally {
         setIsLoading(false);
-        setInput('');
+        setDraft('');
         abortControllerRef.current = null;
       }
     },
-    [input, messages, isLoading, account?.address],
+    [draft, messages, isLoading, account?.address],
   );
 
   const handleStop = () => {
@@ -182,8 +182,9 @@ const HomePage = () => {
     <Container>
       <Header />
       <WalletSelector />
+
       {messages.length > 0 && (
-        <BlockList ref={containerRef}>
+        <MessageList ref={containerRef}>
           {messages.map((message, index) => {
             if (message.role === 'user') {
               return <UserMessageItem key={index} message={message} />;
@@ -213,66 +214,24 @@ const HomePage = () => {
               </div>
             );
           })}
-        </BlockList>
+        </MessageList>
       )}
-      <form
-        // ref={bottomBarRef}
-        onSubmit={handleSubmit}
-        className="w-full mb-4"
-      >
-        <Textarea
-          // type="text"
-          // TODO: auto-grow height of textarea
-          ref={textareaRef}
-          value={input}
-          onChange={handleInputChange}
-          placeholder="Enter your query here..."
-          className="w-full p-2 text-white bg-gray-700 border rounded"
-        />
-        <button
-          type="submit"
-          className="p-2 mt-2 mr-2 text-white bg-blue-500 rounded"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Processing...' : 'Submit'}
-        </button>
-        {isLoading && (
-          <button
-            type="button"
-            onClick={handleStop}
-            className="p-2 mt-2 text-white bg-red-500 rounded"
-          >
-            Stop
-          </button>
-        )}
-      </form>
+
+      <InputSection
+        isLoading={isLoading}
+        onClickSubmit={handleSubmit}
+        onStop={handleStop}
+        value={draft}
+        onChangeValue={handleInputChange}
+      />
+
       {messages.length === 0 && (
-        <div className="flex gap-4">
-          <SuggestionCard
-            onClick={() => {
-              setInput('List all the bridged versions of USDC Coin.');
-
-              // TODO: inputRef -> focus
-              textareaRef.current?.focus();
-            }}
-          >
-            <h3>List all the bridged versions of USDC.</h3>
-          </SuggestionCard>
-          <SuggestionCard
-            onClick={() => {
-              setInput(
-                'Estimate the swap for exchanging 100 APT into Wormhole USDC. Display the state of each pool in the route.',
-              );
-
-              textareaRef.current?.focus();
-            }}
-          >
-            <h3>
-              Estimate the swap for exchanging 100 APT into Wormhole USDC.
-              Display the state of each pool in the route.
-            </h3>
-          </SuggestionCard>
-        </div>
+        <FeaturedSection
+          onSelect={(text) => {
+            setDraft(text);
+            textareaRef.current?.focus();
+          }}
+        />
       )}
     </Container>
   );
@@ -292,36 +251,9 @@ const Container = styled.div`
 
   gap: 32px;
 `;
-const BlockList = styled.div`
+const MessageList = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
-`;
-
-const Textarea = styled.textarea`
-  padding: 16px;
-
-  border-radius: 8px 8px 0px 0px;
-  border: 0;
-  border-bottom: 1px solid #50e3c2;
-  background: linear-gradient(180deg, #282c2c 0%, #203530 100%);
-
-  color: #50e3c2;
-`;
-
-const SuggestionCard = styled.div`
-  padding: 12px;
-  gap: 8px 4px;
-
-  display: flex;
-  flex: 1 0 0;
-  flex-wrap: wrap;
-
-  /* TODO: Remove this to children styles */
-  color: white;
-
-  border: 1px solid #5c5c5c;
-  background: linear-gradient(180deg, #222 0%, #151c1a 100%);
-  box-shadow: 0px 4px 12px 0px rgba(202, 255, 243, 0.12);
 `;
