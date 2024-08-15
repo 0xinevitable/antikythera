@@ -15,6 +15,7 @@ import { WalletSelector } from '@/components/WalletSelector';
 
 import { AssistantMessageItem } from './components/AssistantMessageItem';
 import { ParameterType } from './components/Block';
+import { ErrorMessageItem } from './components/ErrorMessageItem';
 import { ToolMessageItem } from './components/ToolMessageItem';
 import { UserMessageItem } from './components/UserMessageItem';
 import { FeaturedSection } from './sections/FeaturedSection';
@@ -181,7 +182,7 @@ const HomePage = () => {
   return (
     <Container>
       <Header />
-      <WalletSelector />
+      {/* <WalletSelector /> */}
 
       {messages.length > 0 && (
         <MessageList ref={containerRef}>
@@ -201,29 +202,10 @@ const HomePage = () => {
                 />
               );
             }
-            return (
-              <div
-                key={index}
-                // TODO: Error
-                className="p-2 mb-4 bg-red-100 rounded"
-              >
-                <strong>{message.role}</strong>
-                <pre className="overflow-x-auto whitespace-pre-wrap">
-                  {message.content}
-                </pre>
-              </div>
-            );
+            return <ErrorMessageItem key={index} message={message} />;
           })}
         </MessageList>
       )}
-
-      <InputSection
-        isLoading={isLoading}
-        onClickSubmit={handleSubmit}
-        onStop={handleStop}
-        value={draft}
-        onChangeValue={handleInputChange}
-      />
 
       {messages.length === 0 && (
         <FeaturedSection
@@ -233,6 +215,14 @@ const HomePage = () => {
           }}
         />
       )}
+
+      <InputSection
+        isLoading={isLoading}
+        onClickSubmit={handleSubmit}
+        onStop={handleStop}
+        value={draft}
+        onChangeValue={handleInputChange}
+      />
     </Container>
   );
 };
@@ -244,12 +234,13 @@ const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
+  padding: 0 12px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  gap: 32px;
+  gap: 20px;
 `;
 const MessageList = styled.div`
   width: 100%;
