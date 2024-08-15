@@ -12,17 +12,17 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   return (
     <Section>
       <div className="flex gap-[10px] items-center">
-        <TrophyIcon color="#fff" size={20} />
+        <TrophyIcon color="#fff" size={18} />
         <Title>Featured</Title>
       </div>
 
-      <Description>
+      {/* <Description>
         Try the best community-verified prompts and examples
-      </Description>
+      </Description> */}
 
       <FeaturedList>
         <FeaturedCard
-          className="border border-[#009DFF]"
+          className="usdc"
           onClick={() => {
             onSelect('List all the bridged versions of USDC Coin.');
           }}
@@ -51,12 +51,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
               />
               USDC
             </CoinBadge>
-            .
           </FeaturedCardTitle>
         </FeaturedCard>
 
         <FeaturedCard
-          className="border border-[#996DFF]"
+          className="thala"
           onClick={() => {
             onSelect(
               'Estimate the swap for exchanging 100 APT into Move Dollar in ThalaSwap. Display the state of each pool in the route.',
@@ -103,7 +102,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
         </FeaturedCard>
 
         <FeaturedCard
-          className="border border-[#50E3C2]"
+          className="echelon"
           onClick={() => {
             onSelect(
               'Borrow USDT with 20% LTV from Echelon by supplying 100 APT.',
@@ -158,24 +157,23 @@ const Section = styled.section`
   flex-direction: column;
 
   position: relative;
-  padding: 24px;
+  padding: 18px 18px 0;
 
   border-radius: 12px;
   border: 1px solid #3f3f3f;
+  border-bottom: 0;
   background: #1b1b1b;
   z-index: 0;
-
-  overflow: hidden;
 
   &::before {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    z-index: 1;
 
-    width: 100%;
+    width: calc(100% + 2px);
     height: 120px;
 
     background: linear-gradient(180deg, rgba(11, 11, 11, 0) 0%, #0b0b0b 100%);
@@ -184,12 +182,12 @@ const Section = styled.section`
 
 const Title = styled.h2`
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 100%; /* 20px */
 `;
 const Description = styled.p`
-  margin-top: 16px;
+  margin-top: 12px;
 
   color: #9b9cad;
   font-size: 14px;
@@ -207,10 +205,11 @@ const FeaturedList = styled.ul`
 `;
 
 const FeaturedCard = styled.li`
-  padding: 8px 16px 20px;
+  padding: 8px 16px 16px;
   gap: 8px;
   height: fit-content;
   position: relative;
+  z-index: 2;
 
   display: flex;
   flex-direction: column;
@@ -218,9 +217,7 @@ const FeaturedCard = styled.li`
 
   border-radius: 8px;
 
-  /* FIXME: Border Gradient 구현 */
-  background: linear-gradient(180deg, #222 0%, #151c1a 100%);
-  box-shadow: 0px 4px 12px 0px rgba(202, 255, 243, 0.12);
+  /* box-shadow: 0px 4px 12px 0px rgba(202, 255, 243, 0.12); */
 
   cursor: pointer;
   user-select: none;
@@ -235,10 +232,31 @@ const FeaturedCard = styled.li`
   &:hover {
     transform: scale(0.98);
   }
+
+  &.usdc {
+    background:
+      linear-gradient(180deg, #222 0%, #101010 100%) padding-box,
+      linear-gradient(180deg, #009dff 27%, #292929 100%) border-box;
+    border: 1px solid transparent;
+  }
+
+  &.thala {
+    background:
+      linear-gradient(180deg, #222 0%, #101010 100%) padding-box,
+      linear-gradient(180deg, #996dff 27%, #292929 100%) border-box;
+    border: 1px solid transparent;
+  }
+
+  &.echelon {
+    background:
+      linear-gradient(180deg, #222 0%, #101010 100%) padding-box,
+      linear-gradient(180deg, #50e3c2 27%, #292929 100%) border-box;
+    border: 1px solid transparent;
+  }
 `;
 const FeaturedCardTitle = styled.h3`
   color: #ddd;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 160%;
 `;

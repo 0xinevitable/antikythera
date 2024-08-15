@@ -53,7 +53,7 @@ export const Header: React.FC = () => {
   );
 };
 
-const Container = styled.div`
+const Container = styled.header`
   margin-top: 64px;
   margin-bottom: -28px;
   width: 100%;

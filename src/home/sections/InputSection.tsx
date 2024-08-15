@@ -29,7 +29,7 @@ export const InputSection = forwardRef<HTMLTextAreaElement, InputSectionProps>(
         onSubmit={onClickSubmit}
       >
         <div className="flex gap-[10px] items-center">
-          <Wand2Icon color="#fff" size={20} />
+          <Wand2Icon color="#fff" size={18} />
           <Title>Ask Anything</Title>
         </div>
 
@@ -56,7 +56,7 @@ const Form = styled.form`
   flex-direction: column;
 
   position: relative;
-  padding: 24px 24px 18px;
+  padding: 18px 18px 16px;
 
   border-radius: 12px;
   border: 1px solid #3f3f3f;
@@ -66,27 +66,35 @@ const Form = styled.form`
 
 const Title = styled.h2`
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 100%; /* 20px */
 `;
 
 const Textarea = styled.textarea`
+  margin-top: 12px;
   padding: 12px;
 
   border-radius: 8px 8px 0px 0px;
   border: 0;
-  border-bottom: 1px solid #50e3c2;
   background: linear-gradient(180deg, #282c2c 0%, #203530 100%);
 
   color: #50e3c2;
-  font-size: 16px;
+  font-size: 14px;
+
+  border-bottom: 1px solid #3f3f3f;
+  transition: border-bottom-color 0.12s ease;
+
+  &:focus {
+    outline: 0;
+    border-bottom-color: #50e3c2;
+  }
 `;
 
 const ModelBadge = styled.div`
   margin-top: 8px;
   border-radius: 4px;
-  background: #7eaba1;
+  background: #9b9cad;
 
   width: fit-content;
   display: flex;
