@@ -13,8 +13,6 @@ import { NextPage } from 'next';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { WalletSelector } from '@/components/WalletSelector';
-
 import { AssistantMessageItem } from './components/AssistantMessageItem';
 import { ParameterType } from './components/Block';
 import { ErrorMessageItem } from './components/ErrorMessageItem';

@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import Link from 'next/link';
 
+import { WalletSelector } from '@/components/WalletSelector';
+
 type NavigationBarProps = {
   onClickLogo: () => void;
 };
@@ -10,18 +12,22 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
 }) => {
   return (
     <Container>
-      <div
-        className="flex items-center gap-[10px] cursor-pointer"
-        onClick={onClickLogo}
-      >
-        <BrandLogo />
-        <BrandName>Antikythera</BrandName>
+      <div className="flex items-center mr-auto">
+        <div
+          className="flex items-center gap-[10px] cursor-pointer"
+          onClick={onClickLogo}
+        >
+          <BrandLogo />
+          <BrandName>Antikythera</BrandName>
+        </div>
+
+        {/* FIXME: */}
+        <nav className="mt-1 ml-5 text-sm text-white">
+          <Link href="/">About</Link>
+        </nav>
       </div>
 
-      {/* FIXME: */}
-      <nav className="mt-1 ml-5 text-sm text-white">
-        <Link href="/">About</Link>
-      </nav>
+      <WalletSelector />
     </Container>
   );
 };
