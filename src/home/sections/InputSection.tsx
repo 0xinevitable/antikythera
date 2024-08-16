@@ -184,7 +184,6 @@ const ModelBadge = styled.div`
 
   span {
     color: #0e1917;
-    font-family: Satoshi;
     font-size: 12px;
     font-style: normal;
     font-weight: 500;

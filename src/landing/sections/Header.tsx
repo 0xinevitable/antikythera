@@ -69,7 +69,6 @@ export const Header: React.FC = () => {
 };
 
 const Container = styled.header`
-  margin-bottom: -28px;
   width: 100%;
 
   display: flex;

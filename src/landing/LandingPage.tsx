@@ -1,29 +1,55 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
 
+import { Footer } from './sections/Footer';
 import { Header } from './sections/Header';
 
 const LandingPage: NextPage = () => {
   return (
-    <Container>
-      <div className="flex flex-col">
-        <Tape>
-          <Typography />
-          <AptosSymbol />
-          <Typography />
-          <AptosSymbol />
-          <Typography />
-          <AptosSymbol />
-          <Typography />
-          <AptosSymbol />
-        </Tape>
-        <Header />
-      </div>
-    </Container>
+    <Wrapper>
+      <Container>
+        <div className="flex flex-col items-center w-screen overflow-hidden">
+          <Tape className="w-fit">
+            <Typography />
+            <AptosSymbol />
+            <Typography />
+            <AptosSymbol />
+            <Typography />
+            <AptosSymbol />
+            <Typography />
+            <AptosSymbol />
+          </Tape>
+          <Header />
+        </div>
+      </Container>
+      <Footer />
+    </Wrapper>
   );
 };
 
 export default LandingPage;
+
+const Wrapper = styled.div`
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+`;
+const Container = styled.div`
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 12px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 20px;
+`;
 
 const Tape = styled.div`
   margin-top: 40px;
@@ -36,20 +62,6 @@ const Tape = styled.div`
   border-top: 1px solid #626262;
   border-bottom: 1px solid #626262;
   background: #000;
-`;
-
-const Container = styled.div`
-  max-width: 800px;
-  width: 100%;
-  min-height: 100vh;
-  margin: 0 auto;
-  padding: 0 12px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 20px;
 `;
 
 const Typography: React.FC = () => (
