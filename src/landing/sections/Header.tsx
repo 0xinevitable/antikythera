@@ -69,7 +69,6 @@ export const Header: React.FC = () => {
 };
 
 const Container = styled.header`
-  margin-top: 52px;
   margin-bottom: -28px;
   width: 100%;
 
@@ -83,6 +82,8 @@ const IllustContainer = styled.div`
   height: 294px;
   position: relative;
   z-index: 0;
+
+  filter: drop-shadow(0 -4px 12px rgba(0, 0, 0, 0.65));
 `;
 const IllustWrapper = styled(motion.div)`
   display: flex;
