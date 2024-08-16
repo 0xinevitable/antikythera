@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { motion } from 'framer-motion';
 import { TrophyIcon } from 'lucide-react';
 import Image from 'next/image';
 
@@ -31,6 +32,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           onClick={() => {
             onSelect('List all the bridged versions of USDC Coin.');
           }}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring' }}
+          whileHover={{ scale: 0.98, y: -5 }}
+          whileTap={{ scale: 0.95 }}
         >
           <InfoBadge className="absolute top-[11px] right-0" />
           <Image
@@ -67,6 +73,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
               'Estimate the swap for exchanging 100 APT into Move Dollar in ThalaSwap. Display the state of each pool in the route.',
             );
           }}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1, transition: { delay: 0.25 } }}
+          transition={{ type: 'spring' }}
+          whileHover={{ scale: 0.98, y: -5 }}
+          whileTap={{ scale: 0.95 }}
         >
           <QueryBadge className="absolute top-[11px] right-0" />
           <Image
@@ -118,6 +129,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
               'Borrow USDT with 20% LTV from Echelon by supplying 100 APT.',
             );
           }}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1, transition: { delay: 0.5 } }}
+          transition={{ type: 'spring' }}
+          whileHover={{ scale: 0.98, y: -5 }}
+          whileTap={{ scale: 0.95 }}
         >
           <ExecutionBadge className="absolute top-[11px] right-0" />
           <Image
@@ -236,7 +252,7 @@ const Description = styled.p`
   line-height: 100%; /* 14px */
 `;
 
-const FeaturedCard = styled.li`
+const FeaturedCard = styled(motion.li)`
   padding: 8px 14px 14px;
   gap: 8px;
   height: fit-content;
@@ -253,17 +269,6 @@ const FeaturedCard = styled.li`
 
   cursor: pointer;
   user-select: none;
-  transition:
-    opacity 0.2s ease,
-    transform 0.16s ease;
-
-  &:active {
-    opacity: 0.45;
-  }
-
-  &:hover {
-    transform: scale(0.98);
-  }
 
   &.usdc {
     background:
