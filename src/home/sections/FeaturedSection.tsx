@@ -2,6 +2,9 @@ import styled from '@emotion/styled';
 import { TrophyIcon } from 'lucide-react';
 import Image from 'next/image';
 
+import Echelon3D from '@/assets/3d-echelon.png';
+import Thala3D from '@/assets/3d-thala.png';
+import USDC3D from '@/assets/3d-usdc.png';
 import { InlineBlock } from '@/components/InlineBlock';
 
 type FeaturedSectionProps = {
@@ -32,10 +35,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           <InfoBadge className="absolute top-[11px] right-0" />
           <Image
             className="w-[64px] h-[64px] saturate-[105%]"
-            src="/assets/3d-usdc.png"
+            src={USDC3D}
             alt="USDC"
             width={512}
             height={512}
+            placeholder="blur"
             style={{
               filter: 'drop-shadow(-6px 8px 12px rgba(1, 1, 2, 0.51))',
             }}
@@ -67,10 +71,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           <QueryBadge className="absolute top-[11px] right-0" />
           <Image
             className="w-[64px] h-[64px] saturate-[105%]"
-            src="/assets/3d-thala.png"
+            src={Thala3D}
             alt="Thala"
             width={512}
             height={512}
+            placeholder="blur"
             style={{
               filter: 'drop-shadow(-6px 8px 12px rgba(1, 1, 2, 0.51))',
             }}
@@ -117,10 +122,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           <ExecutionBadge className="absolute top-[11px] right-0" />
           <Image
             className="w-[64px] h-[64px] saturate-[105%]"
-            src="/assets/3d-echelon.png"
+            src={Echelon3D}
             alt="Echelon"
             width={512}
             height={512}
+            placeholder="blur"
             style={{
               filter: 'drop-shadow(-6px 8px 12px rgba(1, 1, 2, 0.51))',
             }}
