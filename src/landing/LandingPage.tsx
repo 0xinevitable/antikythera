@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
 
+import { CallToActionSection } from './sections/CallToActionSection';
 import { Footer } from './sections/Footer';
 import { Header } from './sections/Header';
 
@@ -22,6 +23,8 @@ const LandingPage: NextPage = () => {
           <Header />
         </div>
       </Container>
+
+      <CallToActionSection />
       <Footer />
     </Wrapper>
   );

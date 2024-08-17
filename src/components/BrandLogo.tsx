@@ -1,4 +1,5 @@
-type SVGComponent = React.FC<React.SVGProps<SVGSVGElement>>;
+// FIXME:
+export type SVGComponent = React.FC<React.SVGProps<SVGSVGElement>>;
 
 export const BrandLogo: SVGComponent = (props) => (
   <svg
