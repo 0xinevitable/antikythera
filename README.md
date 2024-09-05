@@ -1,4 +1,3 @@
 # Antikythera
 
-- VectorStore of coins (`search('USDT')` -> `CoinType`)
-- VectorStore of each package (`getAccountModules` -> public abi only)
+- https://github.com/EchelonMarket/echelon-sdk
