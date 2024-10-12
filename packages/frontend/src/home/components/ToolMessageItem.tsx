@@ -50,6 +50,9 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
             </>
           );
         }
+        if (brand.name === Brands.DefiLlama.name) {
+          return null;
+        }
         return (
           <span className="text-sm text-white">
             {JSON.stringify(message.kwargs.content)}
