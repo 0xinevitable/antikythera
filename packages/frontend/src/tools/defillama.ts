@@ -76,7 +76,7 @@ export const listChainProtocolsTool = tool(
         'https://api.llama.fi/protocols',
       );
       const aptosProtocols = protocols.flatMap((v) => {
-        if (!v.chains.includes('Aptos')) {
+        if (!v.chains.includes('Aptos') || v.category.includes('CEX')) {
           return [];
         }
 
