@@ -21,4 +21,11 @@ export const Brands = {
     color: Colors.Thala,
     src: '/assets/logo-thala.png',
   },
+  DefiLlama: {
+    name: 'DefiLlama',
+    color: Colors.DefiLlama,
+    src: '/assets/logo-defillama.png',
+  },
 };
+
+export type BrandInfo = (typeof Brands)[keyof typeof Brands];

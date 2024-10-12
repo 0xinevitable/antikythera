@@ -56,7 +56,8 @@ export async function fetchStreamingResponse(
                 } else {
                   // FIXME: ?
                 }
-              } catch {
+              } catch (error) {
+                console.log(error);
                 if (
                   serializedToolMessage.kwargs.content ===
                   'STOP_CURRENT_WALLET_ADDRESS'

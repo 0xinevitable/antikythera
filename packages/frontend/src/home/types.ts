@@ -101,11 +101,24 @@ export const decodeToolMessage = (
 ): AntiKytheraToolMessage => {
   toolMessage.kwargs.content = JSON.parse(toolMessage.kwargs.content);
 
-  // 단일 tool_call 만 있다고 가정
-  toolMessage.kwargs.additional_kwargs.tool_call.function.arguments =
-    JSON.parse(
-      toolMessage.kwargs.additional_kwargs.tool_call.function.arguments,
-    );
+  if ('tool_call' in toolMessage.kwargs.additional_kwargs) {
+    // 단일 tool_call 만 있다고 가정
+    toolMessage.kwargs.additional_kwargs.tool_call.function.arguments =
+      JSON.parse(
+        toolMessage.kwargs.additional_kwargs.tool_call.function.arguments,
+      );
+  } else if ('tool_calls' in toolMessage.kwargs.additional_kwargs) {
+    // 여러 개의 tool_calls 가 존재할 때 하나만 있다고 가정
+    const toolCall = (toolMessage.kwargs.additional_kwargs as any)
+      .tool_calls[0];
+    (toolMessage.kwargs.additional_kwargs as any).tool_call = {
+      ...toolCall,
+      function: {
+        ...toolCall.function,
+        arguments: JSON.parse(toolCall.function.arguments),
+      },
+    };
+  }
 
   return toolMessage as AntiKytheraToolMessage;
 };

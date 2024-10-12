@@ -10,17 +10,26 @@ type ToolMessageProps = {
   message: AntiKytheraToolMessage;
 };
 
+const brandByToolName = (name: string) => {
+  switch (name) {
+    case 'chainTVL':
+      return Brands.DefiLlama;
+    case 'listChainProtocols':
+      return Brands.DefiLlama;
+    case 'findSwapRoute':
+      return Brands.ThalaSwap;
+    case 'searchCoin':
+      return Brands.Nodit;
+    default:
+      return Brands.Aptos;
+  }
+};
+
 export const ToolMessageItem: React.FC<ToolMessageProps> = ({
   id,
   message,
 }) => {
-  const brand =
-    message.kwargs.name === 'findSwapRoute'
-      ? Brands.ThalaSwap
-      : message.kwargs.name === 'searchCoin'
-        ? Brands.Nodit
-        : Brands.Aptos;
-
+  const brand = brandByToolName(message.kwargs.name);
   const title = capitalizeFirstLetter(message.kwargs.name);
 
   return (
@@ -41,14 +50,11 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
             </>
           );
         }
-        if (message.kwargs.name === 'findSwapRoute') {
-          return (
-            <span className="text-sm text-white">
-              {JSON.stringify(message.kwargs.content)}
-            </span>
-          );
-        }
-        return null;
+        return (
+          <span className="text-sm text-white">
+            {JSON.stringify(message.kwargs.content)}
+          </span>
+        );
       })()}
     />
   );

@@ -2,6 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 
 import { APTOS_MAINNET_COINS } from '@/constants/aptos-coins';
+import { Brands } from '@/constants/brands';
 
 const searchCoinSchema = z.object({
   query: z
