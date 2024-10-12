@@ -1,3 +1,5 @@
+import { tool } from '@langchain/core/tools';
+
 import { Message, ParsedLine, decodeToolMessage } from './types';
 
 export async function fetchStreamingResponse(
@@ -40,6 +42,25 @@ export async function fetchStreamingResponse(
         try {
           const parsedLine: ParsedLine = JSON.parse(line);
 
+          if (parsedLine.type === 'pre_tool_call') {
+            console.log('Pre tool call:', parsedLine.data);
+            onUpdate((prev) => [
+              ...prev,
+              {
+                role: 'tool',
+                status: 'pending',
+                name: parsedLine.data.name,
+                tool_call_id: parsedLine.data.tool_call_id,
+                kwargs: {
+                  name: parsedLine.data.name,
+                  tool_call_id: parsedLine.data.tool_call_id,
+                  additional_kwargs: {
+                    tool_call: parsedLine.data.additional_kwargs.tool_call,
+                  },
+                },
+              } as any,
+            ]);
+          }
           if (parsedLine.type === 'tool_calls') {
             console.log('Tool calls:', parsedLine.data);
             for (const serializedToolMessage of parsedLine.data) {
@@ -47,9 +68,15 @@ export async function fetchStreamingResponse(
                 const toolMessage = decodeToolMessage(serializedToolMessage);
                 if (toolMessage.kwargs && toolMessage.kwargs.content) {
                   onUpdate((prev) => [
-                    ...prev,
+                    ...prev.filter((v) =>
+                      v.role === 'tool' &&
+                      v.kwargs.tool_call_id === toolMessage.kwargs.tool_call_id
+                        ? false
+                        : true,
+                    ),
                     {
                       role: 'tool',
+                      status: 'resolved',
                       ...toolMessage,
                     },
                   ]);

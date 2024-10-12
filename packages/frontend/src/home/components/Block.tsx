@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { CheckCheck, FunctionSquareIcon, LoaderIcon } from 'lucide-react';
 import Image from 'next/image';
 import { isValidElement as isValidReactElement } from 'react';
 
@@ -30,6 +31,7 @@ export type BlockType = {
 
 export type BlockProps = BlockType & {
   className?: string;
+  status?: 'pending' | 'resolved';
 };
 
 export const Block: React.FC<BlockProps> = ({
@@ -37,6 +39,7 @@ export const Block: React.FC<BlockProps> = ({
   title,
   brand,
   params,
+  status,
 }) => {
   return (
     <Container className={className}>
@@ -59,6 +62,19 @@ export const Block: React.FC<BlockProps> = ({
         </BrandContainer>
         <Title>{title}</Title>
       </div>
+
+      {status === 'resolved' && (
+        <span className="w-fit flex items-center justify-center gap-2 pl-1.5 pr-2 text-white rounded-lg bg-zinc-700">
+          <CheckCheck size={14} />
+          <span className="font-medium text-[14px]">Resolved</span>
+        </span>
+      )}
+      {status === 'pending' && (
+        <span className="w-fit flex items-center justify-center gap-2 pl-1.5 pr-2 text-white rounded-lg bg-zinc-700">
+          <LoaderIcon size={14} className="animate-spin" />
+          <span className="font-medium text-[14px]">Pending</span>
+        </span>
+      )}
 
       {/* render simple table with tailwind */}
       {isValidReactElement(params)

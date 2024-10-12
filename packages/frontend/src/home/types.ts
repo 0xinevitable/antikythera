@@ -4,6 +4,16 @@ import { CoinData } from '@/constants/aptos-coins';
 
 export type ParsedLine =
   | {
+      type: 'pre_tool_call';
+      data: {
+        tool_call_id: string;
+        name: string;
+        additional_kwargs: {
+          tool_call: OpenAIToolCall;
+        };
+      };
+    }
+  | {
       type: 'tool_calls';
       // FIXME: ?
       data: SerializedToolMessage[];
@@ -89,6 +99,7 @@ export type BasicMessage = {
 };
 export type ToolMessage = {
   role: 'tool';
+  status: 'resolved' | 'pending';
 } & AntiKytheraToolMessage;
 
 export type Message = BasicMessage | ToolMessage;

@@ -1,13 +1,13 @@
 import { Brands } from '@/constants/brands';
 import { capitalizeFirstLetter } from '@/utils/format';
 
-import { AntiKytheraToolMessage } from '../types';
+import { ToolMessage } from '../types';
 import { Block } from './Block';
 import { CoinSearchList } from './CoinSearchList';
 
 type ToolMessageProps = {
   id: string;
-  message: AntiKytheraToolMessage;
+  message: ToolMessage;
 };
 
 const brandByToolName = (name: string) => {
@@ -37,28 +37,35 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
       id={id}
       title={title}
       brand={brand}
-      params={(() => {
-        if (message.kwargs.name === 'searchCoin') {
-          return (
-            <>
-              <span className="text-sm text-white">
-                {JSON.stringify(
-                  message.kwargs.additional_kwargs.tool_call.function.arguments,
-                )}
-              </span>
-              <CoinSearchList coins={message.kwargs.content} />
-            </>
-          );
-        }
-        if (brand.name === Brands.DefiLlama.name) {
-          return null;
-        }
-        return (
-          <span className="text-sm text-white">
-            {JSON.stringify(message.kwargs.content)}
-          </span>
-        );
-      })()}
+      status={message.status}
+      params={
+        <>
+          {message.status === 'resolved' &&
+            (() => {
+              if (message.kwargs.name === 'searchCoin') {
+                return (
+                  <>
+                    <span className="text-sm text-white">
+                      {JSON.stringify(
+                        message.kwargs.additional_kwargs.tool_call.function
+                          .arguments,
+                      )}
+                    </span>
+                    <CoinSearchList coins={message.kwargs.content} />
+                  </>
+                );
+              }
+              if (brand.name === Brands.DefiLlama.name) {
+                return null;
+              }
+              return (
+                <span className="text-sm text-white">
+                  {JSON.stringify(message.kwargs.content)}
+                </span>
+              );
+            })()}
+        </>
+      }
     />
   );
 };

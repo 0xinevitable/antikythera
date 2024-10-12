@@ -93,6 +93,21 @@ export default async function handler(
                 const { name, arguments: argsString } = toolCall.function;
                 try {
                   const args = JSON.parse(argsString);
+
+                  controller.enqueue(
+                    JSON.stringify({
+                      type: 'pre_tool_call',
+                      data: {
+                        tool_call_id: toolCall.id,
+                        name: name,
+                        additional_kwargs: {
+                          // tool_calls: [toolCall],
+                          tool_call: toolCall,
+                        },
+                      },
+                    }) + '\n',
+                  );
+
                   const result = await runTool(name, args);
 
                   if (result === 'STOP_CURRENT_WALLET_ADDRESS') {
