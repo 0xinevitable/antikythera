@@ -118,13 +118,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@antikythera/echelon-sdk@workspace:^, @antikythera/echelon-sdk@workspace:packages/echelon-sdk":
+  version: 0.0.0-use.local
+  resolution: "@antikythera/echelon-sdk@workspace:packages/echelon-sdk"
+  dependencies:
+    "@aptos-labs/ts-sdk": "npm:^1.22.2"
+    "@changesets/cli": "npm:^2.27.5"
+    "@thalalabs/surf": "npm:^1.7.1"
+    ts-node: "npm:^10.9.2"
+    tsup: "npm:^8.0.2"
+    typedoc: "npm:^0.25.13"
+    typedoc-plugin-markdown: "npm:^4.0.3"
+    typescript: "npm:^5.4.5"
+  languageName: unknown
+  linkType: soft
+
 "@antikythera/frontend@workspace:packages/frontend":
   version: 0.0.0-use.local
   resolution: "@antikythera/frontend@workspace:packages/frontend"
   dependencies:
+    "@antikythera/echelon-sdk": "workspace:^"
     "@aptos-labs/ts-sdk": "npm:^1.26.0"
     "@aptos-labs/wallet-adapter-react": "npm:^3.5.7"
-    "@echelonmarket/echelon-sdk": "workspace:^"
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
     "@langchain/core": "npm:^0.2.18"
@@ -970,21 +985,6 @@ __metadata:
   checksum: 10c0/e10f1b02b78e4812646ddf289b7d9f2cb567d336c363b266bd50cd223cf3de7c2c74018d91cd2613041568397ef3a4a2b500aba588c6e5bd78c38374ba68f38c
   languageName: node
   linkType: hard
-
-"@echelonmarket/echelon-sdk@workspace:^, @echelonmarket/echelon-sdk@workspace:packages/echelon-sdk":
-  version: 0.0.0-use.local
-  resolution: "@echelonmarket/echelon-sdk@workspace:packages/echelon-sdk"
-  dependencies:
-    "@aptos-labs/ts-sdk": "npm:^1.22.2"
-    "@changesets/cli": "npm:^2.27.5"
-    "@thalalabs/surf": "npm:^1.7.1"
-    ts-node: "npm:^10.9.2"
-    tsup: "npm:^8.0.2"
-    typedoc: "npm:^0.25.13"
-    typedoc-plugin-markdown: "npm:^4.0.3"
-    typescript: "npm:^5.4.5"
-  languageName: unknown
-  linkType: soft
 
 "@emotion/babel-plugin@npm:^11.11.0":
   version: 11.11.0
