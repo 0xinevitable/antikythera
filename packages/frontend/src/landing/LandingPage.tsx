@@ -1,10 +1,12 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
 
-import { PoweredBySection } from './sections/PoweredBySection'
+import { Reveal } from '@/components/Reveal';
+
 import { CallToActionSection } from './sections/CallToActionSection';
 import { Footer } from './sections/Footer';
 import { Header } from './sections/Header';
+import { PoweredBySection } from './sections/PoweredBySection';
 
 const LandingPage: NextPage = () => {
   return (
@@ -21,11 +23,16 @@ const LandingPage: NextPage = () => {
             <Typography />
             <AptosSymbol />
           </Tape>
-          <Header />
+
+          <Reveal>
+            <Header />
+          </Reveal>
         </div>
       </Container>
 
-      <PoweredBySection />
+      <Reveal delay={200}>
+        <PoweredBySection />
+      </Reveal>
 
       <CallToActionSection />
       <Footer />

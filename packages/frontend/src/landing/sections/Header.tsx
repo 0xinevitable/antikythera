@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { Reveal } from '@/components/Reveal';
 import { Button } from '@/components/ui/button';
 import { float } from '@/styles/motion';
 
@@ -31,20 +32,22 @@ export const Header: React.FC = () => {
 
           <div className="absolute min-w-[438px]">
             <div className="flex flex-col gap-1 absolute top-[-36px] right-[-88px]">
-              <div className="flex ml-[28px]">
+              <Reveal cascade delay={400}>
+                <div className="flex ml-[28px]">
+                  <SVGImage
+                    alt="Execute Transactions"
+                    src="/assets/arrow-execute.svg"
+                    width={207}
+                    height={18}
+                  />
+                </div>
                 <SVGImage
-                  alt="Execute Transactions"
-                  src="/assets/arrow-execute.svg"
-                  width={207}
+                  alt="Query Contracts"
+                  src="/assets/arrow-query.svg"
+                  width={169}
                   height={18}
                 />
-              </div>
-              <SVGImage
-                alt="Query Contracts"
-                src="/assets/arrow-query.svg"
-                width={169}
-                height={18}
-              />
+              </Reveal>
             </div>
           </div>
 
