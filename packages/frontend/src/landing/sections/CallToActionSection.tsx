@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import futureBg from '@/assets/future-bg.png';
 import { BrandLogo, SVGComponent } from '@/components/BrandLogo';
+import { Reveal } from '@/components/Reveal';
 import { Button } from '@/components/ui/button';
 
 export const CallToActionSection: React.FC = () => {
@@ -19,14 +20,16 @@ export const CallToActionSection: React.FC = () => {
       />
 
       <div className="w-full flex flex-col mt-[64px] items-center">
-        <BrandLogo className="text-white w-[48px] h-[26px]" />
-        <Typography className="mt-4" />
-        <Description>Access and prepare prior with Antikythera</Description>
-        <Link href="/home">
-          <Button className="text-base font-bold" variant="secondary">
-            Start Now
-          </Button>
-        </Link>
+        <Reveal cascade>
+          <BrandLogo className="text-white w-[48px] h-[26px]" />
+          <Typography className="mt-4" />
+          <Description>Access and prepare prior with Antikythera</Description>
+          <Link href="/home">
+            <Button className="text-base font-bold" variant="secondary">
+              Start Now
+            </Button>
+          </Link>
+        </Reveal>
       </div>
     </Section>
   );
