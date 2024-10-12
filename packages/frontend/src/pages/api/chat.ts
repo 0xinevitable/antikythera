@@ -30,7 +30,7 @@ const toolsByName = {
   currentWalletAddress: currentWalletAddressTool,
   searchCoin: searchCoinTool,
   findSwapRoute: findSwapRouteTool,
-  getThalaSwapABI: thalaSwapABITool,
+  // getThalaSwapABI: thalaSwapABITool,
   parseUnits: parseUnitsTool,
   formatUnits: formatUnitsTool,
 };
@@ -61,7 +61,8 @@ export default async function handler(
       model: 'gpt-4o',
       temperature: 0,
       streaming: true,
-      apiKey: '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',
+      apiKey:
+        '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',
     });
     const llmWithTools = llm.bind({ tools });
 
