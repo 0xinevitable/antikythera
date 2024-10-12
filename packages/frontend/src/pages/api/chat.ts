@@ -9,7 +9,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { searchCoinTool } from '@/tools/coins';
-import { findSwapRouteTool, thalaSwapABITool } from '@/tools/thalaswap';
+import { findSwapRouteTool } from '@/tools/thalaswap';
 import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
 import { currentWalletAddressTool } from '@/tools/wallet';
 
@@ -21,7 +21,7 @@ const tools: ExtendedTool[] = [
   currentWalletAddressTool,
   searchCoinTool,
   findSwapRouteTool,
-  thalaSwapABITool,
+  // thalaSwapABITool,
   parseUnitsTool,
   formatUnitsTool,
 ];
