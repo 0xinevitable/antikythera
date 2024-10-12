@@ -5,8 +5,8 @@ import { ThalaswapRouter } from '@thalalabs/router-sdk';
 import path from 'path';
 import { z } from 'zod';
 
-import { ThalaSwapPackageId } from '@/vectorstore-abi';
-import { loadOrCreateVectorStore } from '@/vectorstore-abi';
+// import { ThalaSwapPackageId } from '@/vectorstore-abi';
+// import { loadOrCreateVectorStore } from '@/vectorstore-abi';
 
 // Initialize the ThalaSwap Router
 const router = new ThalaswapRouter(
@@ -69,84 +69,84 @@ const thalaSwapABISchema = z.object({
     .describe('Number of results to return for each category'),
 });
 
-const thalaSwapABITool = tool(
-  async ({ query, limit }) => {
-    try {
-      const config = new AptosConfig({ network: Network.MAINNET });
-      const aptos = new Aptos(config);
-      const modules = await aptos.getAccountModules({
-        accountAddress: ThalaSwapPackageId,
-      });
+// const thalaSwapABITool = tool(
+//   async ({ query, limit }) => {
+//     try {
+//       const config = new AptosConfig({ network: Network.MAINNET });
+//       const aptos = new Aptos(config);
+//       const modules = await aptos.getAccountModules({
+//         accountAddress: ThalaSwapPackageId,
+//       });
 
-      const packageId = path.basename(ThalaSwapPackageId);
+//       const packageId = path.basename(ThalaSwapPackageId);
 
-      const allAbis = modules.flatMap((module) => {
-        if (!module.abi) {
-          return [];
-        }
-        const { address: _address, ...abi } = module.abi;
-        return abi.exposed_functions.flatMap((func) => {
-          if (func.visibility === MoveFunctionVisibility.PUBLIC) {
-            return { module: module.abi!.name, ...func, is_view: func.is_view };
-          }
-          return [];
-        });
-      });
+//       const allAbis = modules.flatMap((module) => {
+//         if (!module.abi) {
+//           return [];
+//         }
+//         const { address: _address, ...abi } = module.abi;
+//         return abi.exposed_functions.flatMap((func) => {
+//           if (func.visibility === MoveFunctionVisibility.PUBLIC) {
+//             return { module: module.abi!.name, ...func, is_view: func.is_view };
+//           }
+//           return [];
+//         });
+//       });
 
-      const viewAbis = allAbis.filter((abi) => abi.is_view);
-      const nonViewAbis = allAbis.filter((abi) => !abi.is_view);
+//       const viewAbis = allAbis.filter((abi) => abi.is_view);
+//       const nonViewAbis = allAbis.filter((abi) => !abi.is_view);
 
-      const viewVectorStore = await loadOrCreateVectorStore(
-        packageId,
-        true,
-        viewAbis,
-      );
-      const nonViewVectorStore = await loadOrCreateVectorStore(
-        packageId,
-        false,
-        nonViewAbis,
-      );
+//       const viewVectorStore = await loadOrCreateVectorStore(
+//         packageId,
+//         true,
+//         viewAbis,
+//       );
+//       const nonViewVectorStore = await loadOrCreateVectorStore(
+//         packageId,
+//         false,
+//         nonViewAbis,
+//       );
 
-      if (query) {
-        const viewResults = await viewVectorStore.similaritySearch(
-          query,
-          limit,
-        );
-        const nonViewResults = await nonViewVectorStore.similaritySearch(
-          query,
-          limit,
-        );
+//       if (query) {
+//         const viewResults = await viewVectorStore.similaritySearch(
+//           query,
+//           limit,
+//         );
+//         const nonViewResults = await nonViewVectorStore.similaritySearch(
+//           query,
+//           limit,
+//         );
 
-        return JSON.stringify(
-          {
-            viewFunctions: viewResults.map((r) => JSON.parse(r.pageContent)),
-            nonViewFunctions: nonViewResults.map((r) =>
-              JSON.parse(r.pageContent),
-            ),
-          },
-          null,
-          2,
-        );
-      } else {
-        return JSON.stringify(
-          {
-            viewFunctions: viewAbis,
-            nonViewFunctions: nonViewAbis,
-          },
-          null,
-          2,
-        );
-      }
-    } catch (error) {
-      return `Error fetching or processing ThalaSwap ABI: ${(error as any).message}`;
-    }
-  },
-  {
-    name: 'getThalaSwapABI',
-    description:
-      'Fetch and search ThalaSwap ABI, separating view and non-view functions',
-    schema: thalaSwapABISchema,
-  },
-);
+//         return JSON.stringify(
+//           {
+//             viewFunctions: viewResults.map((r) => JSON.parse(r.pageContent)),
+//             nonViewFunctions: nonViewResults.map((r) =>
+//               JSON.parse(r.pageContent),
+//             ),
+//           },
+//           null,
+//           2,
+//         );
+//       } else {
+//         return JSON.stringify(
+//           {
+//             viewFunctions: viewAbis,
+//             nonViewFunctions: nonViewAbis,
+//           },
+//           null,
+//           2,
+//         );
+//       }
+//     } catch (error) {
+//       return `Error fetching or processing ThalaSwap ABI: ${(error as any).message}`;
+//     }
+//   },
+//   {
+//     name: 'getThalaSwapABI',
+//     description:
+//       'Fetch and search ThalaSwap ABI, separating view and non-view functions',
+//     schema: thalaSwapABISchema,
+//   },
+// );
 
-export { findSwapRouteTool, thalaSwapABITool };
+export { findSwapRouteTool };
