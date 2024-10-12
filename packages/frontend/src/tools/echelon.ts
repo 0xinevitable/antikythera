@@ -6,8 +6,8 @@
 // import { z } from 'zod';
 // import { ThalaSwapPackageId } from '@/vectorstore-abi';
 // import { loadOrCreateVectorStore } from '@/vectorstore-abi';
+import { EchelonClient } from '@antikythera/echelon-sdk';
 import { Aptos, AptosConfig, Network } from '@aptos-labs/ts-sdk';
-import { EchelonClient } from '@echelonmarket/echelon-sdk';
 
 // create the aptos instance
 const aptos = new Aptos(
