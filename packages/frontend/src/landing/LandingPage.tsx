@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 
 import { Reveal } from '@/components/Reveal';
 
+import { AptosAssistantSection } from './sections/AptosAssistantSection';
 import { CallToActionSection } from './sections/CallToActionSection';
 import { Footer } from './sections/Footer';
 import { Header } from './sections/Header';
@@ -33,6 +34,8 @@ const LandingPage: NextPage = () => {
       <Reveal delay={200}>
         <PoweredBySection />
       </Reveal>
+
+      <AptosAssistantSection />
 
       <CallToActionSection />
       <Footer />

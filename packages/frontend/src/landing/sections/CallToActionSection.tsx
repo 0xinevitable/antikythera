@@ -38,7 +38,7 @@ export const CallToActionSection: React.FC = () => {
 const Section = styled.section`
   width: 100%;
   max-width: 800px;
-  margin: 100px auto 52px;
+  margin: 0 auto 52px;
   display: flex;
   position: relative;
   z-index: 0;
