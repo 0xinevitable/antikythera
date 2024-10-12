@@ -34,6 +34,14 @@ export const AssistantMessageItem: React.FC<BasicMessageProps> = ({
             ),
             code: (props) => <CustomCode {...props} />,
             img: (props) => <CustomImg {...props} />,
+            a: ({ className, ...props }) => (
+              <a
+                className={cn('font-medium hover:underline', className)}
+                style={{ color: Colors.AptosNeon }}
+                target="_blank"
+                {...props}
+              />
+            ),
           }}
         >
           {message.content}
