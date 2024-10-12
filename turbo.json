@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "@antikythera/echelon-sdk#build": {
       "cache": true,
       "outputs": ["dist/**"]
