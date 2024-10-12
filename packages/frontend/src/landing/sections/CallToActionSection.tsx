@@ -22,6 +22,7 @@ export const CallToActionSection: React.FC = () => {
       <div className="w-full flex flex-col mt-[64px] items-center">
         <Reveal cascade>
           <BrandLogo className="text-white w-[48px] h-[26px]" />
+          <h2 className="sr-only">The Future is Already Here</h2>
           <Typography className="mt-4" />
           <Description>Access and prepare prior with Antikythera</Description>
           <Link href="/home">
