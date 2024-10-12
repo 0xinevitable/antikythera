@@ -1,0 +1,52 @@
+{
+  "name": "@antikythera/echelon-sdk",
+  "version": "2.0.2",
+  "description": "The SDK for the Echelon Market",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup ./src",
+    "release": "pnpm run build && changeset publish",
+    "gen-doc": "npx typedoc --plugin typedoc-plugin-markdown --out ./docs"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "move",
+    "blockchain",
+    "aptos"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EchelonMarket/echelon-sdk"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.5",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
+    "typedoc": "^0.25.13",
+    "typedoc-plugin-markdown": "^4.0.3",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.26.0",
+    "@thalalabs/surf": "^1.7.1"
+  }
+}

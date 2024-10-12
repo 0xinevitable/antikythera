@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "@antikythera/echelon-sdk#build": {
+      "cache": true,
+      "outputs": ["dist/**"]
+    },
+    "build": {
+      "dependsOn": ["^@antikythera/echelon-sdk#build"],
+      "inputs": [".env"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "dependsOn": ["^@antikythera/echelon-sdk#build"],
+      "inputs": [".env"]
+    }
+  }
+}

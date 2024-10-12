@@ -204,8 +204,6 @@ const HomePage: NextPage = () => {
           />
         )}
 
-        {/* <WalletSelector /> */}
-
         <Main>
           {messages.length > 0 && (
             <MessageList ref={containerRef}>
