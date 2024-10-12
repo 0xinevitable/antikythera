@@ -9,9 +9,12 @@ import {
 } from '@aptos-labs/ts-sdk';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import styled from '@emotion/styled';
+import { motion } from 'framer-motion';
 import { NextPage } from 'next';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import aptosAssistantIllust from '@/assets/aptos-assistant.png';
 
 import { AssistantMessageItem } from './components/AssistantMessageItem';
 import { ParameterType } from './components/Block';
@@ -208,26 +211,40 @@ const HomePage: NextPage = () => {
 
         <Main>
           {messages.length > 0 && (
-            <MessageList ref={containerRef}>
-              {messages.map((message, index) => {
-                if (message.role === 'user') {
-                  return <UserMessageItem key={index} message={message} />;
-                }
-                if (message.role === 'assistant') {
-                  return <AssistantMessageItem key={index} message={message} />;
-                }
-                if (message.role === 'tool') {
-                  return (
-                    <ToolMessageItem
-                      key={index}
-                      id={index.toString()}
-                      message={message}
-                    />
-                  );
-                }
-                return <ErrorMessageItem key={index} message={message} />;
-              })}
-            </MessageList>
+            <>
+              <MessageList ref={containerRef}>
+                {messages.map((message, index) => {
+                  if (message.role === 'user') {
+                    return <UserMessageItem key={index} message={message} />;
+                  }
+                  if (message.role === 'assistant') {
+                    return (
+                      <AssistantMessageItem key={index} message={message} />
+                    );
+                  }
+                  if (message.role === 'tool') {
+                    return (
+                      <ToolMessageItem
+                        key={index}
+                        id={index.toString()}
+                        message={message}
+                      />
+                    );
+                  }
+                  return <ErrorMessageItem key={index} message={message} />;
+                })}
+              </MessageList>
+
+              {/* Profile image, breath while Work-in-progress */}
+              {/* FIXME: Update image to better one */}
+              <motion.div
+                animate={isLoading ? { scale: [1, 0.66, 1] } : undefined}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                style={{ width: 100, height: 100, marginRight: 'auto' }}
+              >
+                <Image alt="" src={aptosAssistantIllust} />
+              </motion.div>
+            </>
           )}
 
           {/* Featured */}
