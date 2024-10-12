@@ -9,47 +9,14 @@ const searchCoinSchema = z.object({
     .describe(
       'The search query. Can be symbol (e.g., "APT", "USDC"), name, or any field in token_type',
     ),
-  field: z
-    .enum([
-      'symbol',
-      'name',
-      'token_type.type',
-      'token_type.account_address',
-      'token_type.module_name',
-      'token_type.struct_name',
-    ])
-    .describe('The specific field to search in.'),
 });
 export const searchCoinTool = tool(
-  async ({ query, field }) => {
-    const searchInField = (
-      coin: any,
-      fieldPath: string,
-      searchQuery: string,
-    ) => {
-      const value = fieldPath
-        .split('.')
-        .reduce((obj, key) => obj && obj[key], coin);
-      return (
-        typeof value === 'string' &&
-        value.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    };
-
-    const results = APTOS_MAINNET_COINS.filter((coin) => {
-      if (field) {
-        return searchInField(coin, field, query);
-      } else {
-        return (
-          searchInField(coin, 'symbol', query) ||
-          searchInField(coin, 'name', query) ||
-          searchInField(coin, 'token_type.type', query) ||
-          searchInField(coin, 'token_type.account_address', query) ||
-          searchInField(coin, 'token_type.module_name', query) ||
-          searchInField(coin, 'token_type.struct_name', query)
-        );
-      }
-    });
+  async ({ query }) => {
+    const results = APTOS_MAINNET_COINS.filter(
+      (coin) =>
+        coin.name.toLowerCase().includes(query.toLowerCase()) ||
+        coin.symbol.toLowerCase().includes(query.toLowerCase()),
+    );
 
     if (results.length === 0) {
       return 'No coins found matching the search criteria.';
