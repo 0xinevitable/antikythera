@@ -59,6 +59,12 @@ const protocolToLogoURL = (protocol: string) => {
   if (protocol.includes('pancake')) {
     return '/assets/logo-pancake.jpg';
   }
+  if (protocol.includes('aptoswap')) {
+    return '/assets/logo-aptoswap.jpg';
+  }
+  if (protocol.includes('cellana')) {
+    return '/assets/logo-cellana.jpg';
+  }
   return null;
 };
 
@@ -89,7 +95,7 @@ export const KanaSwapRouteItem: React.FC<KanaSwapRouteItemProps> = ({
             }
             return (
               <img
-                key={v}
+                key={`${v}-${idx}`}
                 src={logo}
                 className="w-6 h-6 -mr-2 border rounded-md last-of-type:mr-0 border-zinc-500"
                 style={{ zIndex: route.protocols.length - idx }}
