@@ -130,7 +130,9 @@ export const kanaSwapQuoteTool = tool(
         ),
       amountIn: z
         .number()
-        .describe('The amount of input token to swap. Parsed Units'),
+        .describe(
+          'The amount of input token to swap. Parsed Units (e.g., 1000000000 for 1 APT with 9 decimals)',
+        ),
       slippage: z.number().describe('The slippage tolerance (e.g., 0.5)'),
     }),
   },
