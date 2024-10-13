@@ -51,7 +51,6 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
             }
             if (message.kwargs.name === 'kanaSwapQuote') {
               const routeOptions = message.kwargs.content.foundRoutes;
-              console.log(routeOptions);
               return (
                 <div className="flex flex-col gap-2 mt-2">
                   {routeOptions.map((route, index) => (

@@ -164,7 +164,9 @@ const HomePage: NextPage = () => {
     [draft, messages, isLoading, account?.address],
   );
 
-  console.log(messages);
+  useEffect(() => {
+    console.log(messages);
+  }, [messages]);
 
   const handleStop = () => {
     if (abortControllerRef.current) {

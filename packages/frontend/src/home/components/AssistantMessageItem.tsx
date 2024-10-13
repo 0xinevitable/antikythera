@@ -100,8 +100,6 @@ const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
   // Allows hex addresses of 1 to 64 characters (e.g., 0x1, 0x1::module::type, or full 64-char addresses)
   const addressMatch = content.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
 
-  console.log({ content, addressMatch });
-
   if (addressMatch) {
     // const address = addressMatch[1];
     // const shortenedContent = content.replace(address, shortenAddress(address));
