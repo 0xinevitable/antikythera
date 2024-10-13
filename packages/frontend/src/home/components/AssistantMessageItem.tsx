@@ -96,7 +96,7 @@ const CustomCode: React.FC<React.HTMLAttributes<HTMLElement>> = ({
 }) => {
   const content = Children.toArray(children).join('');
 
-  // Match Aptos addresses or ㅊ patterns
+  // Match Aptos addresses
   // Allows hex addresses of 1 to 64 characters (e.g., 0x1, 0x1::module::type, or full 64-char addresses)
   const addressMatch = content.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
 

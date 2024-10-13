@@ -1,6 +1,7 @@
 import { Route as ThalaSwapRoute } from '@thalalabs/router-sdk';
 
 import { CoinData } from '@/constants/aptos-coins';
+import { KanaSwapRouteOption } from '@/tools/kanaswap';
 
 export type ParsedLine =
   | {
@@ -56,23 +57,29 @@ export type AntikytheraToolArgs =
       };
     }
   | {
-      // FIXME: Thala Swap 맥락 추가해야 함
-      content: ThalaSwapRoute;
-      name: 'findSwapRoute';
+      content: {
+        foundRoutes: Omit<KanaSwapRouteOption, 'chainId'>[];
+      };
+      name: 'kanaSwapQuote';
       tool_call_id: string;
       additional_kwargs: {
         // Custom
         tool_call: OpenAIToolCall & {
           function: {
-            name: 'findSwapRoute';
+            name: 'kanaSwapQuote';
             arguments: {
-              fromTokenType: CoinType;
-              toTokenType: CoinType;
-              amountIn: number;
+              inputToken: CoinType;
+              outputToken: CoinType;
+              amountIn: string;
+              slippage: string;
             };
           };
         };
       };
+    }
+  | {
+      content: object;
+      name: string;
     };
 
 export type SerializedToolMessage = {

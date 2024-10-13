@@ -4,6 +4,7 @@ import { capitalizeFirstLetter } from '@/utils/format';
 import { ToolMessage } from '../types';
 import { Block } from './Block';
 import { CoinSearchList } from './CoinSearchList';
+import { KanaSwapRouteItem } from './KanaSwapRouteItem';
 
 type ToolMessageProps = {
   id: string;
@@ -40,34 +41,34 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
       title={title}
       brand={brand}
       status={message.status}
-      params={
-        <>
-          {message.status === 'resolved' &&
-            (() => {
-              if (message.kwargs.name === 'searchCoin') {
-                return (
-                  <>
-                    <span className="text-sm text-white">
-                      {JSON.stringify(
-                        message.kwargs.additional_kwargs.tool_call.function
-                          .arguments,
-                      )}
-                    </span>
-                    <CoinSearchList coins={message.kwargs.content} />
-                  </>
-                );
-              }
-              if (brand.name === Brands.DefiLlama.name) {
-                return null;
-              }
+      params={message.kwargs.additional_kwargs.tool_call.function.arguments}
+    >
+      <>
+        {message.status === 'resolved' &&
+          (() => {
+            if (message.kwargs.name === 'searchCoin') {
+              return <CoinSearchList coins={message.kwargs.content} />;
+            }
+            if (message.kwargs.name === 'kanaSwapQuote') {
+              const routeOptions = message.kwargs.content.foundRoutes;
               return (
-                <span className="text-sm text-white">
-                  {JSON.stringify(message.kwargs.content)}
-                </span>
+                <>
+                  {routeOptions.map((route, index) => (
+                    <KanaSwapRouteItem key={index} route={route} />
+                  ))}
+                </>
               );
-            })()}
-        </>
-      }
-    />
+            }
+            if (brand.name === Brands.DefiLlama.name) {
+              return null;
+            }
+            return (
+              <span className="text-sm text-white">
+                {JSON.stringify(message.kwargs.content)}
+              </span>
+            );
+          })()}
+      </>
+    </Block>
   );
 };

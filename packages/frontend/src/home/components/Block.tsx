@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { isValidElement as isValidReactElement } from 'react';
 
 import { Colors } from '@/constants/colors';
+import { shortenAddress } from '@/utils/format';
 import { formatUnits } from '@/utils/units';
 
 export type Coin = {
@@ -32,6 +33,7 @@ export type BlockType = {
 export type BlockProps = BlockType & {
   className?: string;
   status?: 'pending' | 'resolved';
+  children?: React.ReactNode;
 };
 
 export const Block: React.FC<BlockProps> = ({
@@ -40,6 +42,7 @@ export const Block: React.FC<BlockProps> = ({
   brand,
   params,
   status,
+  children,
 }) => {
   return (
     <Container className={className}>
@@ -77,48 +80,79 @@ export const Block: React.FC<BlockProps> = ({
       )}
 
       {/* render simple table with tailwind */}
-      {isValidReactElement(params)
+      {isValidReactElement(params) || !params
         ? params
-        : params && (
+        : typeof params === 'object' && (
             <table className="w-full text-white rounded-sm">
               <tbody>
-                {Object.entries(params).map(([key, param]) => (
-                  <tr key={key}>
-                    <td className="px-1.5 py-1 text-xs border border-white/30">
-                      {key}
-                    </td>
-                    <td className="px-1.5 py-1 text-xs border border-white/30">
-                      {param.type === 'block' && (
-                        <a
-                          style={{ color: Colors.AptosNeon }}
-                          target="_blank"
-                          href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
-                        >
-                          {param.value}
-                        </a>
+                {Object.entries(params).map(([key, param]) => {
+                  const addressMatch =
+                    typeof param === 'string' &&
+                    param.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
+                  const address = !!addressMatch && addressMatch[1];
+                  const shortenedContent =
+                    !!address &&
+                    param.replace(address, shortenAddress(address));
+
+                  return (
+                    <tr key={key}>
+                      <td className="px-1.5 py-1 text-xs border border-white/30">
+                        {key}
+                      </td>
+                      {typeof param === 'object' ? (
+                        <td className="px-1.5 py-1 text-xs border border-white/30">
+                          {param.type === 'block' && (
+                            <a
+                              style={{ color: Colors.AptosNeon }}
+                              target="_blank"
+                              href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
+                            >
+                              {param.value}
+                            </a>
+                          )}
+                          {param.type === 'hash' && (
+                            <a
+                              style={{ color: Colors.AptosNeon }}
+                              target="_blank"
+                              href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
+                            >
+                              {param.value}
+                            </a>
+                          )}
+                          {param.type === 'string' && param.value}
+                          {param.type === 'coin' && (
+                            <span>
+                              {formatUnits(param.value, param.coin.decimals)}{' '}
+                              {param.coin.symbol}
+                            </span>
+                          )}
+                        </td>
+                      ) : (
+                        <td className="px-1.5 py-1 text-xs border border-white/30">
+                          {addressMatch ? (
+                            <a
+                              // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
+                              href={`https://tracemove.io/search/${param}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium hover:underline"
+                              style={{ color: Colors.AptosNeon }}
+                            >
+                              {shortenedContent}
+                            </a>
+                          ) : (
+                            param
+                          )}
+                        </td>
                       )}
-                      {param.type === 'hash' && (
-                        <a
-                          style={{ color: Colors.AptosNeon }}
-                          target="_blank"
-                          href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
-                        >
-                          {param.value}
-                        </a>
-                      )}
-                      {param.type === 'string' && param.value}
-                      {param.type === 'coin' && (
-                        <span>
-                          {formatUnits(param.value, param.coin.decimals)}{' '}
-                          {param.coin.symbol}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
+
+      {children}
     </Container>
   );
 };
@@ -133,11 +167,7 @@ const Container = styled.li`
   flex-direction: column;
   gap: 8px;
 
-  background: linear-gradient(
-    180deg,
-    rgba(34, 34, 34, 1) 0%,
-    rgba(21, 28, 26, 1) 100%
-  );
+  background: linear-gradient(180deg, #222222 0%, #1e1e1e 100%);
   border: 1px solid #5c5c5c;
   box-shadow: 0px 4px 12px 0px rgba(202, 255, 243, 0.12);
 `;
