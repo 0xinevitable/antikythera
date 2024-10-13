@@ -13,6 +13,8 @@ type ToolMessageProps = {
 
 const brandByToolName = (name: string) => {
   switch (name) {
+    case 'listEchelonMarkets':
+      return Brands.Echelon;
     case 'kanaSwapQuote':
       return Brands.KanaSwap;
     case 'chainTVL':
@@ -59,7 +61,10 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
                 </div>
               );
             }
-            if (brand.name === Brands.DefiLlama.name) {
+            if (
+              brand.name === Brands.DefiLlama.name ||
+              brand.name === Brands.Echelon.name
+            ) {
               return null;
             }
             return (

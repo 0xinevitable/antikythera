@@ -12,6 +12,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Message } from '@/home/types';
 import { searchCoinTool } from '@/tools/coins';
 import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
+import { listEchelonMarketsTool } from '@/tools/echelon';
 import { kanaSwapQuoteTool } from '@/tools/kanaswap';
 // import { findSwapRouteTool } from '@/tools/thalaswap';
 import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
@@ -29,6 +30,7 @@ const tools: ExtendedTool[] = [
   // thalaSwapABITool,
   chainTVLTool,
   listChainProtocolsTool,
+  listEchelonMarketsTool,
   parseUnitsTool,
   formatUnitsTool,
 ];
@@ -40,6 +42,7 @@ const toolsByName = {
   kanaSwapQuote: kanaSwapQuoteTool,
   chainTVL: chainTVLTool,
   listChainProtocols: listChainProtocolsTool,
+  listEchelonMarkets: listEchelonMarketsTool,
   // getThalaSwapABI: thalaSwapABITool,
   parseUnits: parseUnitsTool,
   formatUnits: formatUnitsTool,
@@ -66,7 +69,6 @@ export default async function handler(
   try {
     const data = req.body as { messages: Message[] };
     // const lastMessage = data.messages[data.messages.length - 1].content;
-    console.log(data.messages.map((v: any) => console.log(v)));
 
     const llm = new ChatOpenAI({
       model: 'gpt-4o',
@@ -102,7 +104,7 @@ export default async function handler(
           }),
           new ToolMessage({
             ...v.kwargs,
-            content: JSON.stringify(v.kwargs.content),
+            content: JSON.stringify(v.kwargs.content) || '',
           }),
         ];
       }
@@ -119,7 +121,7 @@ export default async function handler(
           const response = await llmWithTools.invoke([
             new SystemMessage({
               content:
-                'If asked a list, try to answer with a markdown table with much information as possible. Always try to state the source of the information.',
+                'If asked a list, try to answer with a markdown table with much information as possible (if theres a logo col, show it as 1st td). Always try to state the source of the information (e.g. adding `Data sourced from -`).',
             }),
             ...messages,
           ]);

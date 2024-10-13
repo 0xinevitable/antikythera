@@ -31,6 +31,11 @@ export const Brands = {
     color: Colors.KanaLabs,
     src: '/assets/logo-kanalabs.png',
   },
+  Echelon: {
+    name: 'Echelon',
+    color: Colors.Echelon,
+    src: '/assets/logo-echelon.png',
+  },
 };
 
 export type BrandInfo = (typeof Brands)[keyof typeof Brands];

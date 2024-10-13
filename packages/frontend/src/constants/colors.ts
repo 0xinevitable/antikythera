@@ -5,4 +5,5 @@ export const Colors = {
   Thala: '#c2afff',
   DefiLlama: '#4592FF',
   KanaLabs: '#5ACBE8',
+  Echelon: '#77FBFC',
 };

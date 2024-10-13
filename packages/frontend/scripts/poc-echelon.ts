@@ -48,6 +48,7 @@ const main = async () => {
           coinType,
           name: coin?.name,
           symbol: coin?.symbol,
+          logoURL: coin?.logo_url,
           borrowAPR: borrowAPR * 100,
           supplyAPR: supplyAPR * 100,
           coinPriceInUSD,
