@@ -50,6 +50,9 @@ const protocolToLogoURL = (protocol: string) => {
   if (protocol.includes('sushi')) {
     return '/assets/logo-sushi.png';
   }
+  if (protocol.includes('econia')) {
+    return '/assets/logo-econia.jpg';
+  }
   if (protocol.includes('thala')) {
     return '/assets/logo-thala.png';
   }
