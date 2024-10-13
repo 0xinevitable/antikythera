@@ -71,6 +71,6 @@ export const listEchelonMarketsTool = tool(
   {
     name: 'listEchelonMarkets',
     description:
-      'Get a list of markets in Echelon Market (a lending protocol built on Aptos)',
+      'Get a list of lending markets in Echelon. Each item contain coinType of market, Borrow/Supply APR, and tracking coin price.',
   },
 );
