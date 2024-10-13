@@ -8,6 +8,7 @@ import { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+import { Message } from '@/home/types';
 import { searchCoinTool } from '@/tools/coins';
 import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
 import { kanaSwapQuoteTool } from '@/tools/kanaswap';
@@ -62,8 +63,9 @@ export default async function handler(
   }
 
   try {
-    const data = req.body;
-    const lastMessage = data.messages[data.messages.length - 1].content;
+    const data = req.body as { messages: Message[] };
+    // const lastMessage = data.messages[data.messages.length - 1].content;
+    console.log(data.messages.map((v: any) => console.log(v)));
 
     const llm = new ChatOpenAI({
       model: 'gpt-4o',
@@ -74,7 +76,40 @@ export default async function handler(
     });
     const llmWithTools = llm.bind({ tools });
 
-    let messages: BaseMessage[] = [new HumanMessage(lastMessage)];
+    let messages: BaseMessage[] = data.messages.flatMap((v) => {
+      if (v.role === 'user') {
+        return new HumanMessage(v.content);
+      }
+      if (v.role === 'assistant') {
+        return new AIMessage(v.content);
+      }
+      if (v.role === 'tool') {
+        return [
+          new AIMessage('', {
+            ...v.kwargs,
+            tool_calls: [
+              {
+                ...v.kwargs.additional_kwargs.tool_call,
+                function: {
+                  ...v.kwargs.additional_kwargs.tool_call.function,
+                  arguments: JSON.stringify(
+                    v.kwargs.additional_kwargs.tool_call.function.arguments,
+                  ),
+                },
+              },
+            ],
+          }),
+          new ToolMessage({
+            ...v.kwargs,
+            content: JSON.stringify(v.kwargs.content),
+          }),
+        ];
+      }
+      if (v.role === 'error') {
+        return [];
+      }
+      return [];
+    });
     let finalResponse: string | null = null;
 
     const stream = new ReadableStream({
