@@ -30,7 +30,7 @@ const formatUnitsSchema = z.object({
 export const formatUnitsTool = tool(
   async ({ value, decimals }) => {
     try {
-      const bigIntValue = BigInt(value);
+      const bigIntValue = BigInt(value.split('.')[0]);
       const result = formatUnits(bigIntValue, decimals);
       return result;
     } catch (error) {
