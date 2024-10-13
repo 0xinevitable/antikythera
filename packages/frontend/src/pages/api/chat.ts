@@ -117,16 +117,22 @@ export default async function handler(
                     hasStopFlag = true;
                   }
 
-                  toolMessages.push(
-                    new ToolMessage({
-                      content: result,
-                      tool_call_id: toolCall.id,
-                      name: name,
-                      additional_kwargs: {
-                        // tool_calls: [toolCall],
-                        tool_call: toolCall,
-                      },
-                    }),
+                  const toolMessage = new ToolMessage({
+                    content: result,
+                    tool_call_id: toolCall.id,
+                    name: name,
+                    additional_kwargs: {
+                      // tool_calls: [toolCall],
+                      tool_call: toolCall,
+                    },
+                  });
+                  toolMessages.push(toolMessage);
+
+                  controller.enqueue(
+                    JSON.stringify({
+                      type: 'tool_calls',
+                      data: [toolMessage],
+                    }) + '\n',
                   );
                 } catch (error) {
                   console.error(`Error executing tool ${name}:`, error);
@@ -138,9 +144,9 @@ export default async function handler(
             messages.push(...toolMessages);
 
             // Send the tool calls and results as a JSONL stream
-            controller.enqueue(
-              JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
-            );
+            // controller.enqueue(
+            //   JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
+            // );
 
             if (hasStopFlag) {
               controller.enqueue(
