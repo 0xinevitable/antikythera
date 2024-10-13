@@ -38,7 +38,7 @@ const Coins = {
 
 type Address = `0x${string}`;
 
-const config = new AptosConfig({ network: Network.TESTNET });
+const config = new AptosConfig({ network: Network.MAINNET });
 const aptos = new Aptos(config);
 
 const defaultAccount = Account.fromPrivateKey({

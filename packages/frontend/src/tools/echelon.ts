@@ -10,12 +10,7 @@ import { EchelonClient } from '@antikythera/echelon-sdk';
 import { Aptos, AptosConfig, Network } from '@aptos-labs/ts-sdk';
 
 // create the aptos instance
-const aptos = new Aptos(
-  new AptosConfig({
-    network: Network.MAINNET,
-    fullnode: 'your rpc endpoint',
-  }),
-);
+const aptos = new Aptos(new AptosConfig({ network: Network.MAINNET }));
 
 const client = new EchelonClient(
   aptos,
