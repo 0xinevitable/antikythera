@@ -60,11 +60,28 @@ export type KanaSwapMarket = {
   pool: string;
 };
 
+// https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript/52171480#52171480
+const cyrb53 = (str: string, seed = 0) => {
+  let h1 = 0xdeadbeef ^ seed,
+    h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+};
+
 export const kanaSwapQuoteTool = tool(
   async ({ inputToken, outputToken, amountIn, slippage }) => {
     try {
       const {
-        data: { data: foundRoutes },
+        data: { data: results },
       } = await axios.get<KanaSwapQuoteResponse>(
         queryString.stringifyUrl({
           url: 'https://ag.kanalabs.io/v1/swapQuote',
@@ -77,9 +94,19 @@ export const kanaSwapQuoteTool = tool(
           },
         }),
       );
-      return JSON.stringify({
-        foundRoutes: foundRoutes.map(({ chainId, ...v }) => v),
-      });
+
+      const foundRoutes: Omit<KanaSwapRouteOption, 'chainId'>[] = [];
+      const hashSet = new Set<string>();
+
+      for (const { chainId, ...route } of results) {
+        const hash = cyrb53(JSON.stringify(route));
+        if (!hashSet.has(hash.toString())) {
+          hashSet.add(hash.toString());
+          foundRoutes.push(route);
+        }
+      }
+
+      return JSON.stringify({ foundRoutes });
     } catch (error) {
       console.log(error);
       return JSON.stringify({
