@@ -23,7 +23,7 @@ export const searchCoinTool = tool(
   {
     name: 'searchCoin',
     description:
-      'Search for coins by symbol or name. Coin data includes symbol, name, token type, and more metadata.',
+      'Search for coins by symbol or name. Coin data includes symbol, name, token type, and more metadata. (Source: Nodit/Hippo Labs)',
     schema: z.object({
       query: z
         .string()
@@ -36,6 +36,7 @@ export const searchCoinTool = tool(
 
 export const getCoinTool = tool(
   async ({ coin_type }) => {
+    coin_type = coin_type.startsWith('0x') ? coin_type : `0x${coin_type}`;
     const result = APTOS_MAINNET_COINS.find(
       (coin) => coin.token_type.type.toLowerCase() === coin_type.toLowerCase(),
     );
@@ -46,12 +47,12 @@ export const getCoinTool = tool(
       });
     }
 
-    return JSON.stringify(result, null, 2);
+    return JSON.stringify([result], null, 2);
   },
   {
     name: 'getCoin',
     description:
-      "Get a coin information with it's coin type. Coin data includes symbol, name, token type, and more metadata.",
+      "Get a coin information with it's coin type. Coin data includes symbol, name, token type, and more metadata. (Source: Nodit/Hippo Labs)",
     schema: z.object({
       coin_type: z
         .string()

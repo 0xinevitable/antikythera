@@ -24,6 +24,7 @@ const brandByToolName = (name: string) => {
     case 'findSwapRoute':
       return Brands.ThalaSwap;
     case 'searchCoin':
+    case 'getCoin':
       return Brands.Nodit;
     default:
       return Brands.Aptos;
@@ -48,7 +49,10 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
       <>
         {message.status === 'resolved' &&
           (() => {
-            if (message.kwargs.name === 'searchCoin') {
+            if (
+              message.kwargs.name === 'searchCoin' ||
+              message.kwargs.name === 'getCoin'
+            ) {
               const coins = Array.isArray(message.kwargs.content)
                 ? message.kwargs.content
                 : [];

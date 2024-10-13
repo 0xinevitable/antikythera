@@ -18,7 +18,7 @@ export const chainTVLTool = tool(
   },
   {
     name: 'chainTVL',
-    description: 'Get current TVL of Aptos chain',
+    description: 'Get current TVL of Aptos chain. (Source: DefiLlama)',
   },
 );
 
@@ -106,6 +106,7 @@ export const listChainProtocolsTool = tool(
   },
   {
     name: 'listChainProtocols',
-    description: 'Get a list of protocols and their TVL on Aptos chain',
+    description:
+      'Get a list of protocols and their TVL on Aptos chain. (Source: DefiLlama)',
   },
 );
