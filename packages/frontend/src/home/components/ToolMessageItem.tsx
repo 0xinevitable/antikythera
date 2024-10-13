@@ -12,6 +12,8 @@ type ToolMessageProps = {
 
 const brandByToolName = (name: string) => {
   switch (name) {
+    case 'kanaSwapQuote':
+      return Brands.KanaSwap;
     case 'chainTVL':
       return Brands.DefiLlama;
     case 'listChainProtocols':

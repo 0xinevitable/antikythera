@@ -10,7 +10,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import { searchCoinTool } from '@/tools/coins';
 import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
-import { findSwapRouteTool } from '@/tools/thalaswap';
+import { kanaSwapQuoteTool } from '@/tools/kanaswap';
+// import { findSwapRouteTool } from '@/tools/thalaswap';
 import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
 import { currentWalletAddressTool } from '@/tools/wallet';
 
@@ -21,7 +22,8 @@ type ExtendedTool = DynamicTool | DynamicStructuredTool<any>;
 const tools: ExtendedTool[] = [
   currentWalletAddressTool,
   searchCoinTool,
-  findSwapRouteTool,
+  // findSwapRouteTool,
+  kanaSwapQuoteTool,
   // thalaSwapABITool,
   chainTVLTool,
   listChainProtocolsTool,
@@ -32,7 +34,8 @@ const tools: ExtendedTool[] = [
 const toolsByName = {
   currentWalletAddress: currentWalletAddressTool,
   searchCoin: searchCoinTool,
-  findSwapRoute: findSwapRouteTool,
+  // findSwapRoute: findSwapRouteTool,
+  kanaSwapQuote: kanaSwapQuoteTool,
   chainTVL: chainTVLTool,
   listChainProtocols: listChainProtocolsTool,
   // getThalaSwapABI: thalaSwapABITool,

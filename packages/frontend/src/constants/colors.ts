@@ -4,4 +4,5 @@ export const Colors = {
   Nodit: '#03D179',
   Thala: '#c2afff',
   DefiLlama: '#4592FF',
+  KanaLabs: '#5ACBE8',
 };

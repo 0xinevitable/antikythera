@@ -26,6 +26,11 @@ export const Brands = {
     color: Colors.DefiLlama,
     src: '/assets/logo-defillama.png',
   },
+  KanaSwap: {
+    name: 'KanaSwap',
+    color: Colors.KanaLabs,
+    src: '/assets/logo-kanalabs.png',
+  },
 };
 
 export type BrandInfo = (typeof Brands)[keyof typeof Brands];
