@@ -80,77 +80,79 @@ export const Block: React.FC<BlockProps> = ({
       )}
 
       {/* render simple table with tailwind */}
-      {isValidReactElement(params) || !params
-        ? params
-        : typeof params === 'object' && (
-            <table className="w-full text-white rounded-sm">
-              <tbody>
-                {Object.entries(params).map(([key, param]) => {
-                  const addressMatch =
-                    typeof param === 'string' &&
-                    param.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
-                  const address = !!addressMatch && addressMatch[1];
-                  const shortenedContent =
-                    !!address &&
-                    param.replace(address, shortenAddress(address));
+      {!params || Object.values(params).every((v) => !v)
+        ? null
+        : isValidReactElement(params)
+          ? params
+          : typeof params === 'object' && (
+              <table className="w-full text-white rounded-sm">
+                <tbody>
+                  {Object.entries(params).map(([key, param]) => {
+                    const addressMatch =
+                      typeof param === 'string' &&
+                      param.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
+                    const address = !!addressMatch && addressMatch[1];
+                    const shortenedContent =
+                      !!address &&
+                      param.replace(address, shortenAddress(address));
 
-                  return (
-                    <tr key={key}>
-                      <td className="px-1.5 py-1 text-xs border border-white/30">
-                        {key}
-                      </td>
-                      {typeof param === 'object' ? (
+                    return (
+                      <tr key={key}>
                         <td className="px-1.5 py-1 text-xs border border-white/30">
-                          {param.type === 'block' && (
-                            <a
-                              style={{ color: Colors.AptosNeon }}
-                              target="_blank"
-                              href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
-                            >
-                              {param.value}
-                            </a>
-                          )}
-                          {param.type === 'hash' && (
-                            <a
-                              style={{ color: Colors.AptosNeon }}
-                              target="_blank"
-                              href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
-                            >
-                              {param.value}
-                            </a>
-                          )}
-                          {param.type === 'string' && param.value}
-                          {param.type === 'coin' && (
-                            <span>
-                              {formatUnits(param.value, param.coin.decimals)}{' '}
-                              {param.coin.symbol}
-                            </span>
-                          )}
+                          {key}
                         </td>
-                      ) : (
-                        <td className="px-1.5 py-1 text-xs border border-white/30">
-                          {addressMatch ? (
-                            <a
-                              // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
-                              href={`https://tracemove.io/search/${param}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-medium hover:underline"
-                              style={{ color: Colors.AptosNeon }}
-                            >
-                              {shortenedContent}
-                            </a>
-                          ) : (
-                            param
-                          )}
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+                        {typeof param === 'object' ? (
+                          <td className="px-1.5 py-1 text-xs border border-white/30">
+                            {param.type === 'block' && (
+                              <a
+                                style={{ color: Colors.AptosNeon }}
+                                target="_blank"
+                                href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
+                              >
+                                {param.value}
+                              </a>
+                            )}
+                            {param.type === 'hash' && (
+                              <a
+                                style={{ color: Colors.AptosNeon }}
+                                target="_blank"
+                                href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
+                              >
+                                {param.value}
+                              </a>
+                            )}
+                            {param.type === 'string' && param.value}
+                            {param.type === 'coin' && (
+                              <span>
+                                {formatUnits(param.value, param.coin.decimals)}{' '}
+                                {param.coin.symbol}
+                              </span>
+                            )}
+                          </td>
+                        ) : (
+                          <td className="px-1.5 py-1 text-xs border border-white/30">
+                            {addressMatch ? (
+                              <a
+                                // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
+                                href={`https://tracemove.io/search/${param}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium hover:underline"
+                                style={{ color: Colors.AptosNeon }}
+                              >
+                                {shortenedContent}
+                              </a>
+                            ) : (
+                              param
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
 
       {children}
     </Container>
