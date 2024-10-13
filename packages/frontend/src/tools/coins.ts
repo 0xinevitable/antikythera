@@ -36,17 +36,17 @@ export const searchCoinTool = tool(
 
 export const getCoinTool = tool(
   async ({ coin_type }) => {
-    const results = APTOS_MAINNET_COINS.filter((coin) =>
-      coin.token_type.type.toLowerCase().includes(coin_type.toLowerCase()),
+    const result = APTOS_MAINNET_COINS.find(
+      (coin) => coin.token_type.type.toLowerCase() === coin_type.toLowerCase(),
     );
 
-    if (results.length === 0) {
+    if (!result) {
       return JSON.stringify({
         error: 'No coins found with the given coin_type',
       });
     }
 
-    return JSON.stringify(results, null, 2);
+    return JSON.stringify(result, null, 2);
   },
   {
     name: 'getCoin',

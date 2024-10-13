@@ -10,7 +10,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { Message } from '@/home/types';
-import { searchCoinTool } from '@/tools/coins';
+import { getCoinTool, searchCoinTool } from '@/tools/coins';
 import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
 import { listEchelonMarketsTool } from '@/tools/echelon';
 import { kanaSwapQuoteTool } from '@/tools/kanaswap';
@@ -25,6 +25,7 @@ type ExtendedTool = DynamicTool | DynamicStructuredTool<any>;
 const tools: ExtendedTool[] = [
   currentWalletAddressTool,
   searchCoinTool,
+  getCoinTool,
   // findSwapRouteTool,
   kanaSwapQuoteTool,
   // thalaSwapABITool,
@@ -38,6 +39,7 @@ const tools: ExtendedTool[] = [
 const toolsByName = {
   currentWalletAddress: currentWalletAddressTool,
   searchCoin: searchCoinTool,
+  getCoin: getCoinTool,
   // findSwapRoute: findSwapRouteTool,
   kanaSwapQuote: kanaSwapQuoteTool,
   chainTVL: chainTVLTool,
@@ -123,7 +125,9 @@ export default async function handler(
             new SystemMessage({
               content: `
               - If asked a list, try to answer with a markdown table with much information as possible. (If there's a logo/image col, show it as 1st td).
-              - Always try to state the source of the information (e.g. adding \`Data sourced from \`).
+              - Try to state the source of the information (e.g. adding \`Data sourced from \` if it's clear).
+              - NEVER assume any information about coins. Always reterive information from tools before using/mentioning them.
+              - When searching tokens, use a simpler search term (e.g. "eth" instead of "ethereum") to maximize the chance of finding the token.
               `,
             }),
             ...messages,

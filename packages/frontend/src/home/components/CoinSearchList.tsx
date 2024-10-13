@@ -8,7 +8,7 @@ export const CoinSearchList: React.FC<{ coins: CoinData[] }> = ({ coins }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
 
   if (coins.length === 0) {
-    return <p>No results found.</p>;
+    return <p className="text-white">No results found.</p>;
   }
 
   const renderedCoins = collapsed ? coins.slice(0, 5) : coins;
