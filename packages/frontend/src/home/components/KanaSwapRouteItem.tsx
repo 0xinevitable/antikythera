@@ -65,6 +65,9 @@ const protocolToLogoURL = (protocol: string) => {
   if (protocol.includes('cellana')) {
     return '/assets/logo-cellana.jpg';
   }
+  if (protocol.includes('aux')) {
+    return '/assets/logo-aux.jpg';
+  }
   return null;
 };
 
