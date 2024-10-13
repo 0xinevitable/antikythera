@@ -2,6 +2,7 @@ import {
   AIMessage,
   BaseMessage,
   HumanMessage,
+  SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
 import { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
@@ -115,7 +116,13 @@ export default async function handler(
     const stream = new ReadableStream({
       async start(controller) {
         while (finalResponse === null) {
-          const response = await llmWithTools.invoke(messages);
+          const response = await llmWithTools.invoke([
+            new SystemMessage({
+              content:
+                'If asked a list, try to answer with a markdown table with much information as possible. Always try to state the source of the information.',
+            }),
+            ...messages,
+          ]);
           console.log(JSON.stringify(response));
 
           if (
