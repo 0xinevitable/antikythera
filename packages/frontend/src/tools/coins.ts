@@ -23,7 +23,7 @@ export const searchCoinTool = tool(
   {
     name: 'searchCoin',
     description:
-      'Search for coins by symbol or name. Coin data includes symbol, name, token type, and more metadata. (Source: Nodit/Hippo Labs)',
+      'Search for coins by symbol or name. Coin data includes symbol, name, token type, and more metadata. (Source: Nodit, Hippo Labs)',
     schema: z.object({
       query: z
         .string()
@@ -52,7 +52,7 @@ export const getCoinTool = tool(
   {
     name: 'getCoin',
     description:
-      "Get a coin information with it's coin type. Coin data includes symbol, name, token type, and more metadata. (Source: Nodit/Hippo Labs)",
+      "Get a coin information with it's coin type. Coin data includes symbol, name, token type, and more metadata. (Source: Nodit, Hippo Labs)",
     schema: z.object({
       coin_type: z
         .string()
