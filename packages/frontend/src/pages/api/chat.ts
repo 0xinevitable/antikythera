@@ -72,7 +72,8 @@ export default async function handler(
 
     const llm = new ChatOpenAI({
       model: 'gpt-4o',
-      temperature: 0,
+      temperature: 0.2,
+      topP: 0.1,
       streaming: true,
       apiKey:
         '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',
@@ -120,8 +121,10 @@ export default async function handler(
         while (finalResponse === null) {
           const response = await llmWithTools.invoke([
             new SystemMessage({
-              content:
-                'If asked a list, try to answer with a markdown table with much information as possible (if theres a logo col, show it as 1st td). Always try to state the source of the information (e.g. adding `Data sourced from -`).',
+              content: `
+              - If asked a list, try to answer with a markdown table with much information as possible. (If there's a logo/image col, show it as 1st td).
+              - Always try to state the source of the information (e.g. adding \`Data sourced from \`).
+              `,
             }),
             ...messages,
           ]);

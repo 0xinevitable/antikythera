@@ -49,7 +49,10 @@ export const ToolMessageItem: React.FC<ToolMessageProps> = ({
         {message.status === 'resolved' &&
           (() => {
             if (message.kwargs.name === 'searchCoin') {
-              return <CoinSearchList coins={message.kwargs.content} />;
+              const coins = Array.isArray(message.kwargs.content)
+                ? message.kwargs.content
+                : [];
+              return <CoinSearchList coins={coins} />;
             }
             if (message.kwargs.name === 'kanaSwapQuote') {
               const routeOptions = message.kwargs.content.foundRoutes;
