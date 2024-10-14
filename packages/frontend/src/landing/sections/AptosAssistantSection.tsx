@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
+import { useAnimation } from 'framer-motion';
 import { User } from 'lucide-react';
 import Image from 'next/image';
+import { useEffect, useRef } from 'react';
 
 import aptosAssistantIllust from '@/assets/aptos-assistant.png';
 import example1 from '@/assets/example-1.png';
@@ -12,8 +14,47 @@ import { Reveal } from '@/components/Reveal';
 import { BrandBadge } from '../components/BrandBadge';
 
 export const AptosAssistantSection: React.FC = () => {
+  const imgAnimation = useAnimation();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let animating = false;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (animating) {
+        return;
+      }
+      animating = true;
+
+      return requestAnimationFrame(() => {
+        const { clientX, clientY } = e;
+        const moveX = clientX - window.innerWidth / 2;
+        const moveY = clientY - window.innerHeight / 2;
+        const offsetFactor = 15;
+        imgAnimation.start({
+          x: moveX / offsetFactor,
+          y: moveY / offsetFactor,
+        });
+
+        animating = false;
+      });
+    };
+
+    if (!containerRef.current) {
+      return;
+    }
+    containerRef.current.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      if (!containerRef.current) {
+        return;
+      }
+      containerRef.current.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   return (
-    <Container>
+    <Container ref={containerRef}>
       <Reveal cascade>
         <Title>
           THE ALL NEW <br />
@@ -30,7 +71,7 @@ export const AptosAssistantSection: React.FC = () => {
             What are the top ecosystem projects on Aptos?
           </UserMessage>
         </Reveal>
-        <BrandBadge brand="DefiLlama" />
+        <BrandBadge brand="DefiLlama" animate={imgAnimation} />
       </Group1>
       <Reveal delay={200}>
         <AssistantMessageImage1 alt="" src={example1} />
@@ -55,22 +96,30 @@ export const AptosAssistantSection: React.FC = () => {
         </Reveal>
         <BrandBadge
           brand="Nodit"
+          animate={imgAnimation}
+          transition={{ damping: 15 }}
           style={{ position: 'absolute', top: -17, left: 277 }}
         />
         <BrandBadge
           brand="KanaSwap"
+          animate={imgAnimation}
           style={{ position: 'absolute', top: 15, left: 325 }}
         />
         <BrandBadge
           brand="Econia"
+          animate={imgAnimation}
+          transition={{ damping: 8 }}
           style={{ position: 'absolute', top: 96, left: 357, zIndex: 1 }}
         />
         <BrandBadge
           brand="Pontem"
+          animate={imgAnimation}
           style={{ position: 'absolute', top: 126, left: 433, zIndex: 2 }}
         />
         <BrandBadge
           brand="SushiSwap"
+          animate={imgAnimation}
+          transition={{ damping: 20 }}
           style={{ position: 'absolute', top: 290, left: -6, zIndex: 3 }}
         />
 
@@ -78,7 +127,10 @@ export const AptosAssistantSection: React.FC = () => {
           <AssistantMessageImage3 alt="" src={example3} />
         </Reveal3>
         <Reveal4 delay={400}>
-          <AssistantMessageImage4 alt="" src={example4} />
+          <Image4Wrapper>
+            <AssistantMessageImage4 alt="" src={example4} />
+            <Overlay />
+          </Image4Wrapper>
         </Reveal4>
       </Group>
     </Container>
@@ -201,8 +253,23 @@ const Reveal4 = styled(Reveal)`
   top: 280px;
   left: 197px;
 `;
-const AssistantMessageImage4 = styled(Image)`
+const Image4Wrapper = styled.div`
   width: 482px;
   height: 229px;
   box-shadow: -4px -8px 32px 0px rgba(0, 0, 0, 0.25);
+  position: relative;
+`;
+const AssistantMessageImage4 = styled(Image)`
+  width: 100%;
+  height: 100%;
+`;
+const Overlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(11, 11, 11, 0) 0%, #0b0b0b 100%);
 `;

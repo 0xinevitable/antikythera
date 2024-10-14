@@ -1,20 +1,26 @@
 import styled from '@emotion/styled';
+import { MotionProps, motion } from 'framer-motion';
 
 import { Brands } from '@/constants/brands';
 
-type BrandBadgeProps = React.HTMLAttributes<HTMLDivElement> & {
+type BrandBadgeProps = MotionProps & {
   brand: keyof typeof Brands;
+  style?: React.CSSProperties;
 };
 export const BrandBadge: React.FC<BrandBadgeProps> = ({ brand, ...props }) => {
   const info = Brands[brand];
+
   return (
-    <BrandBadgeContainer {...props}>
+    <BrandBadgeContainer
+      transition={{ ease: 'linear', ...props.transition }}
+      {...props}
+    >
       <BrandBadgeImage src={info.src} />
       <BrandBadgeText style={{ color: info.color }}>{info.name}</BrandBadgeText>
     </BrandBadgeContainer>
   );
 };
-const BrandBadgeContainer = styled.div`
+const BrandBadgeContainer = styled(motion.div)`
   display: inline-flex;
   padding: 6px 8px;
   align-items: center;
