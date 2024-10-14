@@ -36,6 +36,21 @@ export const Brands = {
     color: Colors.Echelon,
     src: '/assets/logo-echelon.png',
   },
+  Econia: {
+    name: 'Econia',
+    color: Colors.Econia,
+    src: '/assets/logo-econia.jpg',
+  },
+  Pontem: {
+    name: 'Pontem',
+    color: Colors.Pontem,
+    src: '/assets/logo-pontem.jpg',
+  },
+  SushiSwap: {
+    name: 'SushiSwap',
+    color: Colors.Sushi,
+    src: '/assets/logo-sushi.png',
+  },
 };
 
 export type BrandInfo = (typeof Brands)[keyof typeof Brands];

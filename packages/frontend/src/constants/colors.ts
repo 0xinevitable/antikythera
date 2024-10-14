@@ -6,4 +6,7 @@ export const Colors = {
   DefiLlama: '#4592FF',
   KanaLabs: '#5ACBE8',
   Echelon: '#77FBFC',
+  Econia: '#ffffff',
+  Pontem: '#BF5CE4',
+  Sushi: '#F853A1',
 };

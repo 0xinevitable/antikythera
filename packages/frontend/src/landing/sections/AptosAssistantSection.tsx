@@ -9,6 +9,8 @@ import example3 from '@/assets/example-3.png';
 import example4 from '@/assets/example-4.png';
 import { Reveal } from '@/components/Reveal';
 
+import { BrandBadge } from '../components/BrandBadge';
+
 export const AptosAssistantSection: React.FC = () => {
   return (
     <Container>
@@ -20,14 +22,23 @@ export const AptosAssistantSection: React.FC = () => {
         <IllustWrapper>
           <AptosAssistantIllust alt="" src={aptosAssistantIllust} />
         </IllustWrapper>
+      </Reveal>
 
-        <UserMessage>What are the top ecosystem projects on Aptos?</UserMessage>
+      <Group1 style={{ zIndex: 1 }}>
+        <Reveal delay={100}>
+          <UserMessage style={{ top: 24, right: 0, position: 'absolute' }}>
+            What are the top ecosystem projects on Aptos?
+          </UserMessage>
+        </Reveal>
+        <BrandBadge brand="DefiLlama" />
+      </Group1>
+      <Reveal delay={200}>
         <AssistantMessageImage1 alt="" src={example1} />
       </Reveal>
 
       <div style={{ height: 104, width: '100%', display: 'flex' }} />
 
-      <Reveal cascade duration={100}>
+      <Reveal cascade>
         <Title2>
           The Ultimate Frontend <br />
           Aggregator™️
@@ -42,6 +53,27 @@ export const AptosAssistantSection: React.FC = () => {
         <Reveal delay={200}>
           <AssistantMessageImage2 alt="" src={example2} />
         </Reveal>
+        <BrandBadge
+          brand="Nodit"
+          style={{ position: 'absolute', top: -17, left: 277 }}
+        />
+        <BrandBadge
+          brand="KanaSwap"
+          style={{ position: 'absolute', top: 15, left: 325 }}
+        />
+        <BrandBadge
+          brand="Econia"
+          style={{ position: 'absolute', top: 96, left: 357, zIndex: 1 }}
+        />
+        <BrandBadge
+          brand="Pontem"
+          style={{ position: 'absolute', top: 126, left: 433, zIndex: 2 }}
+        />
+        <BrandBadge
+          brand="SushiSwap"
+          style={{ position: 'absolute', top: 290, left: -6, zIndex: 3 }}
+        />
+
         <Reveal3 delay={300}>
           <AssistantMessageImage3 alt="" src={example3} />
         </Reveal3>
@@ -101,6 +133,11 @@ const AptosAssistantIllust = styled(Image)`
   z-index: 1;
 `;
 
+const Group1 = styled.div`
+  width: 464px;
+  height: 62px;
+  position: relative;
+`;
 const UserMessage = styled.span`
   width: fit-content;
   max-width: 420px;
