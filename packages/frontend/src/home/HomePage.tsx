@@ -14,7 +14,7 @@ import { NextPage } from 'next';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import aptosAssistantIllust from '@/assets/aptos-assistant.png';
+import aptosAssistantIllust from '@/assets/aptos-assistant-fit.png';
 
 import { AssistantMessageItem } from './components/AssistantMessageItem';
 import { ParameterType } from './components/Block';
@@ -238,7 +238,6 @@ const HomePage: NextPage = () => {
               </MessageList>
 
               {/* Profile image, breath while Work-in-progress */}
-              {/* FIXME: Update image to better one */}
               <motion.div
                 animate={isLoading ? { scale: [1, 0.66, 1] } : undefined}
                 transition={{ duration: 1.5, repeat: Infinity }}
