@@ -1,9 +1,16 @@
 import styled from '@emotion/styled';
-import { CheckCheck, FunctionSquareIcon, LoaderIcon } from 'lucide-react';
+import {
+  CheckCheck,
+  ChevronDown,
+  ChevronDownIcon,
+  FunctionSquareIcon,
+  LoaderIcon,
+} from 'lucide-react';
 import Image from 'next/image';
-import { isValidElement as isValidReactElement } from 'react';
+import { isValidElement as isValidReactElement, useState } from 'react';
 
 import { Colors } from '@/constants/colors';
+import { cn } from '@/utils/cn';
 import { shortenAddress } from '@/utils/format';
 import { formatUnits } from '@/utils/units';
 
@@ -44,6 +51,9 @@ export const Block: React.FC<BlockProps> = ({
   status,
   children,
 }) => {
+  const hasEmptyParams = !params || Object.values(params).every((v) => !v);
+  const [isParamsShown, setParamsShown] = useState<boolean>(false);
+
   return (
     <Container className={className}>
       {/* <NetworkContainer>
@@ -66,93 +76,118 @@ export const Block: React.FC<BlockProps> = ({
         <Title>{title}</Title>
       </div>
 
-      {status === 'resolved' && (
-        <span className="w-fit flex items-center justify-center gap-2 pl-1.5 pr-2 text-white rounded-lg bg-zinc-700">
-          <CheckCheck size={14} />
-          <span className="font-medium text-[14px]">Resolved</span>
-        </span>
-      )}
-      {status === 'pending' && (
-        <span className="w-fit flex items-center justify-center gap-2 pl-1.5 pr-2 text-white rounded-lg bg-zinc-700">
-          <LoaderIcon size={14} className="animate-spin" />
-          <span className="font-medium text-[14px]">Pending</span>
-        </span>
-      )}
+      <StatusRow>
+        {status === 'resolved' && (
+          <span className="w-fit flex items-center justify-center gap-2 pl-1.5 pr-2 text-white rounded-lg bg-zinc-700">
+            <CheckCheck size={14} />
+            <span className="font-medium text-[14px]">Resolved</span>
+          </span>
+        )}
+        {status === 'pending' && (
+          <span className="w-fit flex items-center justify-center gap-2 pl-1.5 pr-2 text-white rounded-lg bg-zinc-700">
+            <LoaderIcon size={14} className="animate-spin" />
+            <span className="font-medium text-[14px]">Pending</span>
+          </span>
+        )}
+
+        {!hasEmptyParams && (
+          <button
+            onClick={() => setParamsShown(!isParamsShown)}
+            className="inline-flex items-center gap-0.5 text-zinc-300"
+          >
+            <span className="text-xs font-medium">
+              {isParamsShown ? 'Hide Params' : 'Show Params'}
+            </span>
+            <ChevronDownIcon
+              size={14}
+              className={cn(
+                'transition-transform',
+                isParamsShown && 'rotate-180',
+              )}
+            />
+          </button>
+        )}
+      </StatusRow>
 
       {/* render simple table with tailwind */}
-      {!params || Object.values(params).every((v) => !v)
+      {!isParamsShown
         ? null
-        : isValidReactElement(params)
-          ? params
-          : typeof params === 'object' && (
-              <table className="w-full text-white rounded-sm">
-                <tbody>
-                  {Object.entries(params).map(([key, param]) => {
-                    const addressMatch =
-                      typeof param === 'string' &&
-                      param.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
-                    const address = !!addressMatch && addressMatch[1];
-                    const shortenedContent =
-                      !!address &&
-                      param.replace(address, shortenAddress(address));
+        : hasEmptyParams || !params
+          ? null
+          : isValidReactElement(params)
+            ? params
+            : typeof params === 'object' && (
+                <table className="w-full text-white rounded-sm">
+                  <tbody>
+                    {Object.entries(params).map(([key, param]) => {
+                      const addressMatch =
+                        typeof param === 'string' &&
+                        param.match(/^(0x[a-fA-F0-9]{1,64})(?:::.*)?$/);
+                      const address = !!addressMatch && addressMatch[1];
+                      const shortenedContent =
+                        !!address &&
+                        param.replace(address, shortenAddress(address));
 
-                    return (
-                      <tr key={key}>
-                        <td className="px-1.5 py-1 text-xs border border-white/30">
-                          {key}
-                        </td>
-                        {typeof param === 'object' ? (
+                      return (
+                        <tr key={key}>
                           <td className="px-1.5 py-1 text-xs border border-white/30">
-                            {param.type === 'block' && (
-                              <a
-                                style={{ color: Colors.AptosNeon }}
-                                target="_blank"
-                                href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
-                              >
-                                {param.value}
-                              </a>
-                            )}
-                            {param.type === 'hash' && (
-                              <a
-                                style={{ color: Colors.AptosNeon }}
-                                target="_blank"
-                                href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
-                              >
-                                {param.value}
-                              </a>
-                            )}
-                            {param.type === 'string' && param.value}
-                            {param.type === 'coin' && (
-                              <span>
-                                {formatUnits(param.value, param.coin.decimals)}{' '}
-                                {param.coin.symbol}
-                              </span>
-                            )}
+                            {key}
                           </td>
-                        ) : (
-                          <td className="px-1.5 py-1 text-xs border border-white/30">
-                            {addressMatch ? (
-                              <a
-                                // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
-                                href={`https://tracemove.io/search/${param}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium hover:underline"
-                                style={{ color: Colors.AptosNeon }}
-                              >
-                                {shortenedContent}
-                              </a>
-                            ) : (
-                              param
-                            )}
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
+                          {typeof param === 'object' ? (
+                            <td className="px-1.5 py-1 text-xs border border-white/30">
+                              {param.type === 'block' && (
+                                <a
+                                  style={{ color: Colors.AptosNeon }}
+                                  target="_blank"
+                                  href={`https://explorer.aptoslabs.com/block/${param.value}?network=testnet`}
+                                >
+                                  {param.value}
+                                </a>
+                              )}
+                              {param.type === 'hash' && (
+                                <a
+                                  style={{ color: Colors.AptosNeon }}
+                                  target="_blank"
+                                  href={`https://explorer.aptoslabs.com/txn/${param.value}?network=testnet`}
+                                >
+                                  {param.value}
+                                </a>
+                              )}
+                              {param.type === 'string' && param.value}
+                              {param.type === 'coin' && (
+                                <span>
+                                  {formatUnits(
+                                    param.value,
+                                    param.coin.decimals,
+                                  )}{' '}
+                                  {param.coin.symbol}
+                                </span>
+                              )}
+                            </td>
+                          ) : (
+                            <td className="px-1.5 py-1 text-xs border border-white/30">
+                              {addressMatch ? (
+                                <a
+                                  // href={`https://explorer.aptoslabs.com/account/${address}?network=mainnet`}
+                                  href={`https://tracemove.io/search/${param}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-medium hover:underline"
+                                  style={{ color: Colors.AptosNeon }}
+                                >
+                                  {shortenedContent}
+                                </a>
+                              ) : (
+                                param
+                              )}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
 
       {children}
     </Container>
@@ -234,4 +269,10 @@ const BrandName = styled.span`
   line-height: 100%;
   font-weight: 400;
   position: relative;
+`;
+
+const StatusRow = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 `;
