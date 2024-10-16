@@ -2,7 +2,11 @@ import styled from '@emotion/styled';
 
 const LOGOS = [
   { src: '/assets/powered-by-aptos.svg', height: 22 },
-  { src: '/assets/powered-by-aave.svg', height: 18 },
+  {
+    src: '/assets/powered-by-aave.svg',
+    height: 18,
+    tooltip: 'Coming Soon!',
+  },
   { src: '/assets/powered-by-econia.svg', height: 16 },
   { src: '/assets/powered-by-nodit.svg', height: 25 },
   { src: '/assets/powered-by-thala.svg', height: 20 },
@@ -16,7 +20,16 @@ export const PoweredBySection: React.FC = () => {
       <Title>Powered by</Title>
       <LogoList>
         {LOGOS.map((logo) => (
-          <img key={logo.src} src={logo.src} height={logo.height} />
+          <div
+            {...(!logo.tooltip
+              ? undefined
+              : {
+                  className: 'hint--bottom overflow-visible',
+                  'aria-label': logo.tooltip,
+                })}
+          >
+            <img key={logo.src} src={logo.src} height={logo.height} />
+          </div>
         ))}
       </LogoList>
     </Section>

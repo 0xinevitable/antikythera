@@ -1,6 +1,7 @@
 import { Network } from '@aptos-labs/ts-sdk';
 import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
 import { MartianWallet } from '@martianwallet/aptos-wallet-adapter';
+import 'hint.css/hint.css';
 import { AppProps } from 'next/app';
 import React from 'react';
 

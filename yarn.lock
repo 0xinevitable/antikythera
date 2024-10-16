@@ -168,6 +168,7 @@ __metadata:
     framer-motion: "npm:^11.3.28"
     graphql: "npm:^16.9.0"
     graphql-request: "npm:^7.1.0"
+    hint.css: "npm:^3.0.0"
     langchain: "npm:^0.2.11"
     lucide-react: "npm:^0.338.0"
     next: "npm:^14.2.5"
@@ -5197,6 +5198,13 @@ __metadata:
   dependencies:
     "@types/hast": "npm:^3.0.0"
   checksum: 10c0/b898bc9fe27884b272580d15260b6bbdabe239973a147e97fa98c45fa0ffec967a481aaa42291ec34fb56530dc2d484d473d7e2bae79f39c83f3762307edfea8
+  languageName: node
+  linkType: hard
+
+"hint.css@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "hint.css@npm:3.0.0"
+  checksum: 10c0/1b8ee6cd34e3b1d2520b6ebc2d8692d7b7155166ac0f64d7b2818f2bffc547fa321d9a0d9124a4591e1abce33decd127921c2c433c0ca8bf1d66f06d3fca1310
   languageName: node
   linkType: hard
 
