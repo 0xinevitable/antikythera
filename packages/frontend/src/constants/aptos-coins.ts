@@ -251,7 +251,7 @@ export const APTOS_MAINNET_COINS = [
     pancake_symbol: 'stAPT',
   },
   {
-    name: 'Ditto Discount Token',
+    name: 'Redeemable Ditto Discount Token',
     symbol: 'DTO',
     official_symbol: 'DTO',
     coingecko_id: 'ditto-discount-token',
@@ -476,7 +476,7 @@ export const APTOS_MAINNET_COINS = [
     pancake_symbol: 'SHRIMP',
   },
   {
-    name: 'APARTMENT',
+    name: 'Apartment',
     symbol: 'APARTMENT',
     official_symbol: 'APARTMENT',
     coingecko_id: '',
@@ -626,7 +626,7 @@ export const APTOS_MAINNET_COINS = [
     pancake_symbol: 'UPT',
   },
   {
-    name: 'APARTMENT',
+    name: 'Apartment',
     symbol: 'APARTMENT',
     official_symbol: 'APARTMENT',
     coingecko_id: '',
@@ -701,7 +701,7 @@ export const APTOS_MAINNET_COINS = [
     pancake_symbol: 'ETERN',
   },
   {
-    name: 'DOOT Skeleton',
+    name: 'Doot Skeleton',
     symbol: 'DOOT',
     official_symbol: 'DOOT',
     coingecko_id: '',
@@ -951,7 +951,7 @@ export const APTOS_MAINNET_COINS = [
     permissioned_listing: false,
   },
   {
-    name: 'Doglaika Coin',
+    name: 'DogLaika Coin',
     symbol: 'DLC',
     official_symbol: 'DLC',
     coingecko_id: 'doglaikacoin',
@@ -1301,7 +1301,7 @@ export const APTOS_MAINNET_COINS = [
     permissioned_listing: false,
   },
   {
-    name: 'Tortuga Staked Aptos',
+    name: 'Tortuga Staked APT',
     symbol: 'tAPT',
     official_symbol: 'tAPT',
     coingecko_id: 'tortuga-staked-aptos',
@@ -1376,7 +1376,7 @@ export const APTOS_MAINNET_COINS = [
     pancake_symbol: 'USDY',
   },
   {
-    name: 'DONK',
+    name: 'Donk',
     symbol: 'DONK',
     official_symbol: 'DONK',
     coingecko_id: 'donk_apt',
