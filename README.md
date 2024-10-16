@@ -16,9 +16,11 @@
 
 - That's where **Function Calling** comes in, which enables LLMs to reliably use external tools and APIs. This is possible by defining "Tools" as structured interfaces that describe available functions, their parameters, and expected outputs. LLMs can then generate appropriate function calls based on user inputs, allowing seamless integration with external systems. The response from these external tools is then passed back to the LLM, which uses this information to generate a final output.
 
-- Our ultimate goal is to enable LLMs to **establish their own unique identities within the blockchain**, achieving Financial Autonomy as AI agents themselves. (This concept was initially explored in junhoyeo/CryptoGPT, 2023)
+- Our ultimate goal is to enable LLMs to **establish their own unique identities within the blockchain**, achieving Financial Autonomy as AI agents themselves. (We initially explored this concept in [junhoyeo/CryptoGPT](https://github.com/junhoyeo/CryptoGPT), 2023)
 
-- We build those tools as a public good, allowing anyone to create agents on or off our platform. For instance, if a user asks the AI to purchase an Aptos Name of Antikythera's Beta Version (Demo only, since it contains production-not-ready PK signing), the AI reasons what to do and execute transactions one by one — it check the balance, swap to get more APT if needed (to pay for the name), verify the name price, and complete the registry process automatically.
+- We build these tools as a public good, allowing anyone to create agents on or off our platform. For example, in Antikythera's Beta Version (Not deployed to website, as it contains production-not-ready PK signing), if a user asks the AI to purchase an Aptos Name, the AI reasons through the process and executes transactions sequentially. It checks the balance, swaps for more APT if necessary (to cover the name cost), verifies the name price, and automatically completes the registry process.
+
+![Beta 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/beta-1.jpg)
 
 ## Querying the blockchain
 
