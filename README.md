@@ -6,9 +6,9 @@
 
 Antikythera is a AI Agent which integrates accurate, real-time onchain data from various protocols and applications on the Aptos Blockchain.
 
-![Antikythera vs Aptos Assistant](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/vs-aptos-assistant.jpg?v=2)
+![Antikythera vs Aptos Assistant](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/vs-aptos-assistant.jpg?v=3)
 
-Aptos previously collaborated with Microsoft to create the Aptos Assistant. However, this assistant faced limitations in practical use due to its inability to access real-time on-chain data beyond its pre-trained knowledge. These limitations became apparent even before considering interactions with actual DApps. For instance, the assistant struggled to answer basic informational questions about the ecosystem, such as identifying the protocol with the highest Total Value Locked (TVL) or listing the available applications.
+[Aptos previously released the Aptos Assistant](https://x.com/Aptos/status/1745869626117079340) earlier this year. However, this assistant faced limitations in practical use due to its inability to access real-time on-chain data beyond its pre-trained knowledge. These limitations became apparent even before considering interactions with actual DApps. For instance, the assistant struggled to answer basic informational questions about the ecosystem, such as identifying the protocol with the highest Total Value Locked (TVL) or listing the available applications.
 
 **In contrast, when Antikythera is asked the same question about top ecosystem projects, it provides a detailed markdown table ranking protocols by TVL, including categories, exact figures, logos, and URLs.**
 
@@ -50,6 +50,9 @@ Antikythera is capable of handling a wide range of queries and requests related 
 
 ## Future Work
 
-- On-demand Tool addition capabilities
-  - In the future, we plan to utilize Move's ability to extract Package ABI through specific RPC methods. This will allow AI to evaluate and utilize new packages on-the-fly by analyzing the Aptos Move Code. We've already implemented this approach with ThalaSwap, inspired by Thala's API SDK.
-- We aspire to create a universal client/frontend similar to Instadapp or DeFiLlama by combining AI agents with wallet connections. Our goal is to develop a decentralized frontend aggregator, providing a more user-friendly experience for newcomers to the ecosystem.
+- On-demand Tool Addition Capabilities
+
+  - In the future, we plan to leverage Move's capability to extract package ABI through RPC (`getAccountModule`, equivalent to `sui_getNormalizedMoveModulesByPackage` in Sui). This will enable AI to evaluate and utilize new packages in real-time by analyzing Aptos Move Code. We've already tested this approach with ThalaSwap (butlater replaced by KanaLabs's DEX aggregator integration). This method is also inspired by [ThalaLabs/surf](https://github.com/ThalaLabs/surf).
+
+- Universal Client/Frontend Development
+  - We aim to create a comprehensive client/frontend similar to Instadapp or DeFiLlama by combining AI agents with wallet connections. Our objective is to develop a decentralized frontend aggregator, offering a more intuitive experience for newcomers to the ecosystem.
