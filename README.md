@@ -6,6 +6,8 @@
 
 - Antikythera is a AI Agent which integrates accurate, real-time onchain data from various protocols and applications on the Aptos Blockchain.
 
+![Antikythera vs Aptos Assistant](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/vs-aptos-assistant.jpg)
+
 ![Cover 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/cover-2.png)
 
 - Our AI bot will identify the best prices, arbitrage opportunities, yield opportunities, and current swap routes. It can even execute actions on behalf of users.
