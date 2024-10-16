@@ -46,7 +46,7 @@ Antikythera is capable of handling a wide range of queries and requests related 
 ![Echelon 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-1.jpg?v=2)
 ![Echelon 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-2.jpg?v=2)
 
-> Markets in Echelon (base asset, borrow/supply APRs, Tracked Price)
+> Markets in Echelon (base asset, borrow/supply APRs, tracked price, .etc)
 
 ## Future Work
 
