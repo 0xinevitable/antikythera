@@ -1,4 +1,5 @@
 // https://github.com/hippospace/aptos-coin-list/blob/main/typescript/src/defaultList.mainnet.json
+// + Nodit
 export const APTOS_MAINNET_COINS = [
   {
     name: 'Aptos Coin',
