@@ -10,7 +10,7 @@ Antikythera is a AI Agent which integrates accurate, real-time onchain data from
 
 [Aptos previously released the Aptos Assistant](https://x.com/Aptos/status/1745869626117079340) earlier this year. However, this assistant faced limitations in practical use due to its inability to access real-time on-chain data beyond its pre-trained knowledge. These limitations became apparent even before considering interactions with actual DApps. For instance, the assistant struggled to answer basic informational questions about the ecosystem, such as identifying the protocol with the highest Total Value Locked (TVL) or listing the available applications.
 
-**In contrast, when Antikythera is asked the same question about top ecosystem projects, it provides a detailed markdown table ranking protocols by TVL, including categories, exact figures, logos, and URLs.**
+**In contrast, when Antikythera is asked the same question about top ecosystem projects, it provides a detailed markdown table ranking protocols by exact-figured TVL, including categories, logos, and URLs.**
 
 ![Cover 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/cover-2.png)
 
