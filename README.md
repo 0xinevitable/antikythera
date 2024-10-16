@@ -51,6 +51,7 @@ Antikythera is capable of handling a wide range of queries and requests related 
 ## Future Work
 
 - Roll out execution mode with safer key management or/and browser wallet mode
+- Aave integation after mainnet
 
 - On-demand tool generation
 
