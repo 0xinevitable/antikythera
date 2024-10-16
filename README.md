@@ -18,11 +18,13 @@
 
 - Our ultimate goal is to enable LLMs to **establish their own unique identities within the blockchain**, achieving Financial Autonomy as AI agents themselves. (We initially explored this concept in [junhoyeo/CryptoGPT](https://github.com/junhoyeo/CryptoGPT), 2023)
 
-- We build these tools as a public good, allowing anyone to create agents on or off our platform. For example, in Antikythera's Beta Version (Not deployed to website, as it contains production-not-ready PK signing), if a user asks the AI to purchase an Aptos Name, the AI reasons through the process and executes transactions sequentially. It checks the balance, swaps for more APT if necessary (to cover the name cost), verifies the name price, and automatically completes the registry process.
+- We build these tools as a public good, allowing anyone to create agents on or off our platform. For example, in Antikythera's Beta Version (Not deployed to website, as it contains production-not-ready PK signing), **if a user asks the AI to purchase an Aptos Name, the AI reasons through the process and executes transactions sequentially.** It checks the balance, swaps for more APT if necessary (to cover the name cost), verifies the name price, and automatically completes the registry process.
 
 ![Beta 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/beta-1.jpg)
 
 ## Querying the blockchain
+
+![](https://www.youtube.com/watch?v=v8GP_REJM4w)
 
 - Integration with DeFiLlama for chain TVL and protocol/yield oppertunity data on Aptos
 - Token information using Hippo Labs & Nodit-corrected data, including bridged tokens and their diversification benefits

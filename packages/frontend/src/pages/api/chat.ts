@@ -10,7 +10,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { Message } from '@/home/types';
-import { getCoinTool, searchCoinTool } from '@/tools/coins';
+import { getBalanceTool, getCoinTool, searchCoinTool } from '@/tools/coins';
 import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
 import { listEchelonMarketsTool } from '@/tools/echelon';
 import { kanaSwapQuoteTool } from '@/tools/kanaswap';
@@ -26,6 +26,7 @@ const tools: ExtendedTool[] = [
   currentWalletAddressTool,
   searchCoinTool,
   getCoinTool,
+  getBalanceTool,
   // findSwapRouteTool,
   kanaSwapQuoteTool,
   // thalaSwapABITool,
@@ -40,6 +41,7 @@ const toolsByName = {
   currentWalletAddress: currentWalletAddressTool,
   searchCoin: searchCoinTool,
   getCoin: getCoinTool,
+  getBalance: getBalanceTool,
   // findSwapRoute: findSwapRouteTool,
   kanaSwapQuote: kanaSwapQuoteTool,
   chainTVL: chainTVLTool,
