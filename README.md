@@ -29,10 +29,17 @@
 ![](https://www.youtube.com/watch?v=v8GP_REJM4w)
 
 - Integration with DeFiLlama for chain TVL and protocol/yield oppertunity data on Aptos
+
+![Query USDC Instances](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/usdc-instances.png)
+
 - Token information using Hippo Labs & Nodit-corrected data, including bridged tokens and their diversification benefits
 - Token portfolio of a address
-- ThalaSwap pool information
-- EchelonMarkets pool yields
+
+![Echelon 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-1.jpg)
+![Echelon 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-2.jpg)
+
+- Markets in Echelon
+
 - Kana Labs DEX aggregator integration for optimal pricing and routes
 
 ## Future Work
