@@ -4,13 +4,17 @@
 
 ![Cover 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/cover-1.png)
 
-- Antikythera is a AI Agent which integrates accurate, real-time onchain data from various protocols and applications on the Aptos Blockchain.
+Antikythera is a AI Agent which integrates accurate, real-time onchain data from various protocols and applications on the Aptos Blockchain.
 
-![Antikythera vs Aptos Assistant](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/vs-aptos-assistant.jpg)
+![Antikythera vs Aptos Assistant](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/vs-aptos-assistant.jpg?v=2)
+
+Aptos previously collaborated with Microsoft to create the Aptos Assistant. However, this assistant faced limitations in practical use due to its inability to access real-time on-chain data beyond its pre-trained knowledge. These limitations became apparent even before considering interactions with actual DApps. For instance, the assistant struggled to answer basic informational questions about the ecosystem, such as identifying the protocol with the highest Total Value Locked (TVL) or listing the available applications.
+
+**In contrast, when Antikythera is asked the same question about top ecosystem projects, it provides a detailed markdown table ranking protocols by TVL, including categories, exact figures, logos, and URLs.**
 
 ![Cover 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/cover-2.png)
 
-- Our AI bot will identify the best prices, arbitrage opportunities, yield opportunities, and current swap routes. It can even execute actions on behalf of users.
+Antikythera is capable of handling a wide range of queries and requests related to the Aptos blockchain. It can identify the best prices, arbitrage opportunities, yield opportunities, and current swap routes across various Aptos protocols. It can even execute actions on behalf of users.
 
 ## On-chain AI Agents
 
@@ -22,25 +26,27 @@
 
 - We build these tools as a public good, allowing anyone to create agents on or off our platform. For example, in Antikythera's Beta Version (Not deployed to website, as it contains production-not-ready PK signing), **if a user asks the AI to purchase an Aptos Name, the AI reasons through the process and executes transactions sequentially.** It checks the balance, swaps for more APT if necessary (to cover the name cost), verifies the name price, and automatically completes the registry process.
 
-![Beta 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/beta-1.jpg)
+![Beta 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/beta-1.jpg?v=2)
 
 ## Querying the blockchain
 
 ![](https://www.youtube.com/watch?v=v8GP_REJM4w)
 
-- Integration with DeFiLlama for chain TVL and protocol/yield oppertunity data on Aptos
+> - Kana Labs DEX aggregator integration for optimal pricing and swap routes.
+> - Integration with DeFiLlama for chain TVL and protocol/yield oppertunity data on Aptos
 
 ![Query USDC Instances](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/usdc-instances.png)
 
-- Token information using Hippo Labs & Nodit-corrected data, including bridged tokens and their diversification benefits
-- Token portfolio of a address
+> Token information using Hippo Labs (data corrected/reviewed with Nodit's Indexer API), including bridged tokens and their diversification benefits
 
-![Echelon 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-1.jpg)
-![Echelon 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-2.jpg)
+![Nodit 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/nodit-1.jpg)
 
-- Markets in Echelon
+> Token balances/portfolio of given address
 
-- Kana Labs DEX aggregator integration for optimal pricing and routes
+![Echelon 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-1.jpg?v=2)
+![Echelon 2](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/echelon-2.jpg?v=2)
+
+> Markets in Echelon (base asset, borrow/supply APRs, Tracked Price)
 
 ## Future Work
 

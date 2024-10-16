@@ -25,6 +25,7 @@ const brandByToolName = (name: string) => {
       return Brands.ThalaSwap;
     case 'searchCoin':
     case 'getCoin':
+    case 'getBalance':
       return Brands.Nodit;
     default:
       return Brands.Aptos;
