@@ -50,9 +50,11 @@ Antikythera is capable of handling a wide range of queries and requests related 
 
 ## Future Work
 
-- On-demand Tool Addition Capabilities
+- Roll out execution mode with safer key management or/and browser wallet mode
+
+- On-demand tool generation
 
   - In the future, we plan to leverage Move's capability to extract package ABI through RPC (`getAccountModule`, equivalent to `sui_getNormalizedMoveModulesByPackage` in Sui). This will enable AI to evaluate and utilize new packages in real-time by analyzing Aptos Move Code. We've already tested this approach with ThalaSwap (butlater replaced by KanaLabs's DEX aggregator integration). This method is also inspired by [ThalaLabs/surf](https://github.com/ThalaLabs/surf).
 
-- Universal Client/Frontend Development
+- Universal client
   - We aim to create a comprehensive client/frontend similar to Instadapp or DeFiLlama by combining AI agents with wallet connections. Our objective is to develop a decentralized frontend aggregator, offering a more intuitive experience for newcomers to the ecosystem.
