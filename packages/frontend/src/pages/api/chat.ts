@@ -79,8 +79,9 @@ export default async function handler(
       temperature: 0.2,
       topP: 0.1,
       streaming: true,
-      apiKey:
-        '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',
+
+      // Previous hardcoded API key has been revoked, no worries
+      apiKey: process.env.OPENAI_API_KEY,
     });
     const llmWithTools = llm.bind({ tools });
 
