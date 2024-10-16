@@ -1,23 +1,9 @@
 import axios from 'axios';
 
 interface CoinBalance {
-  owner_address: string;
   amount: number;
-  storage_id: string;
-  last_transaction_version: number;
-  last_transaction_timestamp: string;
-  is_frozen: boolean;
   metadata: {
     asset_type: string;
-    creator_address: string;
-    decimals: number;
-    icon_uri: string | null;
-    name: string;
-    project_uri: string | null;
-    symbol: string;
-    token_standard: string;
-    maximum_v2: number | null;
-    supply_v2: number | null;
   };
 }
 
@@ -41,6 +27,11 @@ async function fetchCoinBalances(
         where: {
           owner_address: {
             _eq: $owner_address
+          },
+          metadata: {
+            asset_type: {
+              _is_null: false
+            }
           }
         }
       ) {
