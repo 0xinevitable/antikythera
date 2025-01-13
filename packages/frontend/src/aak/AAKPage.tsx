@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import aakCoverImage from '@/assets/aak.jpg';
 import { Tape } from '@/components/Tape';
 import { Button } from '@/components/ui/button';
+import { NavigationBar } from '@/home/components/NavigationBar';
 
 import { AAKLogo as _AAKLogo } from './components/AAKLogo';
 import { BuiltAndPoweredBySection } from './components/BuiltAndPoweredBySection';
@@ -15,8 +16,11 @@ const AAKPage: NextPage = () => {
 
   return (
     <Wrapper>
-      {/* navbar bg should be white */}
-      {/* <NavigationBar onClickLogo={() => router.push('/')} /> */}
+      <NavigationBar
+        variant="light"
+        showWalletSelector={false}
+        onClickLogo={() => router.push('/')}
+      />
 
       <div className="flex flex-col items-center w-screen overflow-hidden">
         <StyledTape variant="light" />
@@ -51,7 +55,7 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 const StyledTape = styled(Tape)`
-  margin-top: 40px;
+  margin-top: 60px;
 `;
 
 const AAKCoverImage = styled(Image)`

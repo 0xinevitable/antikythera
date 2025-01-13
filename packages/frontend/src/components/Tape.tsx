@@ -1,9 +1,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-type VariantProps = {
-  variant: 'dark' | 'light';
-};
+import { VariantProps } from '@/constants/types';
 
 type TapeProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
 

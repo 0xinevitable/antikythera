@@ -1,39 +1,53 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import Link from 'next/link';
 
 import { BrandLogo } from '@/components/BrandLogo';
 import { WalletSelector } from '@/components/WalletSelector';
+import { VariantProps } from '@/constants/types';
+import { cn } from '@/utils/cn';
 
-type NavigationBarProps = {
+type NavigationBarProps = VariantProps & {
+  showWalletSelector?: boolean;
   onClickLogo: () => void;
 };
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({
+  variant = 'dark',
+  showWalletSelector = true,
   onClickLogo,
 }) => {
   return (
-    <Container>
+    <Container variant={variant}>
       <div className="flex items-center mr-auto">
         <div
-          className="flex items-center gap-[10px] cursor-pointer"
+          className={cn(
+            'flex items-center gap-[10px] cursor-pointer',
+            variant === 'light' ? 'text-black' : 'text-white',
+          )}
           onClick={onClickLogo}
         >
-          <BrandLogo className="text-white" />
+          <BrandLogo />
           <BrandName>Antikythera</BrandName>
         </div>
 
         {/* FIXME: */}
-        <nav className="mt-1 ml-5 text-sm text-white">
+        <nav
+          className={cn(
+            'mt-1 ml-5 text-sm',
+            variant === 'light' ? 'text-black' : 'text-white',
+          )}
+        >
           <Link href="/">About</Link>
         </nav>
       </div>
 
-      <WalletSelector />
+      {showWalletSelector && <WalletSelector />}
     </Container>
   );
 };
 
-const Container = styled.div`
+const Container = styled.div<VariantProps>`
   position: fixed;
   top: 0;
   left: 0;
@@ -41,16 +55,23 @@ const Container = styled.div`
   z-index: 50;
 
   width: 100%;
-  height: 64px;
+  height: 60px;
   padding: 0px 20px;
 
   display: flex;
   align-items: center;
 
-  background: linear-gradient(180deg, #0b0b0b 20%, rgba(11, 11, 11, 0) 100%);
+  ${({ variant }) =>
+    variant === 'dark' &&
+    css`
+      background: linear-gradient(
+        180deg,
+        #0b0b0b 20%,
+        rgba(11, 11, 11, 0) 100%
+      );
+    `};
 `;
 const BrandName = styled.span`
-  color: #fff;
   font-size: 20px;
   font-weight: 700;
   line-height: 100%; /* 20px */
