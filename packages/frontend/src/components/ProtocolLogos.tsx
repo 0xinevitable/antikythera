@@ -1,5 +1,5 @@
 // React SVG Component
-type RSC = React.FC<React.SVGProps<SVGSVGElement>>;
+export type RSC = React.FC<React.SVGProps<SVGSVGElement>>;
 
 export const PoweredByAave: RSC = (props) => (
   <svg

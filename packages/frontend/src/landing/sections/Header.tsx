@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { AntikytheraLogo as _AntikytheraLogo } from '@/components/AntikytheraLogo';
 import { Reveal } from '@/components/Reveal';
 import { Button } from '@/components/ui/button';
 import { float } from '@/styles/motion';
@@ -22,12 +23,7 @@ export const Header: React.FC = () => {
         </IllustWrapper>
         <Gradient />
         <AntikytheraLogoContainer>
-          <AntikytheraLogo
-            src="/assets/typo-antikythera.svg"
-            alt="Antikythera"
-            width={438}
-            height={94}
-          />
+          <AntikytheraLogo width={438} height={94} />
           <h1 className="sr-only">Antikythera</h1>
 
           <div className="absolute min-w-[438px]">
@@ -133,10 +129,11 @@ const AntikytheraLogoContainer = styled.div`
   left: 50%;
   right: 0;
 `;
-const AntikytheraLogo = styled(Image)`
+const AntikytheraLogo = styled(_AntikytheraLogo)`
   width: 438px;
   height: 94px;
   display: flex;
+  color: white;
 `;
 
 const SVGImage = styled(Image)``;

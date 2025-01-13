@@ -8,5 +8,6 @@
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "svg.preview.background": "dark-transparent"
 }
