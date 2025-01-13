@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import aakImage from '@/assets/aak.jpg';
+import { Tape } from '@/components/Tape';
 import { Button } from '@/components/ui/button';
 
 import { AAKLogo } from './components/AAKLogo';
@@ -15,6 +16,8 @@ const AAKPage: NextPage = () => {
     <Wrapper>
       {/* navbar bg should be white */}
       {/* <NavigationBar onClickLogo={() => router.push('/')} /> */}
+
+      <Tape variant="light" />
 
       <AAKImage src={aakImage} alt="" />
       <div className="flex flex-col gap-6">
