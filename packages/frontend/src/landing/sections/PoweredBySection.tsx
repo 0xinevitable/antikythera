@@ -1,17 +1,27 @@
 import styled from '@emotion/styled';
 
+import {
+  PoweredByAave,
+  PoweredByAptos,
+  PoweredByEchelon,
+  PoweredByEconia,
+  PoweredByKana,
+  PoweredByNodit,
+  PoweredByThala,
+} from '@/components/ProtocolLogos';
+
 const LOGOS = [
-  { src: '/assets/powered-by-aptos.svg', height: 22 },
+  { logo: <PoweredByAptos height={22} />, name: 'aptos' },
   {
-    src: '/assets/powered-by-aave.svg',
-    height: 18,
+    logo: <PoweredByAave height={18} />,
+    name: 'aave',
     tooltip: 'Coming Soon!',
   },
-  { src: '/assets/powered-by-econia.svg', height: 16 },
-  { src: '/assets/powered-by-nodit.svg', height: 25 },
-  { src: '/assets/powered-by-thala.svg', height: 20 },
-  { src: '/assets/powered-by-kana.svg', height: 24 },
-  { src: '/assets/powered-by-echelon.svg', height: 41 },
+  { logo: <PoweredByEconia height={16} />, name: 'econia' },
+  { logo: <PoweredByNodit height={25} />, name: 'nodit' },
+  { logo: <PoweredByThala height={20} />, name: 'thala' },
+  { logo: <PoweredByKana height={24} />, name: 'kana' },
+  { logo: <PoweredByEchelon height={41} />, name: 'echelon' },
 ];
 
 export const PoweredBySection: React.FC = () => {
@@ -19,16 +29,17 @@ export const PoweredBySection: React.FC = () => {
     <Section>
       <Title>Powered by</Title>
       <LogoList>
-        {LOGOS.map((logo) => (
+        {LOGOS.map((protocol) => (
           <div
-            {...(!logo.tooltip
+            key={protocol.name}
+            {...(!protocol.tooltip
               ? undefined
               : {
                   className: 'hint--bottom overflow-visible',
-                  'aria-label': logo.tooltip,
+                  'aria-label': protocol.tooltip,
                 })}
           >
-            <img key={logo.src} src={logo.src} height={logo.height} />
+            {protocol.logo}
           </div>
         ))}
       </LogoList>
