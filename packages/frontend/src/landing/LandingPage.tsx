@@ -15,7 +15,7 @@ const LandingPage: NextPage = () => {
     <Wrapper>
       <Container>
         <div className="flex flex-col items-center w-screen overflow-hidden">
-          <Tape variant="dark" />
+          <StyledTape variant="dark" />
 
           <Reveal>
             <Header />
@@ -57,4 +57,8 @@ const Container = styled.div`
   align-items: center;
 
   gap: 20px;
+`;
+const StyledTape = styled(Tape)`
+  margin-top: 40px;
+  margin-bottom: -40px;
 `;

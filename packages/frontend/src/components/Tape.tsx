@@ -5,8 +5,10 @@ type VariantProps = {
   variant: 'dark' | 'light';
 };
 
-export const Tape: React.FC<VariantProps> = ({ variant }) => (
-  <Container className="w-fit" variant={variant}>
+type TapeProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
+
+export const Tape: React.FC<TapeProps> = ({ variant, ...props }) => (
+  <Container className="w-fit" variant={variant} {...props}>
     <Typography />
     <AptosSymbol />
     <Typography />
@@ -19,9 +21,6 @@ export const Tape: React.FC<VariantProps> = ({ variant }) => (
 );
 
 const Container = styled.div<VariantProps>`
-  margin-top: 40px;
-  margin-bottom: -40px;
-
   display: flex;
   align-items: center;
   gap: 40px;

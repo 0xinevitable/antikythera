@@ -17,12 +17,13 @@ const AAKPage: NextPage = () => {
       {/* navbar bg should be white */}
       {/* <NavigationBar onClickLogo={() => router.push('/')} /> */}
 
-      <Tape variant="light" />
-
-      <AAKImage src={aakImage} alt="" />
-      <div className="flex flex-col gap-6">
-        <AAKLogo />
-        <Button className="w-fit text-base font-bold">Coming Soon</Button>
+      <div className="flex flex-col items-center w-screen overflow-hidden">
+        <StyledTape variant="light" />
+        <AAKImage src={aakImage} alt="" />
+        <div className="flex flex-col gap-6">
+          <AAKLogo />
+          <Button className="w-fit text-base font-bold">Coming Soon</Button>
+        </div>
       </div>
 
       <style jsx global>{`
@@ -43,16 +44,15 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-const Sidebar = styled.nav`
-  width: 280px;
-  background-color: black;
-  border-right: 1px solid rgba(132, 117, 117, 0.2);
+const StyledTape = styled(Tape)`
+  margin-top: 40px;
 `;
 
 const AAKImage = styled(Image)`
   width: 772px;
   height: 434px;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center bottom;
 `;
 
 const Container = styled.div`
