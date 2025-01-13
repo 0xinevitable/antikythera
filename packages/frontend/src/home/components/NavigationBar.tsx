@@ -34,11 +34,12 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
         {/* FIXME: */}
         <nav
           className={cn(
-            'mt-1 ml-5 text-sm',
+            'mt-1 ml-5 text-sm font-medium gap-5 flex items-center opacity-65',
             variant === 'light' ? 'text-black' : 'text-white',
           )}
         >
           <Link href="/">About</Link>
+          <Link href="/aak">Aptos Agent Kit</Link>
         </nav>
       </div>
 
