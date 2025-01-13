@@ -3,12 +3,11 @@ import { NextPage } from 'next';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import aakImage from '@/assets/aak.jpg';
+import aakCoverImage from '@/assets/aak.jpg';
 import { Tape } from '@/components/Tape';
 import { Button } from '@/components/ui/button';
-import { PoweredBySection } from '@/landing/sections/PoweredBySection';
 
-import { AAKLogo } from './components/AAKLogo';
+import { AAKLogo as _AAKLogo } from './components/AAKLogo';
 import { BuiltAndPoweredBySection } from './components/BuiltAndPoweredBySection';
 
 const AAKPage: NextPage = () => {
@@ -21,13 +20,13 @@ const AAKPage: NextPage = () => {
 
       <div className="flex flex-col items-center w-screen overflow-hidden">
         <StyledTape variant="light" />
-        <AAKImage src={aakImage} alt="" />
+        <AAKCoverImage src={aakCoverImage} alt="" />
 
         <HeaderContent>
-          <div className="flex flex-col gap-6">
+          <AAKLogoContainer>
             <AAKLogo />
             <Button className="w-fit text-base font-bold">Coming Soon</Button>
-          </div>
+          </AAKLogoContainer>
 
           <BuiltAndPoweredBySection />
         </HeaderContent>
@@ -55,17 +54,41 @@ const StyledTape = styled(Tape)`
   margin-top: 40px;
 `;
 
-const AAKImage = styled(Image)`
+const AAKCoverImage = styled(Image)`
   width: 772px;
   height: 434px;
   object-fit: cover;
   object-position: center bottom;
 `;
 
+const AAKLogo = styled(_AAKLogo)`
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+`;
+const AAKLogoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
 const HeaderContent = styled.div`
   margin-top: -20px;
+  padding: 0 20px;
+
   width: 100%;
   max-width: 1040px;
+
   display: flex;
   justify-content: space-between;
+  gap: 28px;
+
+  @media screen and (max-width: 990px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+
+    & > ${AAKLogoContainer} {
+      align-items: center;
+    }
+  }
 `;

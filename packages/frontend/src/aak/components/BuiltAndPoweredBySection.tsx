@@ -57,10 +57,9 @@ export const BuiltAndPoweredBySection: React.FC = () => {
 };
 
 const Container = styled.div`
-  padding-top: 40px;
-
   display: flex;
   flex-direction: column;
+  padding-bottom: 60px;
 `;
 
 const Divider = styled.div`
@@ -93,7 +92,7 @@ const Section = styled.section`
 const Title = styled.span`
   color: #7f7f7f;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 94%; /* 15.04px */
 `;
 
