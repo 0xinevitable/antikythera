@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { AntikytheraLogo as _AntikytheraLogo } from '@/components/AntikytheraLogo';
@@ -86,7 +85,7 @@ const Section = styled.section`
 
     position: absolute;
     top: 0;
-    left: 300px;
+    right: 100px;
   }
 `;
 const Title = styled.span`
