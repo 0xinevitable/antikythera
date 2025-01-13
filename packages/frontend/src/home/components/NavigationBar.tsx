@@ -68,14 +68,18 @@ const Container = styled.div<VariantProps>`
   align-items: center;
 
   ${({ variant }) =>
-    variant === 'dark' &&
-    css`
-      background: linear-gradient(
-        180deg,
-        #0b0b0b 20%,
-        rgba(11, 11, 11, 0) 100%
-      );
-    `};
+    variant === 'dark'
+      ? css`
+          background: linear-gradient(
+            180deg,
+            #0b0b0b 20%,
+            rgba(11, 11, 11, 0) 100%
+          );
+        `
+      : css`
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(8px);
+        `};
 `;
 const BrandName = styled.span`
   font-size: 20px;
