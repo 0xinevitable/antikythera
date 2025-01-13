@@ -89,4 +89,6 @@ const LogoList = styled.div`
   justify-content: center;
   align-items: center;
   align-content: center;
+
+  color: #50e3c2;
 `;
