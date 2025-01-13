@@ -9,36 +9,41 @@ import { cn } from '@/utils/cn';
 
 type NavigationBarProps = VariantProps & {
   showWalletSelector?: boolean;
-  onClickLogo: () => void;
+  onClickHome?: () => void;
 };
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({
   variant = 'dark',
   showWalletSelector = true,
-  onClickLogo,
+  onClickHome,
 }) => {
   return (
     <Container variant={variant}>
       <div className="flex items-center mr-auto">
-        <div
-          className={cn(
-            'flex items-center gap-[10px] cursor-pointer',
-            variant === 'light' ? 'text-black' : 'text-white',
-          )}
-          onClick={onClickLogo}
-        >
-          <BrandLogo />
-          <BrandName>Antikythera</BrandName>
-        </div>
+        <Link href="/">
+          <div
+            className={cn(
+              'flex items-center gap-[10px] cursor-pointer',
+              variant === 'light' ? 'text-black' : 'text-white',
+            )}
+          >
+            <BrandLogo />
+            <BrandName>Antikythera</BrandName>
+          </div>
+        </Link>
 
         {/* FIXME: */}
         <nav
           className={cn(
-            'mt-1 ml-5 text-sm font-medium gap-5 flex items-center opacity-65',
+            'mt-1 ml-5 text-sm font-medium tracking-tight gap-5 flex items-center opacity-65',
             variant === 'light' ? 'text-black' : 'text-white',
           )}
         >
-          <Link href="/">About</Link>
+          {!onClickHome ? (
+            <Link href="/home">Home</Link>
+          ) : (
+            <button onClick={onClickHome}>Home</button>
+          )}
           <Link href="/aak">Aptos Agent Kit</Link>
         </nav>
       </div>

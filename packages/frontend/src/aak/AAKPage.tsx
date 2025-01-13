@@ -12,15 +12,9 @@ import { AAKLogo as _AAKLogo } from './components/AAKLogo';
 import { BuiltAndPoweredBySection } from './components/BuiltAndPoweredBySection';
 
 const AAKPage: NextPage = () => {
-  const router = useRouter();
-
   return (
     <Wrapper>
-      <NavigationBar
-        variant="light"
-        showWalletSelector={false}
-        onClickLogo={() => router.push('/')}
-      />
+      <NavigationBar variant="light" showWalletSelector={false} />
 
       <div className="flex flex-col items-center w-screen overflow-hidden">
         <StyledTape variant="light" />

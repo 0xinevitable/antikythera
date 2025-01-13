@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
 
 import { Reveal } from '@/components/Reveal';
 import { Tape } from '@/components/Tape';
@@ -13,14 +12,9 @@ import { Header } from './sections/Header';
 import { PoweredBySection } from './sections/PoweredBySection';
 
 const LandingPage: NextPage = () => {
-  const router = useRouter();
-
   return (
     <Wrapper>
-      <NavigationBar
-        showWalletSelector={false}
-        onClickLogo={() => router.push('/')}
-      />
+      <NavigationBar showWalletSelector={false} />
 
       <Container>
         <div className="flex flex-col items-center w-screen overflow-hidden">

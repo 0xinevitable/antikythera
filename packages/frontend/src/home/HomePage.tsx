@@ -193,7 +193,7 @@ const HomePage: NextPage = () => {
   return (
     <Wrapper>
       <NavigationBar
-        onClickLogo={() => {
+        onClickHome={() => {
           setMessages([]);
         }}
       />
