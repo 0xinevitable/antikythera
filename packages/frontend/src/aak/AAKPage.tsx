@@ -6,8 +6,10 @@ import { useRouter } from 'next/router';
 import aakImage from '@/assets/aak.jpg';
 import { Tape } from '@/components/Tape';
 import { Button } from '@/components/ui/button';
+import { PoweredBySection } from '@/landing/sections/PoweredBySection';
 
 import { AAKLogo } from './components/AAKLogo';
+import { BuiltAndPoweredBySection } from './components/BuiltAndPoweredBySection';
 
 const AAKPage: NextPage = () => {
   const router = useRouter();
@@ -20,10 +22,15 @@ const AAKPage: NextPage = () => {
       <div className="flex flex-col items-center w-screen overflow-hidden">
         <StyledTape variant="light" />
         <AAKImage src={aakImage} alt="" />
-        <div className="flex flex-col gap-6">
-          <AAKLogo />
-          <Button className="w-fit text-base font-bold">Coming Soon</Button>
-        </div>
+
+        <HeaderContent>
+          <div className="flex flex-col gap-6">
+            <AAKLogo />
+            <Button className="w-fit text-base font-bold">Coming Soon</Button>
+          </div>
+
+          <BuiltAndPoweredBySection />
+        </HeaderContent>
       </div>
 
       <style jsx global>{`
@@ -55,31 +62,10 @@ const AAKImage = styled(Image)`
   object-position: center bottom;
 `;
 
-const Container = styled.div`
-  max-width: 800px;
+const HeaderContent = styled.div`
+  margin-top: -20px;
   width: 100%;
-  min-height: 100vh;
-  margin: 0 auto;
-  padding: 60px 12px 64px;
-
+  max-width: 1040px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 24px;
-`;
-
-const Main = styled.main`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-`;
-
-const MessageList = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
 `;
