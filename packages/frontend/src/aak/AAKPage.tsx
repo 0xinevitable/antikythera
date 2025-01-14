@@ -7,6 +7,7 @@ import aakCoverImage from '@/assets/aak.jpg';
 import { Tape } from '@/components/Tape';
 import { Button } from '@/components/ui/button';
 import { NavigationBar } from '@/home/components/NavigationBar';
+import { Footer } from '@/landing/sections/Footer';
 
 import { AAKLogo as _AAKLogo } from './components/AAKLogo';
 import { BuiltAndPoweredBySection } from './components/BuiltAndPoweredBySection';
@@ -41,6 +42,8 @@ const AAKPage: NextPage = () => {
           color: #000;
         }
       `}</style>
+
+      <Footer mode="light" containerMaxWidth={1040} />
     </Wrapper>
   );
 };
@@ -48,6 +51,8 @@ const AAKPage: NextPage = () => {
 export default AAKPage;
 
 const Wrapper = styled.div`
+  width: 100%;
+
   display: flex;
   flex-direction: column;
   align-items: center;
