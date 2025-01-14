@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { NextPage } from 'next';
 import Image from 'next/image';
 
+import aakDiagramImage from '@/assets/aak-diagram.jpg';
 import aakCoverImage from '@/assets/aak.jpg';
 import { Tape } from '@/components/Tape';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,10 @@ const AAKPage: NextPage = () => {
 
           <BuiltAndPoweredBySection />
         </HeaderContent>
+
+        <DiagramWrapper>
+          <DiagramImage src={aakDiagramImage} alt="" />
+        </DiagramWrapper>
       </div>
 
       <style jsx global>{`
@@ -88,4 +93,19 @@ const HeaderContent = styled.div`
       align-items: center;
     }
   }
+`;
+
+const DiagramWrapper = styled.div`
+  width: 100%;
+  margin: 56px 0 120px;
+  padding: 0 20px;
+
+  display: flex;
+  justify-content: center;
+`;
+const DiagramImage = styled(Image)`
+  width: 100%;
+  max-width: 1040px;
+  height: auto;
+  object-fit: contain;
 `;
