@@ -1,3 +1,10 @@
+import {
+  Account,
+  Aptos,
+  AptosConfig,
+  Ed25519PrivateKey,
+  Network,
+} from '@aptos-labs/ts-sdk';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { tool } from '@langchain/core/tools';
@@ -9,73 +16,124 @@ import {
 } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import * as dotenv from 'dotenv';
+import { formatUnits } from 'viem';
 import { z } from 'zod';
+
+const APTOS_COIN_DECIMALS = 8;
 
 dotenv.config();
 
+// Initialize Aptos client
+const config = new AptosConfig({ network: Network.TESTNET });
+const aptos = new Aptos(config);
+
+// Create account from private key in environment variables
+const defaultAccount = Account.fromPrivateKey({
+  privateKey: new Ed25519PrivateKey(process.env.APTOS_PRIVATE_KEY || ''),
+});
+
 // Define the graph state
-// See here for more info: https://langchain-ai.github.io/langgraphjs/how-tos/define-state/
 const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
-    // `messagesStateReducer` function defines how `messages` state key should be updated
-    // (in this case it appends new messages to the list and overwrites messages with the same ID)
     reducer: messagesStateReducer,
   }),
 });
 
-// Define the tools for the agent to use
-const weatherTool = tool(
-  async ({ query }) => {
-    // This is a placeholder for the actual implementation
-    if (
-      query.toLowerCase().includes('sf') ||
-      query.toLowerCase().includes('san francisco')
-    ) {
-      return "It's 60 degrees and foggy.";
+// Tool to query account balance
+const getBalanceTool = tool(
+  async () => {
+    try {
+      const balance = await aptos.getAccountAPTAmount({
+        accountAddress: defaultAccount.accountAddress,
+      });
+      const formattedBalance = formatUnits(
+        BigInt(balance),
+        APTOS_COIN_DECIMALS,
+      );
+      return `Current balance: ${formattedBalance} APT`;
+    } catch (error) {
+      return `Error getting balance: ${error}`;
     }
-    return "It's 90 degrees and sunny.";
   },
   {
-    name: 'weather',
-    description: 'Call to get the current weather for a location.',
+    name: 'get_balance',
+    description: 'Get the APT balance of the wallet',
+    schema: z.object({}),
+  },
+);
+
+// Tool to transfer APT
+const transferTool = tool(
+  async ({ recipient, amount }) => {
+    try {
+      // Build transaction
+      const transaction = await aptos.transaction.build.simple({
+        sender: defaultAccount.accountAddress,
+        data: {
+          function: '0x1::aptos_account::transfer',
+          functionArguments: [recipient, BigInt(amount)],
+        },
+      });
+
+      // Sign and submit transaction
+      const pendingTxn = await aptos.signAndSubmitTransaction({
+        signer: defaultAccount,
+        transaction,
+      });
+
+      // Wait for transaction completion
+      const response = await aptos.waitForTransaction({
+        transactionHash: pendingTxn.hash,
+      });
+
+      if (response.success) {
+        return `Transfer successful! Transaction hash: ${pendingTxn.hash}`;
+      } else {
+        return `Transfer failed. Transaction hash: ${pendingTxn.hash}`;
+      }
+    } catch (error) {
+      return `Error during transfer: ${error}`;
+    }
+  },
+  {
+    name: 'transfer_apt',
+    description: 'Transfer APT to another address',
     schema: z.object({
-      query: z.string().describe('The query to use in your search.'),
+      recipient: z.string().describe('Recipient address starting with 0x'),
+      amount: z.string().describe('Amount of APT to transfer (in octas)'),
     }),
   },
 );
 
-const tools = [weatherTool];
+// Combine all tools
+const tools = [getBalanceTool, transferTool];
 const toolNode = new ToolNode(tools);
 
+// Initialize the model with tools
 const model = new ChatAnthropic({
   model: 'claude-3-5-sonnet-20240620',
   temperature: 0,
 }).bindTools(tools);
 
-// Define the function that determines whether to continue or not
-// We can extract the state typing via `StateAnnotation.State`
+// Define the routing logic
 function shouldContinue(state: typeof StateAnnotation.State) {
   const messages = state.messages;
   const lastMessage = messages[messages.length - 1] as AIMessage;
 
-  // If the LLM makes a tool call, then we route to the "tools" node
   if (lastMessage.tool_calls?.length) {
     return 'tools';
   }
-  // Otherwise, we stop (reply to the user)
   return '__end__';
 }
 
-// Define the function that calls the model
+// Define the model calling function
 async function callModel(state: typeof StateAnnotation.State) {
   const messages = state.messages;
   const response = await model.invoke(messages);
-
-  // We return a list, because this will get added to the existing list
   return { messages: [response] };
 }
 
-// Define a new graph
+// Create and configure the graph
 const workflow = new StateGraph(StateAnnotation)
   .addNode('agent', callModel)
   .addNode('tools', toolNode)
@@ -83,22 +141,27 @@ const workflow = new StateGraph(StateAnnotation)
   .addConditionalEdges('agent', shouldContinue)
   .addEdge('tools', 'agent');
 
-// Initialize memory to persist state between graph runs
+// Initialize memory
 const checkpointer = new MemorySaver();
 
+// Main function to run the agent
 const main = async () => {
-  // Finally, we compile it!
-  // This compiles it into a LangChain Runnable.
-  // Note that we're (optionally) passing the memory when compiling the graph
   const app = workflow.compile({ checkpointer });
 
-  // Use the Runnable
+  // Example usage
   const finalState = await app.invoke(
-    { messages: [new HumanMessage('what is the weather in sf')] },
-    { configurable: { thread_id: '42' } },
+    {
+      messages: [new HumanMessage('What is my current APT balance?')],
+    },
+    { configurable: { thread_id: 'aptos-wallet-1' } },
   );
 
-  console.log(finalState.messages[finalState.messages.length - 1].content);
+  // console.log(finalState.messages[finalState.messages.length - 1].content);
+
+  // print all messages
+  finalState.messages.forEach((message) => {
+    console.log(message.content);
+  });
 };
 
 main()
