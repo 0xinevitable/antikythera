@@ -1,5 +1,7 @@
 import {
+  APTOS_COIN,
   Account,
+  AnyRawTransaction,
   Aptos,
   AptosConfig,
   Ed25519PrivateKey,
@@ -16,16 +18,16 @@ import {
 } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import * as dotenv from 'dotenv';
-import { formatUnits } from 'viem';
 import { z } from 'zod';
-
-const APTOS_COIN_DECIMALS = 8;
 
 dotenv.config();
 
-// Initialize Aptos client
-const config = new AptosConfig({ network: Network.TESTNET });
-const aptos = new Aptos(config);
+// Initialize Aptos client for both mainnet and testnet
+const testnetConfig = new AptosConfig({ network: Network.TESTNET });
+const testnetClient = new Aptos(testnetConfig);
+
+// const mainnetConfig = new AptosConfig({ network: Network.MAINNET });
+// const mainnetClient = new Aptos(mainnetConfig);
 
 // Create account from private key in environment variables
 const defaultAccount = Account.fromPrivateKey({
@@ -39,18 +41,28 @@ const StateAnnotation = Annotation.Root({
   }),
 });
 
-// Tool to query account balance
+// Helper function to handle transaction submission
+async function submitTransaction(transaction: AnyRawTransaction) {
+  const pendingTxn = await testnetClient.signAndSubmitTransaction({
+    signer: defaultAccount,
+    transaction,
+  });
+
+  const response = await testnetClient.waitForTransaction({
+    transactionHash: pendingTxn.hash,
+  });
+
+  return { pendingTxn, response };
+}
+
+// Basic Wallet Tools
 const getBalanceTool = tool(
   async () => {
     try {
-      const balance = await aptos.getAccountAPTAmount({
+      const balance = await testnetClient.getAccountAPTAmount({
         accountAddress: defaultAccount.accountAddress,
       });
-      const formattedBalance = formatUnits(
-        BigInt(balance),
-        APTOS_COIN_DECIMALS,
-      );
-      return `Current balance: ${formattedBalance} APT`;
+      return `Current balance: ${balance.toString()} APT`;
     } catch (error) {
       return `Error getting balance: ${error}`;
     }
@@ -62,12 +74,10 @@ const getBalanceTool = tool(
   },
 );
 
-// Tool to transfer APT
 const transferTool = tool(
   async ({ recipient, amount }) => {
     try {
-      // Build transaction
-      const transaction = await aptos.transaction.build.simple({
+      const transaction = await testnetClient.transaction.build.simple({
         sender: defaultAccount.accountAddress,
         data: {
           function: '0x1::aptos_account::transfer',
@@ -75,16 +85,7 @@ const transferTool = tool(
         },
       });
 
-      // Sign and submit transaction
-      const pendingTxn = await aptos.signAndSubmitTransaction({
-        signer: defaultAccount,
-        transaction,
-      });
-
-      // Wait for transaction completion
-      const response = await aptos.waitForTransaction({
-        transactionHash: pendingTxn.hash,
-      });
+      const { pendingTxn, response } = await submitTransaction(transaction);
 
       if (response.success) {
         return `Transfer successful! Transaction hash: ${pendingTxn.hash}`;
@@ -105,8 +106,127 @@ const transferTool = tool(
   },
 );
 
+// ANS Tools
+const registerNameTool = tool(
+  async ({ name, expirationType, toAddress }) => {
+    if (expirationType !== 'domain') {
+      return 'Only domain expiration policy is supported for now';
+    }
+    try {
+      const transaction = await testnetClient.registerName({
+        sender: defaultAccount,
+        name: name,
+        expiration: { policy: expirationType },
+        ...(toAddress && { toAddress }),
+      });
+
+      const { pendingTxn, response } = await submitTransaction(transaction);
+
+      if (response.success) {
+        return `Successfully registered ${name}! Transaction hash: ${pendingTxn.hash}`;
+      } else {
+        return `Failed to register ${name}. Transaction hash: ${pendingTxn.hash}`;
+      }
+    } catch (error) {
+      return `Error registering name: ${error}`;
+    }
+  },
+  {
+    name: 'register_name',
+    description: 'Register a new ANS name (domain or subdomain)',
+    schema: z.object({
+      name: z
+        .string()
+        .describe('Name to register (with or without .apt suffix)'),
+      expirationType: z
+        .enum(['domain', 'subdomain:follow-domain', 'subdomain:independent'])
+        .describe('Expiration policy for the name'),
+      toAddress: z
+        .string()
+        .optional()
+        .describe('Optional address to transfer the name to'),
+    }),
+  },
+);
+
+const getNameInfoTool = tool(
+  async ({ name }) => {
+    try {
+      const nameInfo = await testnetClient.getName({ name });
+      if (!nameInfo) {
+        return `No information found for ${name}`;
+      }
+      return JSON.stringify(nameInfo, null, 2);
+    } catch (error) {
+      return `Error getting name information: ${error}`;
+    }
+  },
+  {
+    name: 'get_name_info',
+    description: 'Get information about an ANS name',
+    schema: z.object({
+      name: z.string().describe('Name to query (with or without .apt suffix)'),
+    }),
+  },
+);
+
+const setPrimaryNameTool = tool(
+  async ({ name }) => {
+    try {
+      const transaction = await testnetClient.setPrimaryName({
+        sender: defaultAccount,
+        name: name,
+      });
+
+      const { pendingTxn, response } = await submitTransaction(transaction);
+
+      if (response.success) {
+        return `Successfully set ${name} as primary name! Transaction hash: ${pendingTxn.hash}`;
+      } else {
+        return `Failed to set primary name. Transaction hash: ${pendingTxn.hash}`;
+      }
+    } catch (error) {
+      return `Error setting primary name: ${error}`;
+    }
+  },
+  {
+    name: 'set_primary_name',
+    description: 'Set a name as the primary name for the account',
+    schema: z.object({
+      name: z.string().describe('Name to set as primary'),
+    }),
+  },
+);
+
+const getAccountNamesTool = tool(
+  async ({ address }) => {
+    try {
+      const names = await testnetClient.getAccountNames({
+        accountAddress: address,
+      });
+      return JSON.stringify(names, null, 2);
+    } catch (error) {
+      return `Error getting account names: ${error}`;
+    }
+  },
+  {
+    name: 'get_account_names',
+    description: 'Get all names owned by an account',
+    schema: z.object({
+      address: z.string().describe('Account address to query'),
+    }),
+  },
+);
+
 // Combine all tools
-const tools = [getBalanceTool, transferTool];
+const tools = [
+  getBalanceTool,
+  transferTool,
+  registerNameTool,
+  getNameInfoTool,
+  setPrimaryNameTool,
+  getAccountNamesTool,
+];
 const toolNode = new ToolNode(tools);
 
 // Initialize the model with tools
@@ -148,20 +268,29 @@ const checkpointer = new MemorySaver();
 const main = async () => {
   const app = workflow.compile({ checkpointer });
 
-  // Example usage
-  const finalState = await app.invoke(
-    {
-      messages: [new HumanMessage('What is my current APT balance?')],
-    },
-    { configurable: { thread_id: 'aptos-wallet-1' } },
-  );
+  // Example interactions with the agent
+  const queries = [
+    // 'What is my current APT balance?',
+    'I want to use a new domain name test3rff123.apt',
+    // 'Set test123.apt as my primary name',
+    // 'Show me all the names owned by my address',
+  ];
 
-  // console.log(finalState.messages[finalState.messages.length - 1].content);
+  for (const query of queries) {
+    const finalState = await app.invoke(
+      {
+        messages: [new HumanMessage(query)],
+      },
+      { configurable: { thread_id: `aptos-wallet-${Date.now()}` } },
+    );
 
-  // print all messages
-  finalState.messages.forEach((message) => {
-    console.log(message.content);
-  });
+    console.log(`Query: ${query}`);
+    console.log(
+      'Response:',
+      finalState.messages[finalState.messages.length - 1].content,
+    );
+    console.log('---');
+  }
 };
 
 main()
