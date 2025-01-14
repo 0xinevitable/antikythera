@@ -26,6 +26,7 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@thalalabs/router-sdk": "^3.2.1",
     "@thalalabs/surf": "^1.7.1",
+    "@vercel/analytics": "^1.4.1",
     "ai": "^3.2.36",
     "aptos": "^1.21.0",
     "axios": "^1.7.7",
