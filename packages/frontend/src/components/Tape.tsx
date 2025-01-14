@@ -1,12 +1,12 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { VariantProps } from '@/constants/types';
+import { ColorModeProps } from '@/constants/types';
 
-type TapeProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
+type TapeProps = ColorModeProps & React.HTMLAttributes<HTMLDivElement>;
 
-export const Tape: React.FC<TapeProps> = ({ variant, ...props }) => (
-  <Container className="w-fit" variant={variant} {...props}>
+export const Tape: React.FC<TapeProps> = ({ mode, ...props }) => (
+  <Container className="w-fit" mode={mode} {...props}>
     <Typography />
     <AptosSymbol />
     <Typography />
@@ -18,13 +18,13 @@ export const Tape: React.FC<TapeProps> = ({ variant, ...props }) => (
   </Container>
 );
 
-const Container = styled.div<VariantProps>`
+const Container = styled.div<ColorModeProps>`
   display: flex;
   align-items: center;
   gap: 40px;
 
-  ${({ variant }) =>
-    variant === 'dark' &&
+  ${({ mode }) =>
+    mode === 'dark' &&
     css`
       border-top: 1px solid #626262;
       border-bottom: 1px solid #626262;
@@ -32,8 +32,8 @@ const Container = styled.div<VariantProps>`
       color: #626262;
     `};
 
-  ${({ variant }) =>
-    variant === 'light' &&
+  ${({ mode }) =>
+    mode === 'light' &&
     css`
       border-top: 1px solid #000;
       border-bottom: 1px solid #000;

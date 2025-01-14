@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 
 import aakCoverImage from '@/assets/aak.jpg';
 import { Tape } from '@/components/Tape';
@@ -14,10 +13,10 @@ import { BuiltAndPoweredBySection } from './components/BuiltAndPoweredBySection'
 const AAKPage: NextPage = () => {
   return (
     <Wrapper>
-      <NavigationBar variant="light" showWalletSelector={false} />
+      <NavigationBar mode="light" showWalletSelector={false} />
 
       <div className="flex flex-col items-center w-screen overflow-hidden">
-        <StyledTape variant="light" />
+        <StyledTape mode="light" />
         <AAKCoverImage src={aakCoverImage} alt="" />
 
         <HeaderContent>

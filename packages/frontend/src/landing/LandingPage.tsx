@@ -18,7 +18,7 @@ const LandingPage: NextPage = () => {
 
       <Container>
         <div className="flex flex-col items-center w-screen overflow-hidden">
-          <StyledTape variant="dark" />
+          <StyledTape mode="dark" />
 
           <Reveal>
             <Header />

@@ -1,3 +1,3 @@
-export type VariantProps = {
-  variant?: 'dark' | 'light';
+export type ColorModeProps = {
+  mode?: 'dark' | 'light';
 };

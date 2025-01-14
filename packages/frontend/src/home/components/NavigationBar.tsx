@@ -4,27 +4,27 @@ import Link from 'next/link';
 
 import { BrandLogo } from '@/components/BrandLogo';
 import { WalletSelector } from '@/components/WalletSelector';
-import { VariantProps } from '@/constants/types';
+import { ColorModeProps } from '@/constants/types';
 import { cn } from '@/utils/cn';
 
-type NavigationBarProps = VariantProps & {
+type NavigationBarProps = ColorModeProps & {
   showWalletSelector?: boolean;
   onClickHome?: () => void;
 };
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({
-  variant = 'dark',
+  mode = 'dark',
   showWalletSelector = true,
   onClickHome,
 }) => {
   return (
-    <Container variant={variant}>
+    <Container mode={mode}>
       <div className="flex items-center mr-auto">
         <Link href="/">
           <div
             className={cn(
               'flex items-center gap-[10px] cursor-pointer',
-              variant === 'light' ? 'text-black' : 'text-white',
+              mode === 'light' ? 'text-black' : 'text-white',
             )}
           >
             <BrandLogo />
@@ -36,7 +36,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
         <nav
           className={cn(
             'mt-1 ml-5 text-sm font-medium tracking-tight gap-5 flex items-center opacity-65',
-            variant === 'light' ? 'text-black' : 'text-white',
+            mode === 'light' ? 'text-black' : 'text-white',
           )}
         >
           {!onClickHome ? (
@@ -53,7 +53,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
   );
 };
 
-const Container = styled.div<VariantProps>`
+const Container = styled.div<ColorModeProps>`
   position: fixed;
   top: 0;
   left: 0;
@@ -67,8 +67,8 @@ const Container = styled.div<VariantProps>`
   display: flex;
   align-items: center;
 
-  ${({ variant }) =>
-    variant === 'dark'
+  ${({ mode: theme }) =>
+    theme === 'dark'
       ? css`
           background: linear-gradient(
             180deg,
