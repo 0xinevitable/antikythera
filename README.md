@@ -1,5 +1,12 @@
 # Antikythera
 
+## The Aptos Agent Kit (AAK)
+
+![AAK (The Aptos Agent Kit) - The Toolkit Powering Antikythera and the Next Wave of Aptos Agents](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/aak-1.png)
+![Diagram for AAK](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/aak-2.png)
+
+Antikythera will start building and using the Aptos Agent Kit (AAK) from 2025
+
 ## TL;DR
 
 ![Cover 1](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/cover-1.png)
