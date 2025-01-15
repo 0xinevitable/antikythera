@@ -3545,6 +3545,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "aak@workspace:packages/aak"
   dependencies:
+    "@antikythera/echelon-sdk": "workspace:^"
     "@aptos-labs/ts-sdk": "npm:^1.26.0"
     "@langchain/anthropic": "npm:0.3.11"
     "@langchain/core": "npm:0.3.30"

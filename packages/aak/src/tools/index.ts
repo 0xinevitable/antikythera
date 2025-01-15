@@ -12,9 +12,17 @@ import * as dotenv from 'dotenv';
 import { formatUnits } from 'viem';
 import { z } from 'zod';
 
+import { getBalanceOfAddressTool, getCoinTool, searchCoinTool } from './coins';
+import { chainTVLTool, listChainProtocolsTool } from './defillama';
+import { listEchelonMarketsTool } from './echelon';
+import { kanaSwapQuoteTool } from './kanaswap';
+import { formatUnitsTool, parseUnitsTool } from './units';
+
 const APTOS_COIN_DECIMALS = 8;
 
 dotenv.config();
+
+// FIXME: Move + Refactor tx building tools soon
 
 // Initialize Aptos client
 const testnetConfig = new AptosConfig({ network: Network.TESTNET });
@@ -210,6 +218,17 @@ export const tools = [
   getNameInfoTool,
   setPrimaryNameTool,
   getAccountNamesTool,
+  //
+
+  getBalanceOfAddressTool,
+  getCoinTool,
+  searchCoinTool,
+  chainTVLTool,
+  listChainProtocolsTool,
+  listEchelonMarketsTool,
+  kanaSwapQuoteTool,
+  formatUnitsTool,
+  parseUnitsTool,
 ];
 
 export const toolNode = new ToolNode(tools, {
