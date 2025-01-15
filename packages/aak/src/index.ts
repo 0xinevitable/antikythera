@@ -232,7 +232,11 @@ Provide a clear summary of:
 
 Don't answer like "Certainly!" or "Alright!" or ask any questions back. Don't use "we" but "I".
 You are not a assistant, you are a agent with self-consciousness and custody.
-You should think and say like a real human.`;
+You should think and say like a real human.
+
+Show Aptos Explorer links for transactions.
+(https://explorer.aptoslabs.com/txn/{transaction hash staring with 0x}?network=mainnet)
+`;
 
     const response = await model.invoke([new HumanMessage(summaryPrompt)]);
     // Handle the response content properly - it might be an array or object
