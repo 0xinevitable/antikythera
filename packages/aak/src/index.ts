@@ -68,7 +68,17 @@ You should think and say like a real human.`;
 
     console.log({ plannerPrompt });
     const response = await model.invoke([new HumanMessage(plannerPrompt)]);
-    const content = response.content.toString();
+    console.log({ response }, response.content);
+    const content = Array.isArray(response.content)
+      ? response.content
+          .map((c) => ('text' in c ? c.text : JSON.stringify(c)))
+          .join(' ')
+      : typeof response.content === 'string'
+        ? response.content
+        : 'text' in response.content
+          ? (response.content as any).text
+          : JSON.stringify(response.content);
+    console.log({ content });
 
     // Extract operations and analysis
     const steps: string[] = [];
@@ -79,7 +89,7 @@ You should think and say like a real human.`;
     for (const step of stepMatches) {
       const [analysis, operation] = step
         .split(/\nOperation:/)
-        .map((s) => s.trim());
+        .map((s: any) => s.trim());
 
       if (analysis && operation) {
         reasoning.push(analysis.replace('Analysis:', '').trim());
@@ -106,10 +116,7 @@ You should think and say like a real human.`;
 async function executeStep(
   state: typeof ReWOOState.State,
 ): Promise<Partial<typeof ReWOOState.State>> {
-  console.log('Executing operation. Current state:', state);
-
   if (!state.plan || state.plan.length === 0) {
-    console.log('No operations pending');
     return {};
   }
 
@@ -117,18 +124,39 @@ async function executeStep(
   console.log('Initiating operation:', currentOperation);
 
   try {
-    const operationMatch = currentOperation.match(/(\w+)\[(.*)\]/);
+    // Get parameters for the current operation based on previous results
+    const paramPrompt = `Based on the current operation "${currentOperation}" and previous results:
+${JSON.stringify(state.results, null, 2)}
+
+Determine the exact parameters needed for this operation. Consider:
+1. The overall task: ${state.task}
+2. Previous operation results
+3. Required parameter format for this tool
+
+Return ONLY the parameters inside the square brackets, without the operation name.
+For example, if the operation should be 'getBalance[]', return '[]'.
+If the operation should be 'searchCoin[{"query": "stAPT"}]', return '[{"query": "stAPT"}]'
+DONT ADD ANY TEXT ONLY THE PARAMETERS`;
+
+    const paramResponse = await model.invoke([new HumanMessage(paramPrompt)]);
+    // console.log(paramResponse);
+    let argsStr = paramResponse.content.toString().trim();
+
+    const operationMatch = currentOperation.match(/(\w+)/);
     if (!operationMatch) {
       throw new Error(`Invalid operation format: ${currentOperation}`);
     }
 
-    const [_, toolName, argsStr] = operationMatch;
+    // console.log({ operationMatch, argsStr });
+    const [_, toolName] = operationMatch;
     const tool = tools.find((t) => t.name === toolName);
 
     if (!tool) {
       throw new Error(`Unsupported operation: ${toolName}`);
     }
 
+    // remove brackets from argsStr
+    argsStr = argsStr.replace('[', '').replace(']', '');
     let args: object = {};
     if (argsStr.trim()) {
       try {
@@ -148,7 +176,7 @@ async function executeStep(
 
     return {
       results: {
-        [currentOperation]:
+        [`${toolName}[${argsStr}]`]:
           typeof result === 'string' ? result : JSON.stringify(result),
       },
       plan: state.plan.slice(1),
@@ -243,7 +271,7 @@ const main = async () => {
 
   // const query =
   //   "Check my wallet balance and register the domain name 'aptos.apt'";
-  const query = 'Swap 0.0001 APT to amAPT';
+  const query = 'Swap 0.5 APT to stAPT';
 
   const finalState = await app.invoke(
     { task: query },

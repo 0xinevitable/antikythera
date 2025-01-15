@@ -17,7 +17,7 @@ import { z } from 'zod';
 import { getBalanceOfAddressTool, getCoinTool, searchCoinTool } from './coins';
 import { chainTVLTool, listChainProtocolsTool } from './defillama';
 import { listEchelonMarketsTool } from './echelon';
-import { kanaSwapQuoteTool } from './kanaswap';
+// import { kanaSwapQuoteTool } from './kanaswap';
 import { formatUnitsTool, parseUnitsTool } from './units';
 
 const APTOS_COIN_DECIMALS = 8;
@@ -223,12 +223,75 @@ const getAccountNamesTool = tool(
   },
 );
 
+export const kanaSwapQuoteTool2 = tool(
+  async ({ inputToken, outputToken, amountIn, slippage }) => {
+    try {
+      const quote = await KanaSwapAggregator.swapQuotes({
+        apiKey: process.env.KANA_API_KEY || '',
+        inputToken: inputToken,
+        outputToken: outputToken,
+        amountIn: amountIn,
+        slippage: slippage,
+        network: NetworkId.aptos,
+        options: {
+          // integratorAddress: '0x000...........', // if ur an integrator and want to collect fee then u can pass ur address here
+          // is_fee_coin_in: true, // u can pass this one as true if u want collect fee from input Token , but by Default it will be false (Output Token)
+          // isFeeReferrer: true, // this one should be true , if integrator wants to collect fee
+        },
+      });
+
+      // const foundRoutes: Omit<KanaSwapRouteOption, 'chainId'>[] = [];
+      // const hashSet = new Set<string>();
+
+      // for (const { chainId, ...route } of results) {
+      //   const hash = cyrb53(JSON.stringify(route));
+      //   if (!hashSet.has(hash.toString())) {
+      //     hashSet.add(hash.toString());
+      //     foundRoutes.push(route);
+      //   }
+      // }
+
+      return JSON.stringify({ foundRoutes: quote.data });
+    } catch (error) {
+      console.log(error);
+      return JSON.stringify({
+        error: `Error querying TVL: ${(error as Error).message}`,
+      });
+    }
+  },
+  {
+    name: 'kanaSwapQuote',
+    description: 'Get the best rate for a swap with DEX Aggregator in KanaSwap',
+    schema: z.object({
+      inputToken: z
+        .string()
+        .describe(
+          'The full coin type of the token to swap from (e.g., "0x1::aptos_coin::AptosCoin")',
+        ),
+      outputToken: z
+        .string()
+        .describe(
+          'The full coin type of the token to swap to (e.g., "0x1::aptos_coin::AptosCoin")',
+        ),
+      amountIn: z
+        .string()
+        .describe(
+          'The amount of input token to swap. Parsed Units (e.g., "100000000" for 1 APT with 8 decimals)',
+        ),
+      slippage: z.number().describe('The slippage tolerance (e.g., 0.5)'),
+    }),
+  },
+);
+
 const executeKanaSwapTool = tool(
   async ({ kanaSwapQuote }) => {
     try {
       const executeSwap = await KanaSwapAggregator.executeSwapInstruction({
         apiKey: process.env.KANA_API_KEY || '',
-        quote: kanaSwapQuote,
+        quote: {
+          chainId: 2, // ('aptos' = 2) on KanaChainID
+          ...kanaSwapQuote,
+        },
         address: defaultAccount.accountAddress.toString(),
       });
 
@@ -247,7 +310,7 @@ const executeKanaSwapTool = tool(
       kanaSwapQuote: z
         .any()
         .describe(
-          'KanaSwap Quote object (chainId,sourceToken,targetToken,amountIn,amountOut,amountOutWithSlippage,steps,stepToke,stepAmoun,provider,protoco,slippage,minimumOutAmount?,route,estimatedGas?,integratorFee?,kanaFee?,finalAmountOut?,finalAmountOutMin?,maximumGasFee?,feeObject?}',
+          'KanaSwap Quote object (sourceToken,targetToken,amountIn,amountOut,amountOutWithSlippage,steps,stepToke,stepAmoun,provider,protocols,slippage,minimumOutAmount?,route,estimatedGas?,integratorFee?,kanaFee?,finalAmountOut?,finalAmountOutMin?,maximumGasFee?,feeObject?}',
         ),
     }),
   },
@@ -270,7 +333,7 @@ export const tools = [
   chainTVLTool,
   listChainProtocolsTool,
   listEchelonMarketsTool,
-  kanaSwapQuoteTool,
+  kanaSwapQuoteTool2,
   formatUnitsTool,
   parseUnitsTool,
 ];

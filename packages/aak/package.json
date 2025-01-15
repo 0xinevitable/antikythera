@@ -9,7 +9,7 @@
   "dependencies": {
     "@antikythera/echelon-sdk": "workspace:^",
     "@aptos-labs/ts-sdk": "^1.26.0",
-    "@kanalabs/aggregator": "0.7.14",
+    "@kanalabs/aggregator": "0.7.14-beta.0",
     "@langchain/anthropic": "0.3.11",
     "@langchain/core": "0.3.30",
     "@langchain/langgraph": "0.2.39",
