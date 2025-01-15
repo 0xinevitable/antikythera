@@ -1,20 +1,17 @@
-import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+// import { ChatAnthropic } from '@langchain/anthropic';
 import {
   AIMessage,
-  AIMessageChunk,
   BaseMessage,
   HumanMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import { Runnable } from '@langchain/core/runnables';
 import { ChatOpenAI, ChatOpenAICallOptions } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { Message } from '@/home/types';
-import { ExtendedTool, getAllTools } from '@/tools/index';
-
-export const maxDuration = 300;
+// Import tools dynamically
+import { ExtendedTool, getAllTools } from '@/tools';
 
 const tools = getAllTools();
 const toolRegistry = tools.reduce(
@@ -25,77 +22,14 @@ const toolRegistry = tools.reduce(
   {} as Record<string, ExtendedTool>,
 );
 
-const llmWithTools = new ChatOpenAI({
+// Initialize the model
+const model = new ChatOpenAI({
   model: 'gpt-4',
   temperature: 0.2,
   topP: 0.1,
   streaming: true,
   apiKey: process.env.OPENAI_API_KEY,
-}).bind({ tools });
-
-interface ReasoningStep {
-  thought: string;
-  action: string;
-  toolName: string;
-  args: Record<string, unknown>;
-}
-
-interface ToolResult {
-  toolName: string;
-  result: unknown;
-  interpretation: string;
-}
-
-type StreamResponse =
-  | { type: 'reasoning_step'; data: ReasoningStep }
-  | { type: 'tool_result'; data: ToolResult }
-  | { type: 'final_response'; data: string };
-
-async function runTool(toolName: string, args: Record<string, unknown>) {
-  const tool = toolRegistry[toolName];
-  if (!tool) throw new Error(`Tool ${toolName} not found`);
-  return await tool.invoke(args);
-}
-
-// Separate function to get reasoning
-async function getReasoning(
-  llm: Runnable<BaseLanguageModelInput, AIMessageChunk, ChatOpenAICallOptions>,
-  messages: BaseMessage[],
-) {
-  const reasoningPrompt = `Given the user's request, explain:
-1. What specific information you need
-2. Which tool you'll use and why
-3. How this will help answer the user's query
-
-Start your response with "Reasoning:"`;
-
-  const reasoningResponse = await llm.invoke([
-    ...messages,
-    new HumanMessage(reasoningPrompt),
-  ]);
-
-  const content = reasoningResponse.content.toString();
-  const reasoningMatch = content.match(/Reasoning: (.*?)(?=\n|$)/s);
-  return reasoningMatch ? reasoningMatch[1].trim() : content.trim();
-}
-
-// Separate function to get tool interpretation
-async function getToolInterpretation(
-  llm: Runnable<BaseLanguageModelInput, AIMessageChunk, ChatOpenAICallOptions>,
-  toolName: string,
-  result: unknown,
-) {
-  const interpretPrompt = `Here is the result from the ${toolName} tool:
-${JSON.stringify(result, null, 2)}
-
-Explain what this result means and how it helps answer the user's query.
-Be specific and concise.`;
-
-  const interpretResponse = await llm.invoke([
-    new HumanMessage(interpretPrompt),
-  ]);
-  return interpretResponse.content.toString().trim();
-}
+}).bindTools(tools);
 
 export default async function handler(
   req: NextApiRequest,
@@ -107,126 +41,139 @@ export default async function handler(
 
   try {
     const data = req.body as { messages: Message[] };
-
-    // Convert messages
     const messages: BaseMessage[] = data.messages.flatMap((v) => {
-      switch (v.role) {
-        case 'user':
-          return new HumanMessage(v.content);
-        case 'assistant':
-          return new AIMessage(v.content);
-        case 'tool':
-          return [
-            new AIMessage('', {
-              tool_calls: [
-                {
-                  ...v.kwargs.additional_kwargs.tool_call,
-                  function: {
-                    ...v.kwargs.additional_kwargs.tool_call.function,
-                    arguments: JSON.stringify(
-                      v.kwargs.additional_kwargs.tool_call.function.arguments,
-                    ),
-                  },
-                },
-              ],
-            }),
-            new ToolMessage({
-              content: JSON.stringify(v.kwargs.content) || '',
-              tool_call_id: v.kwargs.tool_call_id,
-              name: v.kwargs.name,
-            }),
-          ];
-        default:
-          return [];
+      if (v.role === 'user') return new HumanMessage(v.content);
+      if (v.role === 'assistant') return new AIMessage(v.content);
+      if (v.role === 'tool') {
+        return new ToolMessage({
+          content: v.kwargs.content,
+          tool_call_id: v.kwargs.tool_call_id,
+          name: v.kwargs.name,
+          additional_kwargs: v.kwargs.additional_kwargs,
+        });
       }
+      return [];
     });
-
-    const systemPrompt = `You are a crypto assistant. Use the available tools to provide accurate information:
-
-Remember to verify all information about crypto assets using tools.`;
 
     const stream = new ReadableStream({
       async start(controller) {
+        let currentState = {
+          messages,
+          reasoning: [] as string[],
+          toolResults: {} as Record<string, any>,
+          response: '',
+        };
+
+        const emitEvent = (type: string, data: any) => {
+          controller.enqueue(JSON.stringify({ type, data }) + '\n');
+        };
+
         try {
-          // First get tool selection and reasoning
-          const response = await llmWithTools.invoke([
-            new SystemMessage(systemPrompt),
-            ...messages,
+          // Analyze step
+          emitEvent('llm_start', {});
+
+          const systemPrompt = new SystemMessage({
+            content: `You are a helpful assistant that analyzes requests and determines what tools are needed.
+- If asked for a list, respond with a markdown table with as much information as possible
+- Include data sources in responses
+- Never assume information about coins/tokens - always verify through tools
+- Use simple search terms for tokens (e.g. "eth" vs "ethereum")
+- Break down complex requests into steps
+- Explain reasoning for each tool use
+- Focus on providing accurate information`,
+          });
+
+          const analysisResponse = await model.invoke([
+            systemPrompt,
+            ...currentState.messages,
+            new HumanMessage(`Analyze this request and explain what tools are needed:
+${currentState.messages[currentState.messages.length - 1].content}
+
+Format your response as:
+REASONING: [Why these tools are needed]
+TOOLS: [List of tool operations in JSON format]`),
           ]);
 
-          if (response.additional_kwargs?.tool_calls) {
-            for (const toolCall of response.additional_kwargs.tool_calls) {
-              if (toolCall.type === 'function' && toolCall.function) {
-                const { name, arguments: argsString } = toolCall.function;
+          emitEvent('llm_end', { output: analysisResponse.content });
+
+          const content = analysisResponse.content.toString();
+          const [reasoning, toolsStr] = content
+            .split('TOOLS:')
+            .map((s) => s.trim());
+          console.log(reasoning, tools);
+          const toolCalls = JSON.parse(
+            toolsStr.replace('REASONING:', '').trim(),
+          );
+
+          currentState = {
+            ...currentState,
+            reasoning: [reasoning.replace('REASONING:', '').trim()],
+            messages: [...currentState.messages, analysisResponse],
+          };
+
+          // Execute tools
+          for (const toolCall of toolCalls) {
+            if (toolCall.type === 'function' && toolCall.function) {
+              const { name, arguments: argsString } = toolCall.function;
+              try {
+                emitEvent('tool_start', { tool: name, input: argsString });
+
                 const args = JSON.parse(argsString);
+                const tool = toolRegistry[name];
 
-                // Get reasoning for this specific tool use
-                const reasoning = await getReasoning(llmWithTools, messages);
-
-                // Stream reasoning step
-                const reasoningStep: ReasoningStep = {
-                  thought: reasoning,
-                  action: `Using ${name} tool`,
-                  toolName: name,
-                  args: args,
-                };
-
-                controller.enqueue(
-                  JSON.stringify({
-                    type: 'reasoning_step',
-                    data: reasoningStep,
-                  }) + '\n',
-                );
-
-                // Execute tool
-                try {
-                  const result = await runTool(name, args);
-
-                  // Get interpretation of the results
-                  const interpretation = await getToolInterpretation(
-                    llmWithTools,
-                    name,
-                    result,
-                  );
-
-                  const toolResult: ToolResult = {
-                    toolName: name,
-                    result: result,
-                    interpretation: interpretation,
-                  };
-
-                  controller.enqueue(
-                    JSON.stringify({
-                      type: 'tool_result',
-                      data: toolResult,
-                    }) + '\n',
-                  );
-                } catch (error) {
-                  console.error(`Tool execution error:`, error);
-                  throw error;
+                if (!tool) {
+                  throw new Error(`Tool ${name} not found`);
                 }
+
+                const result = await tool.invoke(args);
+                currentState.toolResults[name] = result;
+
+                emitEvent('tool_end', { tool: name, output: result });
+
+                currentState.messages.push(
+                  new ToolMessage({
+                    content: result,
+                    tool_call_id: toolCall.id,
+                    name: name,
+                    additional_kwargs: { tool_call: toolCall },
+                  }),
+                );
+              } catch (error) {
+                console.error(`Error executing tool ${name}:`, error);
+                emitEvent('tool_error', {
+                  tool: name,
+                  error: (error as Error).message,
+                });
               }
             }
           }
 
-          // Get final response
-          const finalResponse = await llmWithTools.invoke([
-            ...messages,
-            new SystemMessage(
-              'Provide a final comprehensive response based on all the information gathered.',
-            ),
+          // Generate final response
+          emitEvent('llm_start', {});
+
+          const context = `Tool Results:\n${JSON.stringify(currentState.toolResults, null, 2)}
+Reasoning:\n${currentState.reasoning.join('\n')}`;
+
+          const finalResponse = await model.invoke([
+            new SystemMessage({
+              content: `Generate a helpful response based on the tool results and reasoning. 
+- Format tables using markdown
+- Include data sources
+- Make information clear and actionable
+- Highlight key insights
+- Suggest next steps if appropriate`,
+            }),
+            ...currentState.messages,
+            new HumanMessage(`Generate a response based on:\n${context}`),
           ]);
 
-          controller.enqueue(
-            JSON.stringify({
-              type: 'final_response',
-              data: finalResponse.content.toString().trim(),
-            }) + '\n',
-          );
+          emitEvent('llm_end', { output: finalResponse.content });
+          emitEvent('final_response', finalResponse.content);
+
+          controller.close();
         } catch (error) {
-          console.error('Stream processing error:', error);
-          throw error;
-        } finally {
+          console.error('Stream Error:', error);
+          emitEvent('error', { message: (error as Error).message });
           controller.close();
         }
       },
@@ -245,13 +192,10 @@ Remember to verify all information about crypto assets using tools.`;
         },
       }),
     );
-  } catch (err) {
-    console.error('Handler error:', err);
-    return res
-      .status(500)
-      .send(
-        (err as Error).message ||
-          'An error occurred while processing your request.',
-      );
+  } catch (error) {
+    console.error('API Handler Error:', error);
+    res.status(500).send((error as Error).message);
   }
 }
+
+export const maxDuration = 300; // 5 minutes
