@@ -134,8 +134,8 @@ export const getBalanceOfAddressTool = tool(
     }
   },
   {
-    name: 'getBalance',
-    description: 'Get token balances of an Aptos Wallet Address',
+    name: 'getBalanceOfAddress',
+    description: 'Get token balances of an specific Aptos Wallet Address',
     schema: z.object({
       address: z
         .string()

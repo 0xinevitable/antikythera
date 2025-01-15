@@ -243,8 +243,7 @@ const main = async () => {
 
   // const query =
   //   "Check my wallet balance and register the domain name 'aptos.apt'";
-  const query =
-    'I want to search the best coin to swap from APT and print the optimal route';
+  const query = 'Swap APT to amAPT';
 
   const finalState = await app.invoke(
     { task: query },
