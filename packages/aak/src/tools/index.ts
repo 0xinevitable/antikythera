@@ -45,10 +45,21 @@ const KanaSwapAggregator = new SwapAggregator(Environment.production, {
     //         hash: Types.HexEncodedBytes;
     //     } | AptosWalletErrorResult>;
     aptos: async (transaction: any, options?: any) => {
+      // transaction: {
+      //   data: {
+      //     function: '0x9538c839fe490ccfaf32ad9f7491b5e84e610ff6edc110ff883f06ebde82463d::KanalabsRouterV2::swap',
+      //     typeArguments: [Array],
+      //     functionArguments: [Array]
+      //   }
+      // },
+      // options: undefined
       console.log(transaction, options);
       console.log({ transaction, options });
+      const rawTransaction = await aptosClient.transaction.build.simple({
+        ...transaction,
+      });
       return aptosClient.signAndSubmitTransaction({
-        transaction,
+        transaction: rawTransaction,
         signer: defaultAccount,
       });
     },
@@ -336,7 +347,7 @@ export const tools = [
   executeKanaSwapTool,
   //
 
-  getBalanceOfAddressTool,
+  // getBalanceOfAddressTool,
   getCoinTool,
   searchCoinTool,
   chainTVLTool,
