@@ -1,12 +1,9 @@
-import { tool } from '@langchain/core/tools';
-
 import { Message, ParsedLine, decodeToolMessage } from './types';
 
 export async function fetchStreamingResponse(
   messages: Message[],
   onUpdate: React.Dispatch<React.SetStateAction<Message[]>>,
   signal: AbortSignal,
-  address: string,
 ): Promise<void> {
   const response = await fetch('/api/chat', {
     method: 'POST',
@@ -16,17 +13,19 @@ export async function fetchStreamingResponse(
     body: JSON.stringify({ messages }),
     signal,
   });
-  if (response.status >= 400 && response.status < 600) {
-    throw await response.text();
+
+  if (!response.ok) {
+    throw new Error(await response.text());
   }
-  const stream = response.body;
-  if (!stream) {
+
+  const reader = response.body?.getReader();
+  if (!reader) {
     throw new Error('Stream not found!');
   }
 
-  const reader = stream.getReader();
   const decoder = new TextDecoder();
-  let buffer: string = '';
+  let buffer = '';
+  let currentAssistantMessage = '';
 
   try {
     while (true) {
@@ -38,101 +37,16 @@ export async function fetchStreamingResponse(
       buffer = lines.pop() || '';
 
       for (const line of lines) {
-        if (line.trim() === '') continue;
-        try {
-          const parsedLine: ParsedLine = JSON.parse(line);
-
-          if (parsedLine.type === 'pre_tool_call') {
-            console.log('Pre tool call:', parsedLine.data);
-            onUpdate((prev) => [
-              ...prev,
-              {
-                role: 'tool',
-                status: 'pending',
-                name: parsedLine.data.name,
-                tool_call_id: parsedLine.data.tool_call_id,
-                kwargs: {
-                  name: parsedLine.data.name,
-                  tool_call_id: parsedLine.data.tool_call_id,
-                  additional_kwargs: {
-                    tool_call: parsedLine.data.additional_kwargs.tool_call,
-                  },
-                },
-              } as any,
-            ]);
-          }
-          if (parsedLine.type === 'tool_calls') {
-            console.log('Tool calls:', parsedLine.data);
-            for (const serializedToolMessage of parsedLine.data) {
-              try {
-                const toolMessage = decodeToolMessage(serializedToolMessage);
-                if (toolMessage.kwargs && toolMessage.kwargs.content) {
-                  onUpdate((prev) => [
-                    ...prev.filter((v) =>
-                      v.role === 'tool' &&
-                      v.kwargs.tool_call_id === toolMessage.kwargs.tool_call_id
-                        ? false
-                        : true,
-                    ),
-                    {
-                      role: 'tool',
-                      status: 'resolved',
-                      ...toolMessage,
-                    },
-                  ]);
-                } else {
-                  // FIXME: ?
-                }
-              } catch (error) {
-                console.log(error);
-                if (
-                  serializedToolMessage.kwargs.content ===
-                  'STOP_CURRENT_WALLET_ADDRESS'
-                ) {
-                  onUpdate((prev) => [
-                    ...prev,
-                    {
-                      role: 'tool',
-                      // ...toolMessage,
-                      kwargs: {
-                        name: 'currentWalletAddress',
-                        content: { address },
-                        tool_call_id: '',
-                        additional_kwargs: {
-                          // Custom
-                          tool_call: {
-                            id: '',
-                            type: 'function',
-                            function: {
-                              name: 'currentWalletAddress',
-                              arguments: {},
-                            },
-                          },
-                        },
-                      },
-                    } as any,
-                  ]);
-                }
-              }
-            }
-          } else if (parsedLine.type === 'final_response') {
-            console.log('Final response:', parsedLine.data);
-            onUpdate((prev) => [
-              ...prev,
-              { role: 'assistant', content: parsedLine.data },
-            ]);
-          }
-        } catch (error) {
-          console.error('Error parsing line:', error);
-        }
+        if (!line.trim()) continue;
+        console.log(line);
       }
     }
   } catch (error) {
     if ((error as Error).name === 'AbortError') {
       console.log('Fetch aborted');
-    } else {
-      throw error;
+      return;
     }
+    throw error;
   } finally {
     reader.releaseLock();
   }

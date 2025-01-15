@@ -1,231 +1,237 @@
+import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import {
   AIMessage,
+  AIMessageChunk,
   BaseMessage,
   HumanMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
-import { ChatOpenAI } from '@langchain/openai';
+import { Runnable } from '@langchain/core/runnables';
+import { ChatOpenAI, ChatOpenAICallOptions } from '@langchain/openai';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { Message } from '@/home/types';
-import { getBalanceTool, getCoinTool, searchCoinTool } from '@/tools/coins';
-import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
-import { listEchelonMarketsTool } from '@/tools/echelon';
-import { kanaSwapQuoteTool } from '@/tools/kanaswap';
-import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
+import { ExtendedTool, getAllTools } from '@/tools/index';
 
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 300;
 
-type ExtendedTool = DynamicTool | DynamicStructuredTool<any>;
+const tools = getAllTools();
+const toolRegistry = tools.reduce(
+  (acc, tool) => {
+    acc[tool.name] = tool;
+    return acc;
+  },
+  {} as Record<string, ExtendedTool>,
+);
 
-const tools: ExtendedTool[] = [
-  searchCoinTool,
-  getCoinTool,
-  getBalanceTool,
-  // findSwapRouteTool,
-  kanaSwapQuoteTool,
-  // thalaSwapABITool,
-  chainTVLTool,
-  listChainProtocolsTool,
-  listEchelonMarketsTool,
-  parseUnitsTool,
-  formatUnitsTool,
-];
+const llmWithTools = new ChatOpenAI({
+  model: 'gpt-4',
+  temperature: 0.2,
+  topP: 0.1,
+  streaming: true,
+  apiKey: process.env.OPENAI_API_KEY,
+}).bind({ tools });
 
-const toolsByName = {
-  searchCoin: searchCoinTool,
-  getCoin: getCoinTool,
-  getBalance: getBalanceTool,
-  // findSwapRoute: findSwapRouteTool,
-  kanaSwapQuote: kanaSwapQuoteTool,
-  chainTVL: chainTVLTool,
-  listChainProtocols: listChainProtocolsTool,
-  listEchelonMarkets: listEchelonMarketsTool,
-  // getThalaSwapABI: thalaSwapABITool,
-  parseUnits: parseUnitsTool,
-  formatUnits: formatUnitsTool,
-};
+interface ReasoningStep {
+  thought: string;
+  action: string;
+  toolName: string;
+  args: Record<string, unknown>;
+}
 
-const runTool = async (
-  toolName: string,
-  args: Record<string, unknown> & { name: string; args: any },
-) => {
-  const tool = toolsByName[toolName as keyof typeof toolsByName];
+interface ToolResult {
+  toolName: string;
+  result: unknown;
+  interpretation: string;
+}
+
+type StreamResponse =
+  | { type: 'reasoning_step'; data: ReasoningStep }
+  | { type: 'tool_result'; data: ToolResult }
+  | { type: 'final_response'; data: string };
+
+async function runTool(toolName: string, args: Record<string, unknown>) {
+  const tool = toolRegistry[toolName];
   if (!tool) throw new Error(`Tool ${toolName} not found`);
   return await tool.invoke(args);
-};
+}
+
+// Separate function to get reasoning
+async function getReasoning(
+  llm: Runnable<BaseLanguageModelInput, AIMessageChunk, ChatOpenAICallOptions>,
+  messages: BaseMessage[],
+) {
+  const reasoningPrompt = `Given the user's request, explain:
+1. What specific information you need
+2. Which tool you'll use and why
+3. How this will help answer the user's query
+
+Start your response with "Reasoning:"`;
+
+  const reasoningResponse = await llm.invoke([
+    ...messages,
+    new HumanMessage(reasoningPrompt),
+  ]);
+
+  const content = reasoningResponse.content.toString();
+  const reasoningMatch = content.match(/Reasoning: (.*?)(?=\n|$)/s);
+  return reasoningMatch ? reasoningMatch[1].trim() : content.trim();
+}
+
+// Separate function to get tool interpretation
+async function getToolInterpretation(
+  llm: Runnable<BaseLanguageModelInput, AIMessageChunk, ChatOpenAICallOptions>,
+  toolName: string,
+  result: unknown,
+) {
+  const interpretPrompt = `Here is the result from the ${toolName} tool:
+${JSON.stringify(result, null, 2)}
+
+Explain what this result means and how it helps answer the user's query.
+Be specific and concise.`;
+
+  const interpretResponse = await llm.invoke([
+    new HumanMessage(interpretPrompt),
+  ]);
+  return interpretResponse.content.toString().trim();
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   if (req.method !== 'POST') {
-    // return new Response('Method not allowed', { status: 405 });
     return res.status(405).send('Method not allowed');
   }
 
   try {
     const data = req.body as { messages: Message[] };
-    // const lastMessage = data.messages[data.messages.length - 1].content;
 
-    const llm = new ChatOpenAI({
-      model: 'gpt-4o',
-      temperature: 0.2,
-      topP: 0.1,
-      streaming: true,
-
-      // Previous hardcoded API key has been revoked, no worries
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    const llmWithTools = llm.bind({ tools });
-
-    let messages: BaseMessage[] = data.messages.flatMap((v) => {
-      if (v.role === 'user') {
-        return new HumanMessage(v.content);
-      }
-      if (v.role === 'assistant') {
-        return new AIMessage(v.content);
-      }
-      if (v.role === 'tool') {
-        return [
-          new AIMessage('', {
-            ...v.kwargs,
-            tool_calls: [
-              {
-                ...v.kwargs.additional_kwargs.tool_call,
-                function: {
-                  ...v.kwargs.additional_kwargs.tool_call.function,
-                  arguments: JSON.stringify(
-                    v.kwargs.additional_kwargs.tool_call.function.arguments,
-                  ),
+    // Convert messages
+    const messages: BaseMessage[] = data.messages.flatMap((v) => {
+      switch (v.role) {
+        case 'user':
+          return new HumanMessage(v.content);
+        case 'assistant':
+          return new AIMessage(v.content);
+        case 'tool':
+          return [
+            new AIMessage('', {
+              tool_calls: [
+                {
+                  ...v.kwargs.additional_kwargs.tool_call,
+                  function: {
+                    ...v.kwargs.additional_kwargs.tool_call.function,
+                    arguments: JSON.stringify(
+                      v.kwargs.additional_kwargs.tool_call.function.arguments,
+                    ),
+                  },
                 },
-              },
-            ],
-          }),
-          new ToolMessage({
-            ...v.kwargs,
-            content: JSON.stringify(v.kwargs.content) || '',
-          }),
-        ];
+              ],
+            }),
+            new ToolMessage({
+              content: JSON.stringify(v.kwargs.content) || '',
+              tool_call_id: v.kwargs.tool_call_id,
+              name: v.kwargs.name,
+            }),
+          ];
+        default:
+          return [];
       }
-      if (v.role === 'error') {
-        return [];
-      }
-      return [];
     });
-    let finalResponse: string | null = null;
+
+    const systemPrompt = `You are a crypto assistant. Use the available tools to provide accurate information:
+
+Remember to verify all information about crypto assets using tools.`;
 
     const stream = new ReadableStream({
       async start(controller) {
-        while (finalResponse === null) {
+        try {
+          // First get tool selection and reasoning
           const response = await llmWithTools.invoke([
-            new SystemMessage({
-              content: `
-              - If asked a list, try to answer with a markdown table with much information as possible. (If there's a logo/image col, show it as 1st td).
-              - Try to state the source of the information (e.g. adding \`Data sourced from \` if it's clear).
-              - NEVER assume any information about coins. Always reterive information from tools before using/mentioning them.
-              - When searching tokens, use a simpler search term (e.g. "eth" instead of "ethereum") to maximize the chance of finding the token.
-              `,
-            }),
+            new SystemMessage(systemPrompt),
             ...messages,
           ]);
-          console.log(JSON.stringify(response));
 
-          if (
-            'additional_kwargs' in response &&
-            response.additional_kwargs.tool_calls
-          ) {
-            let hasStopFlag: boolean = false;
-
-            const toolMessages: ToolMessage[] = [];
-            for (const toolCall of response.additional_kwargs.tool_calls ||
-              []) {
+          if (response.additional_kwargs?.tool_calls) {
+            for (const toolCall of response.additional_kwargs.tool_calls) {
               if (toolCall.type === 'function' && toolCall.function) {
                 const { name, arguments: argsString } = toolCall.function;
+                const args = JSON.parse(argsString);
+
+                // Get reasoning for this specific tool use
+                const reasoning = await getReasoning(llmWithTools, messages);
+
+                // Stream reasoning step
+                const reasoningStep: ReasoningStep = {
+                  thought: reasoning,
+                  action: `Using ${name} tool`,
+                  toolName: name,
+                  args: args,
+                };
+
+                controller.enqueue(
+                  JSON.stringify({
+                    type: 'reasoning_step',
+                    data: reasoningStep,
+                  }) + '\n',
+                );
+
+                // Execute tool
                 try {
-                  const args = JSON.parse(argsString);
-
-                  controller.enqueue(
-                    JSON.stringify({
-                      type: 'pre_tool_call',
-                      data: {
-                        tool_call_id: toolCall.id,
-                        name: name,
-                        additional_kwargs: {
-                          // tool_calls: [toolCall],
-                          tool_call: toolCall,
-                        },
-                      },
-                    }) + '\n',
-                  );
-
                   const result = await runTool(name, args);
 
-                  if (result === 'STOP_CURRENT_WALLET_ADDRESS') {
-                    hasStopFlag = true;
-                  }
+                  // Get interpretation of the results
+                  const interpretation = await getToolInterpretation(
+                    llmWithTools,
+                    name,
+                    result,
+                  );
 
-                  const toolMessage = new ToolMessage({
-                    content: result,
-                    tool_call_id: toolCall.id,
-                    name: name,
-                    additional_kwargs: {
-                      // tool_calls: [toolCall],
-                      tool_call: toolCall,
-                    },
-                  });
-                  toolMessages.push(toolMessage);
+                  const toolResult: ToolResult = {
+                    toolName: name,
+                    result: result,
+                    interpretation: interpretation,
+                  };
 
                   controller.enqueue(
                     JSON.stringify({
-                      type: 'tool_calls',
-                      data: [toolMessage],
+                      type: 'tool_result',
+                      data: toolResult,
                     }) + '\n',
                   );
                 } catch (error) {
-                  console.error(`Error executing tool ${name}:`, error);
+                  console.error(`Tool execution error:`, error);
+                  throw error;
                 }
               }
             }
-
-            messages.push(response as AIMessage);
-            messages.push(...toolMessages);
-
-            // Send the tool calls and results as a JSONL stream
-            // controller.enqueue(
-            //   JSON.stringify({ type: 'tool_calls', data: toolMessages }) + '\n',
-            // );
-
-            if (hasStopFlag) {
-              controller.enqueue(
-                JSON.stringify({ type: 'final_response' }) + '\n',
-              );
-              controller.close();
-              return;
-            }
-          } else if (typeof response.content === 'string') {
-            finalResponse = response.content;
-            messages.push(response as AIMessage);
-
-            // Send the final response as a JSONL stream
-            controller.enqueue(
-              JSON.stringify({ type: 'final_response', data: finalResponse }) +
-                '\n',
-            );
           }
+
+          // Get final response
+          const finalResponse = await llmWithTools.invoke([
+            ...messages,
+            new SystemMessage(
+              'Provide a final comprehensive response based on all the information gathered.',
+            ),
+          ]);
+
+          controller.enqueue(
+            JSON.stringify({
+              type: 'final_response',
+              data: finalResponse.content.toString().trim(),
+            }) + '\n',
+          );
+        } catch (error) {
+          console.error('Stream processing error:', error);
+          throw error;
+        } finally {
+          controller.close();
         }
-        controller.close();
       },
     });
 
-    // return new Response(stream, {
-    //   headers: {
-    //     'Content-Type': 'application/x-ndjson',
-    //     'Transfer-Encoding': 'chunked',
-    //   },
-    // });
     res.setHeader('Content-Type', 'application/x-ndjson');
     res.setHeader('Transfer-Encoding', 'chunked');
 
@@ -240,6 +246,7 @@ export default async function handler(
       }),
     );
   } catch (err) {
+    console.error('Handler error:', err);
     return res
       .status(500)
       .send(
