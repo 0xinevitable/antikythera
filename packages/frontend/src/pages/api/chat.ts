@@ -14,16 +14,13 @@ import { getBalanceTool, getCoinTool, searchCoinTool } from '@/tools/coins';
 import { chainTVLTool, listChainProtocolsTool } from '@/tools/defillama';
 import { listEchelonMarketsTool } from '@/tools/echelon';
 import { kanaSwapQuoteTool } from '@/tools/kanaswap';
-// import { findSwapRouteTool } from '@/tools/thalaswap';
 import { formatUnitsTool, parseUnitsTool } from '@/tools/units';
-import { currentWalletAddressTool } from '@/tools/wallet';
 
 export const maxDuration = 300; // 5 minutes
 
 type ExtendedTool = DynamicTool | DynamicStructuredTool<any>;
 
 const tools: ExtendedTool[] = [
-  currentWalletAddressTool,
   searchCoinTool,
   getCoinTool,
   getBalanceTool,
@@ -38,7 +35,6 @@ const tools: ExtendedTool[] = [
 ];
 
 const toolsByName = {
-  currentWalletAddress: currentWalletAddressTool,
   searchCoin: searchCoinTool,
   getCoin: getCoinTool,
   getBalance: getBalanceTool,
