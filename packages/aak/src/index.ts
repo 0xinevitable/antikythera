@@ -241,8 +241,10 @@ const checkpointer = new MemorySaver();
 const main = async () => {
   const app = workflow.compile({ checkpointer });
 
+  // const query =
+  //   "Check my wallet balance and register the domain name 'aptos.apt'";
   const query =
-    "Check my wallet balance and register the domain name 'aptos.apt'";
+    'I want to search the best coin to swap from APT and print the optimal route';
 
   const finalState = await app.invoke(
     { task: query },
