@@ -36,6 +36,20 @@ const defaultAccount = Account.fromPrivateKey({
   legacy: true,
 });
 
+// Helper function for transactions
+async function submitTransaction(transaction: AnyRawTransaction) {
+  const pendingTxn = await aptosClient.signAndSubmitTransaction({
+    signer: defaultAccount,
+    transaction,
+  });
+
+  const response = await aptosClient.waitForTransaction({
+    transactionHash: pendingTxn.hash,
+  });
+
+  return { pendingTxn, response };
+}
+
 const KanaSwapAggregator = new SwapAggregator(Environment.production, {
   providers: {
     aptos: aptosClient,
@@ -56,29 +70,16 @@ const KanaSwapAggregator = new SwapAggregator(Environment.production, {
       console.log(transaction, options);
       console.log({ transaction, options });
       const rawTransaction = await aptosClient.transaction.build.simple({
-        ...transaction,
+        sender: defaultAccount.accountAddress,
+        data: transaction.data,
       });
-      return aptosClient.signAndSubmitTransaction({
-        transaction: rawTransaction,
-        signer: defaultAccount,
-      });
+      console.log({ rawTransaction });
+      const { pendingTxn, response } = await submitTransaction(rawTransaction);
+      console.log({ pendingTxn, response });
+      return { hash: pendingTxn.hash };
     },
   },
 });
-
-// Helper function for transactions
-async function submitTransaction(transaction: AnyRawTransaction) {
-  const pendingTxn = await aptosClient.signAndSubmitTransaction({
-    signer: defaultAccount,
-    transaction,
-  });
-
-  const response = await aptosClient.waitForTransaction({
-    transactionHash: pendingTxn.hash,
-  });
-
-  return { pendingTxn, response };
-}
 
 // Basic Wallet Tools
 const getBalanceTool = tool(
