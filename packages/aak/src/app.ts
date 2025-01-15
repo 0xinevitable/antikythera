@@ -272,15 +272,11 @@ const workflow = new StateGraph(ReWOOState)
 const checkpointer = new MemorySaver();
 
 // Main function
-const main = async () => {
+export const executeAgent = async (task: string) => {
   const app = workflow.compile({ checkpointer });
 
-  // const query =
-  //   "Check my wallet balance and register the domain name 'aptos.apt'";
-  const query = 'Swap 1 APT to MOD';
-
   const finalState = await app.invoke(
-    { task: query },
+    { task },
     {
       configurable: { thread_id: `aptos-wallet-${Date.now()}` },
     },
@@ -288,10 +284,3 @@ const main = async () => {
 
   console.log('Final State:', JSON.stringify(finalState, null, 2));
 };
-
-main()
-  .then(() => process.exit(0))
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
