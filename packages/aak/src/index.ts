@@ -177,21 +177,26 @@ function shouldContinue(state: typeof ReWOOState.State): string {
 async function solve(
   state: typeof ReWOOState.State,
 ): Promise<Partial<typeof ReWOOState.State>> {
-  console.log('Finalizing operations. State:', state);
+  console.log('Finalizing operations. State:', JSON.stringify(state, null, 2));
 
   try {
-    const summaryPrompt = `As a crypto agent, analyze the results of these operations:
-
-${state.reasoning
-  ?.map((analysis, i) => {
-    const operation = Object.keys(state.results || {})[i];
-    const result = Object.values(state.results || {})[i];
-    return `Step ${i + 1}:
+    // Create a formatted operations summary
+    const operationsSummary = state.reasoning
+      ?.map((analysis, i) => {
+        const operations = Object.keys(state.results || {});
+        const results = Object.values(state.results || {});
+        const operation = operations[i];
+        const result = results[i];
+        return `Step ${i + 1}:
 Analysis: ${analysis}
 Operation: ${operation}
 Result: ${result}`;
-  })
-  .join('\n\n')}
+      })
+      .join('\n\n');
+
+    const summaryPrompt = `As a crypto agent, analyze the results of these operations:
+
+${operationsSummary}
 
 Provide a clear summary of:
 1. What operations were performed
@@ -200,10 +205,16 @@ Provide a clear summary of:
 4. Any recommendations or next steps`;
 
     const response = await model.invoke([new HumanMessage(summaryPrompt)]);
-    console.log('Operation summary generated');
+    // Handle the response content properly - it might be an array or object
+    const content = response.content;
+    const formattedResponse = Array.isArray(content)
+      ? content.map((item) => JSON.stringify(item)).join('\n')
+      : content?.toString() || '';
+
+    console.log('Operation summary generated:', formattedResponse);
 
     return {
-      response: response.content.toString(),
+      response: formattedResponse,
     };
   } catch (error) {
     console.error('Summary generation failed:', (error as Error).message);
