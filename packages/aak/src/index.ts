@@ -1,5 +1,4 @@
 import {
-  APTOS_COIN,
   Account,
   AnyRawTransaction,
   Aptos,
@@ -8,46 +7,25 @@ import {
   Network,
 } from '@aptos-labs/ts-sdk';
 import { ChatAnthropic } from '@langchain/anthropic';
-import {
-  AIMessage,
-  BaseMessage,
-  HumanMessage,
-  SystemMessage,
-} from '@langchain/core/messages';
-import { tool } from '@langchain/core/tools';
+import { HumanMessage } from '@langchain/core/messages';
 import { StateGraph } from '@langchain/langgraph';
-import {
-  Annotation,
-  MemorySaver,
-  messagesStateReducer,
-} from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { Annotation, MemorySaver } from '@langchain/langgraph';
 import * as dotenv from 'dotenv';
-import { z } from 'zod';
+
+import { tools } from './tools';
 
 dotenv.config();
 
-// Initialize Aptos client for both mainnet and testnet
+// Initialize Aptos client
 const testnetConfig = new AptosConfig({ network: Network.TESTNET });
 const testnetClient = new Aptos(testnetConfig);
 
-// const mainnetConfig = new AptosConfig({ network: Network.MAINNET });
-// const mainnetClient = new Aptos(mainnetConfig);
-
-// Create account from private key in environment variables
+// Create account from private key
 const defaultAccount = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.APTOS_PRIVATE_KEY || ''),
 });
-console.log(defaultAccount.accountAddress.toStringLong());
 
-// Define the graph state
-const StateAnnotation = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: messagesStateReducer,
-  }),
-});
-
-// Helper function to handle transaction submission
+// Helper function for transactions
 async function submitTransaction(transaction: AnyRawTransaction) {
   const pendingTxn = await testnetClient.signAndSubmitTransaction({
     signer: defaultAccount,
@@ -61,234 +39,164 @@ async function submitTransaction(transaction: AnyRawTransaction) {
   return { pendingTxn, response };
 }
 
-// Basic Wallet Tools
-const getBalanceTool = tool(
-  async () => {
-    try {
-      const balance = await testnetClient.getAccountAPTAmount({
-        accountAddress: defaultAccount.accountAddress,
-      });
-      return `Current balance: ${balance.toString()} APT`;
-    } catch (error) {
-      return `Error getting balance: ${error}`;
-    }
-  },
-  {
-    name: 'get_balance',
-    description: 'Get the APT balance of the wallet',
-    schema: z.object({}),
-  },
-);
-
-const transferTool = tool(
-  async ({ recipient, amount }) => {
-    try {
-      const transaction = await testnetClient.transaction.build.simple({
-        sender: defaultAccount.accountAddress,
-        data: {
-          function: '0x1::aptos_account::transfer',
-          functionArguments: [recipient, BigInt(amount)],
-        },
-      });
-
-      const { pendingTxn, response } = await submitTransaction(transaction);
-
-      if (response.success) {
-        return `Transfer successful! Transaction hash: ${pendingTxn.hash}`;
-      } else {
-        return `Transfer failed. Transaction hash: ${pendingTxn.hash}`;
-      }
-    } catch (error) {
-      return `Error during transfer: ${error}`;
-    }
-  },
-  {
-    name: 'transfer_apt',
-    description: 'Transfer APT to another address',
-    schema: z.object({
-      recipient: z.string().describe('Recipient address starting with 0x'),
-      amount: z.string().describe('Amount of APT to transfer (in octas)'),
-    }),
-  },
-);
-
-// ANS Tools
-const registerNameTool = tool(
-  async ({ name, expirationType, toAddress }) => {
-    if (expirationType !== 'domain') {
-      return 'Only domain expiration policy is supported for now';
-    }
-    try {
-      const transaction = await testnetClient.registerName({
-        sender: defaultAccount,
-        name: name,
-        expiration: { policy: expirationType },
-        ...(toAddress && { toAddress }),
-      });
-
-      const { pendingTxn, response } = await submitTransaction(transaction);
-
-      if (response.success) {
-        return `Successfully registered ${name}! Transaction hash: ${pendingTxn.hash}.`;
-      } else {
-        return `Failed to register ${name}. Transaction hash: ${pendingTxn.hash}. ${JSON.stringify(response)}`;
-      }
-    } catch (error) {
-      return `Error registering name: ${error}`;
-    }
-  },
-  {
-    name: 'register_name',
-    description: 'Register a new ANS name (domain or subdomain)',
-    schema: z.object({
-      name: z
-        .string()
-        .describe('Name to register (with or without .apt suffix)'),
-      expirationType: z
-        .enum(['domain', 'subdomain:follow-domain', 'subdomain:independent'])
-        .describe('Expiration policy for the name'),
-      toAddress: z
-        .string()
-        .optional()
-        .describe('Optional address to transfer the name to'),
-    }),
-  },
-);
-
-const getNameInfoTool = tool(
-  async ({ name }) => {
-    try {
-      const nameInfo = await testnetClient.getName({ name });
-      if (!nameInfo) {
-        return `No information found for ${name}`;
-      }
-      return JSON.stringify(nameInfo, null, 2);
-    } catch (error) {
-      return `Error getting name information: ${error}`;
-    }
-  },
-  {
-    name: 'get_name_info',
-    description: 'Get information about an ANS name',
-    schema: z.object({
-      name: z.string().describe('Name to query (with or without .apt suffix)'),
-    }),
-  },
-);
-
-const setPrimaryNameTool = tool(
-  async ({ name }) => {
-    try {
-      const transaction = await testnetClient.setPrimaryName({
-        sender: defaultAccount,
-        name: name,
-      });
-
-      const { pendingTxn, response } = await submitTransaction(transaction);
-
-      if (response.success) {
-        return `Successfully set ${name} as primary name! Transaction hash: ${pendingTxn.hash}`;
-      } else {
-        return `Failed to set primary name. Transaction hash: ${pendingTxn.hash}`;
-      }
-    } catch (error) {
-      return `Error setting primary name: ${error}`;
-    }
-  },
-  {
-    name: 'set_primary_name',
-    description: 'Set a name as the primary name for the account',
-    schema: z.object({
-      name: z.string().describe('Name to set as primary'),
-    }),
-  },
-);
-
-const getAccountNamesTool = tool(
-  async ({ address }) => {
-    try {
-      const names = await testnetClient.getAccountNames({
-        accountAddress: address,
-      });
-      return JSON.stringify(names, null, 2);
-    } catch (error) {
-      return `Error getting account names: ${error}`;
-    }
-  },
-  {
-    name: 'get_account_names',
-    description: 'Get all names owned by an account',
-    schema: z.object({
-      address: z.string().describe('Account address to query'),
-    }),
-  },
-);
-
-// Combine all tools
-const tools = [
-  getBalanceTool,
-  transferTool,
-  registerNameTool,
-  getNameInfoTool,
-  setPrimaryNameTool,
-  getAccountNamesTool,
-];
-const toolNode = new ToolNode(tools, {
-  tags: ['tool_llm'],
+// Define the state schema
+const PlanExecuteState = Annotation.Root({
+  input: Annotation<string>({
+    reducer: (x, y) => y ?? x ?? '',
+  }),
+  plan: Annotation<string[]>({
+    reducer: (x, y) => y ?? x ?? [],
+  }),
+  pastSteps: Annotation<[string, string][]>({
+    reducer: (x, y) => x.concat(y),
+  }),
+  response: Annotation<string>({
+    reducer: (x, y) => y ?? x,
+  }),
 });
 
-// Initialize the model with tools
+// Initialize the model
 const model = new ChatAnthropic({
   model: 'claude-3-5-sonnet-20240620',
   temperature: 0,
 }).bindTools(tools);
 
-// Define the routing logic
-function shouldContinue(state: typeof StateAnnotation.State) {
-  const messages = state.messages;
-  const lastMessage = messages[messages.length - 1] as AIMessage;
+// Planning step
+async function planStep(
+  state: typeof PlanExecuteState.State,
+): Promise<Partial<typeof PlanExecuteState.State>> {
+  const plannerPrompt = `Create a specific step-by-step plan for the following crypto operation. Each step should map to one of these available operations:
 
-  if (lastMessage.tool_calls?.length) {
-    return 'tools';
-  }
-  return '__end__';
+  Available operations:
+  - Check wallet balance
+  - Transfer APT tokens
+  - Register ANS name
+  - Get ANS name info
+  - Set primary ANS name
+  - Get account ANS names
+
+  Operation requested: ${state.input}
+
+  Return only the numbered steps, each on a new line.`;
+
+  const response = await model.invoke([new HumanMessage(plannerPrompt)]);
+  const content = response.content.toString();
+
+  // Extract numbered steps
+  const steps = content
+    .split('\n')
+    .filter((line) => /^\d+\./.test(line.trim()))
+    .map((line) => line.replace(/^\d+\.\s*/, '').trim())
+    .filter((step) => step.length > 0);
+
+  return { plan: steps };
 }
 
-// Define the model calling function
-async function callModel(state: typeof StateAnnotation.State) {
-  const messages = state.messages;
-  const response = await model.invoke(messages);
-  return { messages: [response] };
+// Execution step
+async function executeStep(
+  state: typeof PlanExecuteState.State,
+): Promise<Partial<typeof PlanExecuteState.State>> {
+  const currentStep = state.plan[0];
+
+  // Get tool execution plan from LLM
+  const toolSelectionPrompt = `Given this operation: "${currentStep}"
+  Determine the appropriate tool to use and its parameters.
+  Available tools:
+  - get_balance: Get wallet balance
+  - transfer_apt: Transfer APT (needs recipient and amount)
+  - register_name: Register ANS name (needs name and expirationType)
+  - get_name_info: Get ANS name info (needs name)
+  - set_primary_name: Set primary name (needs name)
+  - get_account_names: Get account names (needs address)`;
+
+  const toolPlan = await model.invoke([new HumanMessage(toolSelectionPrompt)]);
+  const toolResponse = await model.invoke([new HumanMessage(currentStep)]);
+
+  let result = '';
+
+  try {
+    if (toolResponse.tool_calls && toolResponse.tool_calls.length > 0) {
+      const toolCall = toolResponse.tool_calls[0];
+
+      // Match tool name to function
+      const tool = tools.find((t) => t.name === toolCall.name);
+      if (tool) {
+        // @ts-ignore
+        result = await tool.invoke(toolCall.args);
+      } else {
+        result = 'Error: Tool not found';
+      }
+    } else {
+      // Fallback to direct model response
+      result =
+        typeof toolResponse.content === 'string'
+          ? toolResponse.content
+          : JSON.stringify(toolResponse.content);
+    }
+  } catch (error) {
+    result = `Error executing operation: ${(error as Error).message}`;
+  }
+
+  return {
+    pastSteps: [[currentStep, result]],
+    plan: state.plan.slice(1),
+  };
+}
+
+// Re-planning step
+async function replanStep(
+  state: typeof PlanExecuteState.State,
+): Promise<Partial<typeof PlanExecuteState.State>> {
+  if (state.plan.length === 0) {
+    const results = state.pastSteps
+      .map(([step, result]) => {
+        return `${step}: ${result}`;
+      })
+      .join('\n');
+
+    return {
+      response: `Operation results:\n${results}`,
+    };
+  }
+
+  return { plan: state.plan };
+}
+
+// Define when to end
+function shouldEnd(state: typeof PlanExecuteState.State) {
+  return state.response ? 'true' : 'false';
 }
 
 // Create and configure the graph
-const workflow = new StateGraph(StateAnnotation)
-  .addNode('agent', callModel)
-  .addNode('tools', toolNode)
-  .addEdge('__start__', 'agent')
-  .addConditionalEdges('agent', shouldContinue)
-  .addEdge('tools', 'agent');
+const workflow = new StateGraph(PlanExecuteState)
+  .addNode('planner', planStep)
+  .addNode('agent', executeStep)
+  .addNode('replan', replanStep)
+  .addEdge('__start__', 'planner')
+  .addEdge('planner', 'agent')
+  .addEdge('agent', 'replan')
+  .addConditionalEdges('replan', shouldEnd, {
+    true: '__end__',
+    false: 'agent',
+  });
 
 // Initialize memory
 const checkpointer = new MemorySaver();
 
-// Main function to run the agent
+// Main function
 const main = async () => {
   const app = workflow.compile({ checkpointer });
-  const query =
-    "I'm a crypto AI Agent that can execute transactions with my wallet. I want to use a new domain name aptos.apt.";
+
+  const query = 'Check wallet balance and register aptos.apt domain';
 
   const finalState = await app.invoke(
-    { messages: [new HumanMessage(query)] },
+    { input: query },
     {
       configurable: { thread_id: `aptos-wallet-${Date.now()}` },
     },
   );
 
-  for (let i = 0; i < finalState.messages.length; i++) {
-    const message = finalState.messages[i];
-    console.log(message);
-  }
+  console.log('Final State:', JSON.stringify(finalState, null, 2));
 };
 
 main()
