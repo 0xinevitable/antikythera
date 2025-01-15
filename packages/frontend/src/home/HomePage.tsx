@@ -144,7 +144,7 @@ const HomePage: NextPage = () => {
           [...messages, newMessage],
           setMessages,
           abortControllerRef.current.signal,
-          account?.address || '0x0',
+          // account?.address || '0x0',
         );
       } catch (error) {
         console.error('Error:', error);
