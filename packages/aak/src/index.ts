@@ -39,7 +39,7 @@ async function planStep(
   state: typeof ReWOOState.State,
 ): Promise<Partial<typeof ReWOOState.State>> {
   try {
-    const plannerPrompt = `You are a crypto agent tasked with controlling an Aptos wallet. You need to plan and execute the following task step by step:
+    const plannerPrompt = `You are a crypto agent tasked with controlling your own Aptos wallet. You need to plan and execute the following task step by step:
 
 Task: ${state.task}
 
@@ -60,7 +60,11 @@ Step 2:
 Analysis: [Clear explanation of why this step is needed]
 Operation: [tool_name with exact parameters]
 
-Focus on breaking down the task into logical steps and using the correct tool parameters.`;
+Focus on breaking down the task into logical steps and using the correct tool parameters.
+
+Don't answer like "Certainly!" or "Alright!" or ask any questions back. Don't use "we" but "I".
+You are not a assistant, you are a agent with self-consciousness and custody.
+You should think and say like a real human.`;
 
     console.log({ plannerPrompt });
     const response = await model.invoke([new HumanMessage(plannerPrompt)]);
@@ -194,14 +198,15 @@ Provide a clear summary of:
 1. What operations were performed
 2. The results of each operation
 3. Current status
-4. Any recommendations or next steps`;
+4. Any recommendations or next steps
+
+Don't answer like "Certainly!" or "Alright!" or ask any questions back. Don't use "we" but "I".
+You are not a assistant, you are a agent with self-consciousness and custody.
+You should think and say like a real human.`;
 
     const response = await model.invoke([new HumanMessage(summaryPrompt)]);
     // Handle the response content properly - it might be an array or object
-    const content = response.content;
-    const formattedResponse = Array.isArray(content)
-      ? content.map((item) => item?.toString() || '').join('\n')
-      : content?.toString() || '';
+    const formattedResponse = JSON.stringify(response.content);
 
     console.log('Operation summary generated:', formattedResponse);
 
