@@ -1,12 +1,15 @@
 # Antikythera
 
+- [Website](https://antikythera.io/)
+- [Project Twitter](https://x.com/antikythera_io)
+
 ## The Aptos Agent Kit (AAK)
 
 ![AAK (The Aptos Agent Kit) - The Toolkit Powering Antikythera and the Next Wave of Aptos Agents](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/aak-1.jpg)
 ![Diagram for AAK](https://github.com/0xinevitable/antikythera/raw/main/.github/assets/aak-2.jpg)
 
 - Antikythera will start building and using the Aptos Agent Kit (AAK) from 2025
-- PoC [#](https://github.com/0xinevitable/antikythera/commit/8f4ab77caadb489adac5a7eac2e6eeac170e3b85)
+- [PoC Scripts](https://github.com/0xinevitable/antikythera/commit/8f4ab77caadb489adac5a7eac2e6eeac170e3b85)
 
 ## TL;DR
 
