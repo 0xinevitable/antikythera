@@ -1,12 +1,5 @@
-import {
-  Account,
-  AnyRawTransaction,
-  Aptos,
-  AptosConfig,
-  Ed25519PrivateKey,
-  Network,
-} from '@aptos-labs/ts-sdk';
 import { ChatAnthropic } from '@langchain/anthropic';
+import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { HumanMessage } from '@langchain/core/messages';
 import { StateGraph } from '@langchain/langgraph';
 import { Annotation, MemorySaver } from '@langchain/langgraph';
@@ -16,42 +9,22 @@ import { tools } from './tools';
 
 dotenv.config();
 
-// Initialize Aptos client
-const testnetConfig = new AptosConfig({ network: Network.TESTNET });
-const testnetClient = new Aptos(testnetConfig);
-
-// Create account from private key
-const defaultAccount = Account.fromPrivateKey({
-  privateKey: new Ed25519PrivateKey(process.env.APTOS_PRIVATE_KEY || ''),
-});
-
-// Helper function for transactions
-async function submitTransaction(transaction: AnyRawTransaction) {
-  const pendingTxn = await testnetClient.signAndSubmitTransaction({
-    signer: defaultAccount,
-    transaction,
-  });
-
-  const response = await testnetClient.waitForTransaction({
-    transactionHash: pendingTxn.hash,
-  });
-
-  return { pendingTxn, response };
-}
-
 // Define the state schema
-const PlanExecuteState = Annotation.Root({
-  input: Annotation<string>({
+const ReWOOState = Annotation.Root({
+  task: Annotation<string>({
     reducer: (x, y) => y ?? x ?? '',
   }),
   plan: Annotation<string[]>({
     reducer: (x, y) => y ?? x ?? [],
   }),
-  pastSteps: Annotation<[string, string][]>({
-    reducer: (x, y) => x.concat(y),
+  reasoning: Annotation<string[]>({
+    reducer: (x, y) => (x ?? []).concat(y ?? []),
+  }),
+  results: Annotation<Record<string, string>>({
+    reducer: (x, y) => ({ ...(x ?? {}), ...(y ?? {}) }),
   }),
   response: Annotation<string>({
-    reducer: (x, y) => y ?? x,
+    reducer: (x, y) => y ?? x ?? '',
   }),
 });
 
@@ -61,124 +34,197 @@ const model = new ChatAnthropic({
   temperature: 0,
 }).bindTools(tools);
 
-// Planning step
+// Planning step with reasoning
 async function planStep(
-  state: typeof PlanExecuteState.State,
-): Promise<Partial<typeof PlanExecuteState.State>> {
-  const plannerPrompt = `Create a specific step-by-step plan for the following crypto operation. Each step should map to one of these available operations:
-
-  Available operations:
-  - Check wallet balance
-  - Transfer APT tokens
-  - Register ANS name
-  - Get ANS name info
-  - Set primary ANS name
-  - Get account ANS names
-
-  Operation requested: ${state.input}
-
-  Return only the numbered steps, each on a new line.`;
-
-  const response = await model.invoke([new HumanMessage(plannerPrompt)]);
-  const content = response.content.toString();
-
-  // Extract numbered steps
-  const steps = content
-    .split('\n')
-    .filter((line) => /^\d+\./.test(line.trim()))
-    .map((line) => line.replace(/^\d+\.\s*/, '').trim())
-    .filter((step) => step.length > 0);
-
-  return { plan: steps };
-}
-
-// Execution step
-async function executeStep(
-  state: typeof PlanExecuteState.State,
-): Promise<Partial<typeof PlanExecuteState.State>> {
-  const currentStep = state.plan[0];
-
-  // Get tool execution plan from LLM
-  const toolSelectionPrompt = `Given this operation: "${currentStep}"
-  Determine the appropriate tool to use and its parameters.
-  Available tools:
-  - get_balance: Get wallet balance
-  - transfer_apt: Transfer APT (needs recipient and amount)
-  - register_name: Register ANS name (needs name and expirationType)
-  - get_name_info: Get ANS name info (needs name)
-  - set_primary_name: Set primary name (needs name)
-  - get_account_names: Get account names (needs address)`;
-
-  const toolPlan = await model.invoke([new HumanMessage(toolSelectionPrompt)]);
-  const toolResponse = await model.invoke([new HumanMessage(currentStep)]);
-
-  let result = '';
-
+  state: typeof ReWOOState.State,
+): Promise<Partial<typeof ReWOOState.State>> {
   try {
-    if (toolResponse.tool_calls && toolResponse.tool_calls.length > 0) {
-      const toolCall = toolResponse.tool_calls[0];
+    const plannerPrompt = `You are a crypto agent tasked with controlling an Aptos wallet. You need to plan and execute the following task step by step:
 
-      // Match tool name to function
-      const tool = tools.find((t) => t.name === toolCall.name);
-      if (tool) {
-        // @ts-ignore
-        result = await tool.invoke(toolCall.args);
-      } else {
-        result = 'Error: Tool not found';
+Task: ${state.task}
+
+Available tools:
+- get_balance[] - Check wallet APT balance
+- transfer_apt[recipient, amount] - Execute APT transfer
+- register_name[name, expirationType] - Register ANS domain name
+- get_name_info[name] - Get information about an ANS name
+- set_primary_name[name] - Set primary name for account
+- get_account_names[] - Get all names owned by account
+
+For the given task, break it down into specific steps. For each step:
+1. Explain WHY this step is necessary
+2. Provide the EXACT tool operation in this format:
+   get_balance[]
+   OR
+   register_name[{"name": "example.apt", "expirationType": "fixed"}]
+
+Your response must follow this EXACT format:
+
+Step 1:
+Analysis: [Clear explanation of why this step is needed]
+Operation: [tool_name with exact parameters]
+
+Step 2:
+Analysis: [Clear explanation of why this step is needed]
+Operation: [tool_name with exact parameters]
+
+Focus on breaking down the task into logical steps and using the correct tool parameters.`;
+
+    const response = await model.invoke([new HumanMessage(plannerPrompt)]);
+    const content = response.content.toString();
+
+    // Extract operations and analysis
+    const steps: string[] = [];
+    const reasoning: string[] = [];
+
+    const stepMatches = content.split(/Step \d+:/g).filter(Boolean);
+
+    for (const step of stepMatches) {
+      const [analysis, operation] = step
+        .split(/\nOperation:/)
+        .map((s) => s.trim());
+
+      if (analysis && operation) {
+        reasoning.push(analysis.replace('Analysis:', '').trim());
+        steps.push(operation.trim());
       }
-    } else {
-      // Fallback to direct model response
-      result =
-        typeof toolResponse.content === 'string'
-          ? toolResponse.content
-          : JSON.stringify(toolResponse.content);
     }
+
+    if (steps.length === 0) {
+      throw new Error('No valid steps were generated');
+    }
+
+    console.log('Generated Plan:', { steps, reasoning });
+    return { plan: steps, reasoning };
   } catch (error) {
-    result = `Error executing operation: ${(error as Error).message}`;
-  }
-
-  return {
-    pastSteps: [[currentStep, result]],
-    plan: state.plan.slice(1),
-  };
-}
-
-// Re-planning step
-async function replanStep(
-  state: typeof PlanExecuteState.State,
-): Promise<Partial<typeof PlanExecuteState.State>> {
-  if (state.plan.length === 0) {
-    const results = state.pastSteps
-      .map(([step, result]) => {
-        return `${step}: ${result}`;
-      })
-      .join('\n');
-
+    console.error('Planning Error:', (error as Error).message);
     return {
-      response: `Operation results:\n${results}`,
+      plan: [],
+      reasoning: [`Operation planning failed: ${(error as Error).message}`],
     };
   }
-
-  return { plan: state.plan };
 }
 
-// Define when to end
-function shouldEnd(state: typeof PlanExecuteState.State) {
-  return state.response ? 'true' : 'false';
+// Execute operation
+async function executeStep(
+  state: typeof ReWOOState.State,
+): Promise<Partial<typeof ReWOOState.State>> {
+  console.log('Executing operation. Current state:', state);
+
+  if (!state.plan || state.plan.length === 0) {
+    console.log('No operations pending');
+    return {};
+  }
+
+  const currentOperation = state.plan[0];
+  console.log('Initiating operation:', currentOperation);
+
+  try {
+    const operationMatch = currentOperation.match(/(\w+)\[(.*)\]/);
+    if (!operationMatch) {
+      throw new Error(`Invalid operation format: ${currentOperation}`);
+    }
+
+    const [_, toolName, argsStr] = operationMatch;
+    const tool = tools.find((t) => t.name === toolName);
+
+    if (!tool) {
+      throw new Error(`Unsupported operation: ${toolName}`);
+    }
+
+    let args: ToolCall | undefined;
+    if (argsStr.trim()) {
+      try {
+        args = JSON.parse(argsStr);
+      } catch {
+        // Try parsing with added braces for backward compatibility
+        args = JSON.parse(`{${argsStr}}`);
+      }
+    }
+
+    // Keep the required args check
+    if (!args) {
+      throw new Error(`Invalid operation arguments: ${argsStr}`);
+    }
+
+    const result = await tool.invoke(args);
+    console.log('Operation result:', result);
+
+    return {
+      results: {
+        [currentOperation]:
+          typeof result === 'string' ? result : JSON.stringify(result),
+      },
+      plan: state.plan.slice(1),
+    };
+  } catch (error) {
+    console.error('Operation failed:', (error as Error).message);
+    return {
+      results: {
+        [currentOperation]: `Operation failed: ${(error as Error).message}`,
+      },
+      plan: state.plan.slice(1),
+    };
+  }
 }
 
-// Create and configure the graph
-const workflow = new StateGraph(PlanExecuteState)
+// Should continue function
+function shouldContinue(state: typeof ReWOOState.State): string {
+  return !state.plan || state.plan.length === 0 ? 'solve' : 'execute';
+}
+
+// Finalize operations
+async function solve(
+  state: typeof ReWOOState.State,
+): Promise<Partial<typeof ReWOOState.State>> {
+  console.log('Finalizing operations. State:', state);
+
+  try {
+    const summaryPrompt = `As a crypto agent, analyze the results of these operations:
+
+${state.reasoning
+  ?.map((analysis, i) => {
+    const operation = Object.keys(state.results || {})[i];
+    const result = Object.values(state.results || {})[i];
+    return `Step ${i + 1}:
+Analysis: ${analysis}
+Operation: ${operation}
+Result: ${result}`;
+  })
+  .join('\n\n')}
+
+Provide a clear summary of:
+1. What operations were performed
+2. The results of each operation
+3. Current status
+4. Any recommendations or next steps`;
+
+    const response = await model.invoke([new HumanMessage(summaryPrompt)]);
+    console.log('Operation summary generated');
+
+    return {
+      response: response.content.toString(),
+    };
+  } catch (error) {
+    console.error('Summary generation failed:', (error as Error).message);
+    return {
+      response: `Operation summary failed: ${(error as Error).message}`,
+    };
+  }
+}
+
+// Create the graph
+const workflow = new StateGraph(ReWOOState)
   .addNode('planner', planStep)
-  .addNode('agent', executeStep)
-  .addNode('replan', replanStep)
+  .addNode('execute', executeStep)
+  .addNode('solve', solve)
   .addEdge('__start__', 'planner')
-  .addEdge('planner', 'agent')
-  .addEdge('agent', 'replan')
-  .addConditionalEdges('replan', shouldEnd, {
-    true: '__end__',
-    false: 'agent',
-  });
+  .addEdge('planner', 'execute')
+  .addConditionalEdges('execute', shouldContinue, {
+    execute: 'execute',
+    solve: 'solve',
+  })
+  .addEdge('solve', '__end__');
 
 // Initialize memory
 const checkpointer = new MemorySaver();
@@ -187,10 +233,11 @@ const checkpointer = new MemorySaver();
 const main = async () => {
   const app = workflow.compile({ checkpointer });
 
-  const query = 'Check wallet balance and register aptos.apt domain';
+  const query =
+    "Check my wallet balance and register the domain name 'aptos.apt'";
 
   const finalState = await app.invoke(
-    { input: query },
+    { task: query },
     {
       configurable: { thread_id: `aptos-wallet-${Date.now()}` },
     },
