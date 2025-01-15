@@ -164,8 +164,8 @@ __metadata:
     "@aptos-labs/wallet-adapter-react": "npm:^3.5.7"
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
-    "@langchain/core": "npm:^0.2.18"
-    "@langchain/openai": "npm:^0.2.5"
+    "@langchain/core": "npm:0.2.18"
+    "@langchain/openai": "npm:0.2.5"
     "@martianwallet/aptos-wallet-adapter": "npm:^0.0.5"
     "@mizuwallet-sdk/core": "npm:^1.2.0"
     "@next/bundle-analyzer": "npm:^14.1.0"
@@ -1856,7 +1856,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@langchain/anthropic@npm:^0.3.11":
+"@langchain/anthropic@npm:0.3.11":
   version: 0.3.11
   resolution: "@langchain/anthropic@npm:0.3.11"
   dependencies:
@@ -1870,7 +1870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@langchain/core@npm:>0.2.0 <0.3.0, @langchain/core@npm:>=0.2.11 <0.3.0, @langchain/core@npm:>=0.2.16 <0.3.0, @langchain/core@npm:^0.2.18":
+"@langchain/core@npm:0.2.18, @langchain/core@npm:>0.2.0 <0.3.0, @langchain/core@npm:>=0.2.11 <0.3.0, @langchain/core@npm:>=0.2.16 <0.3.0":
   version: 0.2.18
   resolution: "@langchain/core@npm:0.2.18"
   dependencies:
@@ -1890,7 +1890,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@langchain/core@npm:^0.3.30":
+"@langchain/core@npm:0.3.30":
   version: 0.3.30
   resolution: "@langchain/core@npm:0.3.30"
   dependencies:
@@ -1933,7 +1933,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@langchain/langgraph@npm:^0.2.39":
+"@langchain/langgraph@npm:0.2.39":
   version: 0.2.39
   resolution: "@langchain/langgraph@npm:0.2.39"
   dependencies:
@@ -1947,7 +1947,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@langchain/openai@npm:>=0.1.0 <0.3.0, @langchain/openai@npm:^0.2.5":
+"@langchain/openai@npm:0.2.5, @langchain/openai@npm:>=0.1.0 <0.3.0":
   version: 0.2.5
   resolution: "@langchain/openai@npm:0.2.5"
   dependencies:
@@ -3546,9 +3546,9 @@ __metadata:
   resolution: "aak@workspace:packages/aak"
   dependencies:
     "@aptos-labs/ts-sdk": "npm:^1.26.0"
-    "@langchain/anthropic": "npm:^0.3.11"
-    "@langchain/core": "npm:^0.3.30"
-    "@langchain/langgraph": "npm:^0.2.39"
+    "@langchain/anthropic": "npm:0.3.11"
+    "@langchain/core": "npm:0.3.30"
+    "@langchain/langgraph": "npm:0.2.39"
     "@types/node": "npm:^22.10.6"
     dotenv: "npm:^16.4.7"
     tsx: "npm:^4.19.2"
