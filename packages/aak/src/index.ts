@@ -8,7 +8,12 @@ import {
   Network,
 } from '@aptos-labs/ts-sdk';
 import { ChatAnthropic } from '@langchain/anthropic';
-import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
+import {
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  SystemMessage,
+} from '@langchain/core/messages';
 import { tool } from '@langchain/core/tools';
 import { StateGraph } from '@langchain/langgraph';
 import {
@@ -33,6 +38,7 @@ const testnetClient = new Aptos(testnetConfig);
 const defaultAccount = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.APTOS_PRIVATE_KEY || ''),
 });
+console.log(defaultAccount.accountAddress.toStringLong());
 
 // Define the graph state
 const StateAnnotation = Annotation.Root({
@@ -123,9 +129,9 @@ const registerNameTool = tool(
       const { pendingTxn, response } = await submitTransaction(transaction);
 
       if (response.success) {
-        return `Successfully registered ${name}! Transaction hash: ${pendingTxn.hash}`;
+        return `Successfully registered ${name}! Transaction hash: ${pendingTxn.hash}.`;
       } else {
-        return `Failed to register ${name}. Transaction hash: ${pendingTxn.hash}`;
+        return `Failed to register ${name}. Transaction hash: ${pendingTxn.hash}. ${JSON.stringify(response)}`;
       }
     } catch (error) {
       return `Error registering name: ${error}`;
@@ -227,7 +233,9 @@ const tools = [
   setPrimaryNameTool,
   getAccountNamesTool,
 ];
-const toolNode = new ToolNode(tools);
+const toolNode = new ToolNode(tools, {
+  tags: ['tool_llm'],
+});
 
 // Initialize the model with tools
 const model = new ChatAnthropic({
@@ -267,29 +275,19 @@ const checkpointer = new MemorySaver();
 // Main function to run the agent
 const main = async () => {
   const app = workflow.compile({ checkpointer });
+  const query =
+    "I'm a crypto AI Agent that can execute transactions with my wallet. I want to use a new domain name aptos.apt.";
 
-  // Example interactions with the agent
-  const queries = [
-    // 'What is my current APT balance?',
-    'I want to use a new domain name test3rff123.apt',
-    // 'Set test123.apt as my primary name',
-    // 'Show me all the names owned by my address',
-  ];
+  const finalState = await app.invoke(
+    { messages: [new HumanMessage(query)] },
+    {
+      configurable: { thread_id: `aptos-wallet-${Date.now()}` },
+    },
+  );
 
-  for (const query of queries) {
-    const finalState = await app.invoke(
-      {
-        messages: [new HumanMessage(query)],
-      },
-      { configurable: { thread_id: `aptos-wallet-${Date.now()}` } },
-    );
-
-    console.log(`Query: ${query}`);
-    console.log(
-      'Response:',
-      finalState.messages[finalState.messages.length - 1].content,
-    );
-    console.log('---');
+  for (let i = 0; i < finalState.messages.length; i++) {
+    const message = finalState.messages[i];
+    console.log(message);
   }
 };
 
