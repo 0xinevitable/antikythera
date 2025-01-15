@@ -94,7 +94,7 @@ const getBalanceTool = tool(
     }
   },
   {
-    name: 'get_balance',
+    name: 'get_my_apt_balance',
     description: 'Get the APT balance of my wallet',
     schema: z.object({}),
   },
