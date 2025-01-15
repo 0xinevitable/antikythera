@@ -80,6 +80,7 @@ const cyrb53 = (str: string, seed = 0) => {
 export const kanaSwapQuoteTool = tool(
   async ({ inputToken, outputToken, amountIn, slippage }) => {
     try {
+      console.time('Kanaswap API Call');
       const {
         data: { data: results },
       } = await axios.get<KanaSwapQuoteResponse>(
@@ -94,6 +95,7 @@ export const kanaSwapQuoteTool = tool(
           },
         }),
       );
+      console.timeEnd('Kanaswap API Call');
 
       const foundRoutes: Omit<KanaSwapRouteOption, 'chainId'>[] = [];
       const hashSet = new Set<string>();
