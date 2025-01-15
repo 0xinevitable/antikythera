@@ -5273,7 +5273,7 @@ __metadata:
   resolution: "aak@workspace:packages/aak"
   dependencies:
     "@antikythera/echelon-sdk": "workspace:^"
-    "@aptos-labs/ts-sdk": "npm:^1.26.0"
+    "@aptos-labs/ts-sdk": "npm:1.23.0"
     "@kanalabs/aggregator": "npm:0.7.14-beta.0"
     "@langchain/anthropic": "npm:0.3.11"
     "@langchain/core": "npm:0.3.30"

@@ -17,7 +17,7 @@ import { z } from 'zod';
 import { getBalanceOfAddressTool, getCoinTool, searchCoinTool } from './coins';
 import { chainTVLTool, listChainProtocolsTool } from './defillama';
 import { listEchelonMarketsTool } from './echelon';
-// import { kanaSwapQuoteTool } from './kanaswap';
+import { kanaSwapQuoteTool } from './kanaswap';
 import { formatUnitsTool, parseUnitsTool } from './units';
 
 const APTOS_COIN_DECIMALS = 8;
@@ -33,16 +33,25 @@ const aptosClient = new Aptos(aptosConfig);
 // Create account from private key
 const defaultAccount = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.APTOS_PRIVATE_KEY || ''),
+  legacy: true,
 });
 
 const KanaSwapAggregator = new SwapAggregator(Environment.production, {
   providers: {
-    //@ts-ignore
     aptos: aptosClient,
   },
   signers: {
-    //@ts-ignore
-    aptos: defaultAccount,
+    // (transaction: any, options?: any): Promise<{
+    //         hash: Types.HexEncodedBytes;
+    //     } | AptosWalletErrorResult>;
+    aptos: async (transaction: any, options?: any) => {
+      console.log(transaction, options);
+      console.log({ transaction, options });
+      return aptosClient.signAndSubmitTransaction({
+        transaction,
+        signer: defaultAccount,
+      });
+    },
   },
 });
 
@@ -333,7 +342,8 @@ export const tools = [
   chainTVLTool,
   listChainProtocolsTool,
   listEchelonMarketsTool,
-  kanaSwapQuoteTool2,
+  // kanaSwapQuoteTool2,
+  kanaSwapQuoteTool,
   formatUnitsTool,
   parseUnitsTool,
 ];

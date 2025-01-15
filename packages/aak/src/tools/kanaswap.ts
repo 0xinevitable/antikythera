@@ -95,6 +95,7 @@ export const kanaSwapQuoteTool = tool(
         }),
       );
 
+      console.log({ results });
       const foundRoutes: Omit<KanaSwapRouteOption, 'chainId'>[] = [];
       const hashSet = new Set<string>();
 

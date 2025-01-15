@@ -139,7 +139,7 @@ If the operation should be 'searchCoin[{"query": "stAPT"}]', return '[{"query": 
 DONT ADD ANY TEXT ONLY THE PARAMETERS`;
 
     const paramResponse = await model.invoke([new HumanMessage(paramPrompt)]);
-    // console.log(paramResponse);
+    console.log(paramResponse);
     let argsStr = paramResponse.content.toString().trim();
 
     const operationMatch = currentOperation.match(/(\w+)/);
@@ -147,7 +147,7 @@ DONT ADD ANY TEXT ONLY THE PARAMETERS`;
       throw new Error(`Invalid operation format: ${currentOperation}`);
     }
 
-    // console.log({ operationMatch, argsStr });
+    console.log({ operationMatch, argsStr });
     const [_, toolName] = operationMatch;
     const tool = tools.find((t) => t.name === toolName);
 
@@ -155,8 +155,10 @@ DONT ADD ANY TEXT ONLY THE PARAMETERS`;
       throw new Error(`Unsupported operation: ${toolName}`);
     }
 
-    // remove brackets from argsStr
-    argsStr = argsStr.replace('[', '').replace(']', '');
+    // remove brackets from argsStr (check if first and last characters are brackets and remove only them)
+    if (argsStr[0] === '[' && argsStr[argsStr.length - 1] === ']') {
+      argsStr = argsStr.slice(1, -1);
+    }
     let args: object = {};
     if (argsStr.trim()) {
       try {
@@ -271,7 +273,7 @@ const main = async () => {
 
   // const query =
   //   "Check my wallet balance and register the domain name 'aptos.apt'";
-  const query = 'Swap 0.5 APT to stAPT';
+  const query = 'Swap 1 APT to MOD';
 
   const finalState = await app.invoke(
     { task: query },
