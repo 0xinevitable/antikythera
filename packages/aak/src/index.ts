@@ -243,7 +243,7 @@ const main = async () => {
 
   // const query =
   //   "Check my wallet balance and register the domain name 'aptos.apt'";
-  const query = 'Swap APT to amAPT';
+  const query = 'Swap 0.0001 APT to amAPT';
 
   const finalState = await app.invoke(
     { task: query },
