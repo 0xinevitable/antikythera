@@ -43,14 +43,6 @@ async function planStep(
 
 Task: ${state.task}
 
-Available tools:
-- get_balance[] - Check wallet APT balance
-- transfer_apt[recipient, amount] - Execute APT transfer
-- register_name[name, expirationType] - Register ANS domain name
-- get_name_info[name] - Get information about an ANS name
-- set_primary_name[name] - Set primary name for account
-- get_account_names[] - Get all names owned by account
-
 For the given task, break it down into specific steps. For each step:
 1. Explain WHY this step is necessary
 2. Provide the EXACT tool operation in this format:
@@ -70,6 +62,7 @@ Operation: [tool_name with exact parameters]
 
 Focus on breaking down the task into logical steps and using the correct tool parameters.`;
 
+    console.log({ plannerPrompt });
     const response = await model.invoke([new HumanMessage(plannerPrompt)]);
     const content = response.content.toString();
 
@@ -132,7 +125,7 @@ async function executeStep(
       throw new Error(`Unsupported operation: ${toolName}`);
     }
 
-    let args: ToolCall | undefined;
+    let args: object = {};
     if (argsStr.trim()) {
       try {
         args = JSON.parse(argsStr);
@@ -142,12 +135,11 @@ async function executeStep(
       }
     }
 
-    // Keep the required args check
+    // args are `{}` if no arguments are provided
     if (!args) {
-      throw new Error(`Invalid operation arguments: ${argsStr}`);
+      args = {};
     }
-
-    const result = await tool.invoke(args);
+    const result = await tool.invoke(args as ToolCall);
     console.log('Operation result:', result);
 
     return {
@@ -208,7 +200,7 @@ Provide a clear summary of:
     // Handle the response content properly - it might be an array or object
     const content = response.content;
     const formattedResponse = Array.isArray(content)
-      ? content.map((item) => JSON.stringify(item)).join('\n')
+      ? content.map((item) => item?.toString() || '').join('\n')
       : content?.toString() || '';
 
     console.log('Operation summary generated:', formattedResponse);

@@ -9,7 +9,10 @@ import {
 import { tool } from '@langchain/core/tools';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import * as dotenv from 'dotenv';
+import { formatUnits } from 'viem';
 import { z } from 'zod';
+
+const APTOS_COIN_DECIMALS = 8;
 
 dotenv.config();
 
@@ -43,7 +46,7 @@ const getBalanceTool = tool(
       const balance = await testnetClient.getAccountAPTAmount({
         accountAddress: defaultAccount.accountAddress,
       });
-      return `Current balance: ${balance.toString()} APT`;
+      return `Current balance: ${formatUnits(BigInt(balance), APTOS_COIN_DECIMALS)} APT`;
     } catch (error) {
       return `Error getting balance: ${error}`;
     }
